@@ -25,10 +25,6 @@ async def mainpage() -> str:
     return "YOU ARE ON THE MAIN PAGE"
 
 
-async def create_user(request: Request) -> dict:
-    await user_collection.insert_one({"sample": "user"})
-    return {"Success": True}
-
 
 async def get_users(request: Request) -> list:
     cursor = user_collection.find({})
