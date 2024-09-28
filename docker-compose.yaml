@@ -1,0 +1,33 @@
+services:
+  mongo_db:
+    image: mongo
+    container_name: mongo_db
+    ports:
+      - "27017:27017"
+    networks:
+      - custom
+
+  app:
+    container_name: repair-app
+    image: app
+    restart: on-failure
+    environment:
+      - MONGODB_URL=mongodb://mongo_db/repair_db
+    ports:
+      - "8000:8000"
+    networks:
+      - custom
+    build: .
+    volumes:
+      - .:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - mongo_db
+
+        
+        
+networks:
+  custom:
+    driver: bridge
+        
+        
