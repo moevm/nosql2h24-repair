@@ -1,10 +1,8 @@
 import os
-from dataclasses import dataclass
 
 from fastapi import FastAPI, APIRouter
 from fastapi.routing import APIRoute
 from motor import motor_asyncio
-from motor.motor_asyncio import AsyncIOMotorClient
 from starlette.requests import Request
 
 from users.schemas import UserRegisterSchema
@@ -23,7 +21,6 @@ async def ping() -> dict:
 
 async def mainpage() -> str:
     return "YOU ARE ON THE MAIN PAGE"
-
 
 
 async def get_users(request: Request) -> list:
