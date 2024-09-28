@@ -46,7 +46,6 @@ async def register(user_data: UserRegisterSchema) -> dict:
 routes = [
     APIRoute(path="/ping", endpoint=ping, methods=["GET"]),
     APIRoute(path="/", endpoint=mainpage, methods=["GET"]),
-    APIRoute(path="/create_user", endpoint=create_user, methods=["POST"]),
     APIRoute(path="/get_users", endpoint=get_users, methods=["GET"]),
 ]
 
