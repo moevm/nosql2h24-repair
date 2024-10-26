@@ -5,8 +5,8 @@ from fastapi.routing import APIRoute
 from motor import motor_asyncio
 from starlette.requests import Request
 
-from users.schemas import UserRegisterSchema
-from users.utils import get_password_hash
+from hello_world.app.users.schemas import UserRegisterSchema
+from hello_world.app.users.utils import get_password_hash
 
 app = FastAPI()
 
