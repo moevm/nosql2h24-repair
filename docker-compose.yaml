@@ -22,7 +22,6 @@ services:
       dockerfile: app/Dockerfile
     volumes:
       - .:/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
       - mongo_db
 
