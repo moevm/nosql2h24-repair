@@ -1,12 +1,13 @@
 import os
 
+import uvicorn
 from fastapi import FastAPI, APIRouter
 from fastapi.routing import APIRoute
 from motor import motor_asyncio
 from starlette.requests import Request
 
-from users.schemas import UserRegisterSchema
-from users.utils import get_password_hash
+from app.users.schemas import UserRegisterSchema
+from app.users.utils import get_password_hash
 
 app = FastAPI()
 
@@ -47,3 +48,7 @@ routes = [
 ]
 
 app.include_router(APIRouter(routes=routes))
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
