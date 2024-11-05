@@ -11,4 +11,3 @@ motor
 passlib[bcrypt]
 pydantic_settings
 python-jose
-bson
