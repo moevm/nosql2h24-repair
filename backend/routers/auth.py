@@ -3,8 +3,7 @@ from fastapi import APIRouter, HTTPException, status, Response, Depends
 
 from config import settings
 from dao.user import find_all_users, find_user_by_email, create_user
-from database import User
-from schemas.user import UserCreateSchema, UserLoginSchema, UserResponseSchema
+from schemas.user import UserCreateSchema, UserLoginSchema, UserResponseSchema, UserDao
 from utils.password import verify_password, create_access_token, get_password_hash
 from utils.token import get_current_user
 
@@ -16,7 +15,7 @@ SECRET_KEY = settings.JWT_SECRET_KEY
 
 @router.post("/register")
 async def register_user(user_data: UserCreateSchema) -> dict:
-    user = find_user_by_email(user_data.email.lower())
+    user = await find_user_by_email(user_data.email.lower())
     if user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -31,19 +30,19 @@ async def register_user(user_data: UserCreateSchema) -> dict:
 
     user_data.password = get_password_hash(user_data.password)
     del user_data.passwordConfirmed
-    user_id = create_user(user_data)
+    user_id = await create_user(user_data)
     return {"status": "success", "user_id": user_id}
 
 
 @router.get("/get")
 async def get_users() -> dict[str, List[UserResponseSchema]]:
-    users = find_all_users()
+    users = await find_all_users()
     return {"users": users}
 
 
 @router.post("/login")
 async def login_user(response: Response, user_data: UserLoginSchema) -> dict:
-    user = find_user_by_email(user_data.email.lower())
+    user = await find_user_by_email(user_data.email.lower())
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -60,7 +59,7 @@ async def login_user(response: Response, user_data: UserLoginSchema) -> dict:
 
 
 @router.get("/me/")
-async def get_me(user_data: User = Depends(get_current_user)):
+async def get_me(user_data: UserDao = Depends(get_current_user)):
     return user_data
 
 
