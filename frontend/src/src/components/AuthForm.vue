@@ -56,19 +56,22 @@ export default {
     },
     async authenticate() {
       // Логика авторизации
-      axios.post('http://app-backend:8000/api/auth/login')
+      axios.post('/api/auth/login')
           .then(res => {
             console.log(res);
           })
-          .catch(error => {
-            console.error("Ошибка сети:", error.message);
-            if (error.response) {
-              console.error("Данные ответа:", error.response.data);
-            } else if (error.request) {
-              console.error("Запрос:", error.request);
-            } else {
-              console.error("Сообщение об ошибке:", error.message);
-            }
+          // .catch(error => {
+          //   console.error("Ошибка сети:", error.message);
+          //   if (error.response) {
+          //     console.error("Данные ответа:", error.response.data);
+          //   } else if (error.request) {
+          //     console.error("Запрос:", error.request);
+          //   } else {
+          //     console.error("Сообщение об ошибке:", error.message);
+          //   }
+          // })
+          .catch(function (error) {
+            console.log(error.toJSON());
           });
       console.log("authenticate что-то получила");
       // if (this.login === 'user' && this.password === 'password') {

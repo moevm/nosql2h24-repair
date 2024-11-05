@@ -1,6 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
-from starlette.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 
 from config import settings
 from database import db
@@ -9,11 +9,9 @@ from routers import auth, user
 app = FastAPI()
 app.database = db
 
-# origins = [
-#     settings.CLIENT_ORIGIN
-# ]
 origins = [
-    "http://localhost:8000",
+    settings.CLIENT_ORIGIN,
+    "http://172.18.0.3:8080",
 ]
 
 app.add_middleware(
@@ -23,7 +21,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 app.include_router(auth.router, tags=['Auth'], prefix="/api/auth")
 app.include_router(user.router, tags=['User'], prefix="/api/user")
