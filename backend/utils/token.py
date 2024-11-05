@@ -3,8 +3,8 @@ from fastapi import Request, HTTPException, status, Depends
 from jose import jwt, JWTError
 from datetime import datetime, timezone
 
-from backend.config import settings
-from backend.dao.user import find_user_by_id
+from config import settings
+from dao.user import find_user_by_id
 
 
 def get_token(request: Request):

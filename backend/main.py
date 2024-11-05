@@ -1,11 +1,10 @@
-
 import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from backend.config import settings
-from backend.database import db
-from backend.routers import auth, user
+from config import settings
+from database import db
+from routers import auth, user
 
 app = FastAPI()
 app.database = db
@@ -27,4 +26,4 @@ app.include_router(user.router, tags=['User'], prefix="/api/user")
 
 
 if __name__ == "__main__":
-    uvicorn.run("__main__:backend", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

@@ -1,8 +1,8 @@
 from bson import ObjectId
 from pydantic import BaseModel
 
-from backend.database import User
-from backend.schemas.user import UserResponseSchema, UserCreateSchema, UserDao
+from database import User
+from schemas.user import UserResponseSchema, UserCreateSchema, UserDao
 
 
 def object_id_to_str(user) -> dict[str, str]:

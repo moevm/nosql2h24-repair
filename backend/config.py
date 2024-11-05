@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     CLIENT_ORIGIN: str
     
     class Config:
-        env_file = "./.env"
+        env_file = "../.env"
         env_file_encoding = "utf-8"
         extra = "allow"
         
