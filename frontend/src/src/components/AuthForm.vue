@@ -37,6 +37,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   data() {
     return {
@@ -53,31 +54,90 @@ export default {
     toggleRegister() {
       this.isRegister = !this.isRegister;
     },
-    authenticate() {
+    async authenticate() {
       // Логика авторизации
-      if (this.login === 'user' && this.password === 'password') {
-        // Успешная авторизация
-        this.$router.push('/main'); // Переход на основную страницу
-      } else {
-        alert('Неверный логин или пароль');
-      }
+      axios.post('http://app-backend:8000/api/auth/login')
+          .then(res => {
+            console.log(res);
+          })
+          .catch(error => {
+            console.error("Ошибка сети:", error.message);
+            if (error.response) {
+              console.error("Данные ответа:", error.response.data);
+            } else if (error.request) {
+              console.error("Запрос:", error.request);
+            } else {
+              console.error("Сообщение об ошибке:", error.message);
+            }
+          });
+      console.log("authenticate что-то получила");
+      // if (this.login === 'user' && this.password === 'password') {
+      //   // Успешная авторизация
+      //   this.$router.push('/main'); // Переход на основную страницу
+      // } else {
+      //   alert('Неверный логин или пароль');
+      // }
     },
     register() {
-      // Проверки перед регистрацией
-      if (this.password !== this.confirmPassword) {
-        alert('Пароли не совпадают');
-        return;
-      }
-      if (!this.login || !this.email || !this.phone || !this.role) {
-        alert('Заполните все поля');
-        return;
-      }
-
-      // Успешная регистрация
-      alert('Регистрация прошла успешно');
-      this.isRegister = false; // Возвращаемся к форме авторизации после успешной регистрации
+      this.sendDataRegistration()
+      console.log("registration что-то получила");
+      // // Проверки перед регистрацией
+      // if (this.password !== this.confirmPassword) {
+      //   alert('Пароли не совпадают');
+      //   return;
+      // }
+      // if (!this.login || !this.email || !this.phone || !this.role) {
+      //   alert('Заполните все поля');
+      //   return;
+      // }
+      //
+      // // Успешная регистрация
+      // alert('Регистрация прошла успешно');
+      // this.isRegister = false; // Возвращаемся к форме авторизации после успешной регистрации
     },
-  },
+    async sendDataRegistration() {
+      // Формируем JSON-объект
+      const dataToSend = {
+        login: this.login,
+        password: this.password,
+        email: this.email,
+        phone: this.phone,
+        confirmPassword: this.confirmPassword,
+        role: this.role
+      };
+
+      try {
+        // Отправляем данные на сервер
+        const response = await axios.post('http://app-backend:8000/api/auth/register', dataToSend, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log('Data sent successfully:', response.data);
+      } catch (error) {
+        console.error('Error sending data:', error);
+      }
+    },
+    async sendDataAuthorisation() {
+      // Формируем JSON-объект
+      const dataToSend = {
+        login: this.login,
+        password: this.password,
+      };
+      // Отправляем данные на сервер
+      axios.post('http://app-backend:8000/api/auth/login', dataToSend, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+          .then(res => {
+        console.log(res);
+      })
+          .catch(function (error) {
+            console.log(error);
+          });
+    }
+  }
 };
 </script>
 

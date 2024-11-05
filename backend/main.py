@@ -9,8 +9,11 @@ from routers import auth, user
 app = FastAPI()
 app.database = db
 
+# origins = [
+#     settings.CLIENT_ORIGIN
+# ]
 origins = [
-    settings.CLIENT_ORIGIN
+    "http://localhost:8000",
 ]
 
 app.add_middleware(
