@@ -2,7 +2,6 @@
 instance/*
 !instance/.gitignore
 .webassets-cache
-.env
 .idea
 __pycache__/ *.py[cod]
 __pycache__/
