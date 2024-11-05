@@ -1,17 +1,11 @@
-from datetime import datetime, timezone, timedelta
-from typing import List, Dict
-
-from bson import ObjectId
+from typing import List
 from fastapi import APIRouter, HTTPException, status, Response, Depends
 
-from app import schemas
 from app.config import settings
 from app.dao.user import find_all_users, find_user_by_email, create_user
 from app.database import User
 from app.schemas.user import UserCreateSchema, UserLoginSchema, UserResponseSchema
-from app.serializers.userSerializers import user_response_entity, user_entity, user_list_entity
-from app.utils import password
-from app.utils.password import verify_password, pwd_context, create_access_token, get_password_hash
+from app.utils.password import verify_password, create_access_token, get_password_hash
 from app.utils.token import get_current_user
 
 router = APIRouter()

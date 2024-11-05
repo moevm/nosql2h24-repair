@@ -5,8 +5,6 @@ from datetime import datetime, timezone
 
 from app.config import settings
 from app.dao.user import find_user_by_id
-from app.database import User
-from app.serializers.userSerializers import user_entity
 
 
 def get_token(request: Request):
