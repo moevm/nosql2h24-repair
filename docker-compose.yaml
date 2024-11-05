@@ -14,16 +14,16 @@ services:
       - mongo:/data/db
 
   app:
-    container_name: repair-app
+    container_name: repair-backend
     image: app
     restart: on-failure
     ports:
       - "8000:8000"
     build:
       context: .
-      dockerfile: app/Dockerfile
+      dockerfile: backend/Dockerfile
     volumes:
-      - .:/app
+      - .:/backend
     depends_on:
       - mongo_db
 

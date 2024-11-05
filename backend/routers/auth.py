@@ -1,12 +1,12 @@
 from typing import List
 from fastapi import APIRouter, HTTPException, status, Response, Depends
 
-from app.config import settings
-from app.dao.user import find_all_users, find_user_by_email, create_user
-from app.database import User
-from app.schemas.user import UserCreateSchema, UserLoginSchema, UserResponseSchema
-from app.utils.password import verify_password, create_access_token, get_password_hash
-from app.utils.token import get_current_user
+from backend.config import settings
+from backend.dao.user import find_all_users, find_user_by_email, create_user
+from backend.database import User
+from backend.schemas.user import UserCreateSchema, UserLoginSchema, UserResponseSchema
+from backend.utils.password import verify_password, create_access_token, get_password_hash
+from backend.utils.token import get_current_user
 
 router = APIRouter()
 ACCESS_TOKEN_EXPIRES_IN = settings.ACCESS_TOKEN_EXPIRES_IN

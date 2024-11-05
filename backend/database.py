@@ -2,7 +2,7 @@ import pymongo
 from pymongo import mongo_client
 from pymongo.errors import ConnectionFailure
 
-from app.config import settings
+from backend.config import settings
 
 print(settings.DATABASE_URL)
 client = mongo_client.MongoClient(settings.DATABASE_URL, serverSelectionTimeoutMS=5000)

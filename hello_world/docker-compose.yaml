@@ -8,7 +8,7 @@ services:
       - custom
 
   app:
-    container_name: repair-app
+    container_name: repair-backend
     image: app
     restart: on-failure
     environment:
@@ -19,8 +19,8 @@ services:
       - custom
     build: ..
     volumes:
-      - .:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+      - .:/backend
+    command: uvicorn main:backend --host 0.0.0.0 --port 8000 --reload
     depends_on:
       - mongo_db
 
