@@ -26,11 +26,5 @@ app.include_router(auth.router, tags=['Auth'], prefix="/api/auth")
 app.include_router(user.router, tags=['User'], prefix="/api/user")
 
 
-@app.get("/api/healthchecker")
-async def ping() -> dict:
-    return {"Ping": "Pong!"}
-
-
-
 if __name__ == "__main__":
     uvicorn.run("__main__:app", host="0.0.0.0", port=8000, reload=True)
