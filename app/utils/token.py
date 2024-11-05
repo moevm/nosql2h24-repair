@@ -4,6 +4,7 @@ from jose import jwt, JWTError
 from datetime import datetime, timezone
 
 from app.config import settings
+from app.dao.user import find_user_by_id
 from app.database import User
 from app.serializers.userSerializers import user_entity
 
@@ -30,8 +31,9 @@ async def get_current_user(token: str = Depends(get_token)):
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Не найден ID пользователя')
 
-    user = user_entity(User.find_one({'_id': ObjectId(str(user_id))}))
+    user = find_user_by_id(ObjectId(str(user_id)))
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='User not found')
 
+    del user.password
     return user

@@ -1,4 +1,6 @@
 from datetime import datetime
+
+from bson import ObjectId
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -24,7 +26,10 @@ class UserLoginSchema(UserBaseSchema):
     password: str = Field(min_length=8)
 
 class UserResponseSchema(UserBaseSchema):
-    id: str
+    id: str 
+
+class UserDao(UserResponseSchema):
+    password: str = Field(min_length=8)
 
 class UserResponse(BaseModel):
     status: str
