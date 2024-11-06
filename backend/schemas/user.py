@@ -21,7 +21,7 @@ class UserCreateSchema(UserBaseSchema):
     verified: bool = False
 
 
-class UserLoginSchema(UserBaseSchema):
+class UserLoginSchema(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8)
 

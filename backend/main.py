@@ -1,6 +1,7 @@
 import uvicorn
 import logging
-from fastapi import FastAPI
+import time
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import settings
@@ -10,35 +11,30 @@ from routers import auth, user
 app = FastAPI()
 app.database = db
 
-origins = [
-    settings.CLIENT_ORIGIN,
-    " 172.18.0.1",
+
+allowed_origins = [
+    "http://localhost:8080",
+    "http://localhost:8000",
+    "http://localhost",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "OPTIONS", "PATCH", "DELETE"],
+    allow_headers=["*"]
 )
-# Middleware для добавления CORS-заголовков (при необходимости)
-@app.middleware("http")
-async def add_cors_headers(request, call_next):
-    response = await call_next(request)
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "OPTIONS, POST, GET"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    return response
-
-# Middleware для логгирования запросов
-logging.basicConfig(level=logging.INFO)
 
 @app.middleware("http")
-async def log_requests(request, call_next):
-    logging.info(f"Request method: {request.method}, URL: {request.url}")
-    response = await call_next(request)
-    return response
+async def process_time_header(request: Request, next):
+    start = time.time()
+    resp = await next(request)
+    time_lapsed = time.time() - start
+    resp.headers["X-Process-Time"] = str(time_lapsed)
+    logging.info(f"Request: {request.method} {request.url} - Response Time: {time_lapsed}s")
+
+    return resp
 
 app.include_router(auth.router, tags=['Auth'], prefix="/api/auth")
 app.include_router(user.router, tags=['User'], prefix="/api/user")
