@@ -3,8 +3,6 @@ FROM python:3.12-alpine
 RUN mkdir app
 WORKDIR /app
 
-ENV PYTHONPATH=.
-
 COPY requirements.txt .
 COPY .env .
 
