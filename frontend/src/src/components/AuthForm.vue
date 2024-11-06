@@ -56,7 +56,16 @@ export default {
     },
     async authenticate() {
       // Логика авторизации
-      axios.post('/api/auth/login')
+
+      axios.post('http://172.18.0.4:8000/api/auth/login',
+          { email: "example@example.com", password: "password123" },
+          {     headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            withCredentials: true
+          }
+      )
           .then(res => {
             console.log(res);
           })

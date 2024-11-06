@@ -39,6 +39,9 @@ async def get_users() -> dict[str, List[UserResponseSchema]]:
     users = await find_all_users()
     return {"users": users}
 
+@router.options("/api/auth/login")
+async def options_login():
+    return Response(status_code=200)
 
 @router.post("/login")
 async def login_user(response: Response, user_data: UserLoginSchema) -> dict:
