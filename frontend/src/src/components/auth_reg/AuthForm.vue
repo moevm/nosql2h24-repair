@@ -4,22 +4,23 @@
         <h2>{{ isRegister ? 'Регистрация' : 'Авторизация' }}</h2>
   
         <!-- Поле логина -->
-        <input v-model="login" type="text" placeholder="Логин" />
+        <input v-model="email" type="text" placeholder="Логин(email)" />
   
         <!-- Поле пароля -->
         <input v-model="password" type="password" placeholder="Пароль" />
   
         <!-- Дополнительные поля для регистрации -->
         <template v-if="isRegister">
-          <input v-model="email" type="email" placeholder="Email" />
-          <input v-model="phone" type="tel" placeholder="Телефон" />
+          <input v-model="name" type="email" placeholder="Имя" />
+          <input v-model="lastname" type="tel" placeholder="Фамилия" />
+          <input v-model="middlename" type="tel" placeholder="Отчество" />
           <input v-model="confirmPassword" type="password" placeholder="Повторите пароль" />
           <select v-model="role">
             <option value="" disabled>Выберите роль</option>
-            <option value="worker">Рабочий</option>
-            <option value="customer">Заказчик</option>
-            <option value="foreman">Прораб</option>
-            <option value="admin">Админ</option>
+            <option value="Рабочий">Рабочий</option>
+            <option value="Заказчик">Заказчик</option>
+            <option value="Прораб">Прораб</option>
+            <option value="Администратор">Администратор</option>
           </select>
         </template>
   
@@ -37,38 +38,43 @@
   </template>
   
   <script>
+  // import { sendDataRegistration }from '@/src/js/auth_registr'
   import axios from 'axios'
   export default {
     data() {
       return {
-        login: '',
-        password: '',
         email: '',
-        phone: '',
+        password: '',
+        name: '',
+        lastname: '',
+        middlename: '',
         confirmPassword: '',
         role: '',
         isRegister: false, // Определяет, находимся ли мы на странице регистрации или авторизации
       };
     },
     methods: {
+
       toggleRegister() {
         this.isRegister = !this.isRegister;
       },
       async authenticate() {
+
+      },
         // Логика авторизации
   
-        axios.post('http://172.18.0.4:8000/api/auth/login',
-            { email: "example@example.com", password: "password123" },
-            {     headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-              },
-              withCredentials: true
-            }
-        )
-            .then(res => {
-              console.log(res);
-            })
+        // axios.post('http://172.18.0.4:8000/api/auth/login',
+        //     { email: "example@example.com", password: "password123" },
+        //     {     headers: {
+        //         'Content-Type': 'application/json',
+        //         'Accept': 'application/json'
+        //       },
+        //       withCredentials: true
+        //     }
+        // )
+        //     .then(res => {
+        //       console.log(res);
+        //     })
             // .catch(error => {
             //   console.error("Ошибка сети:", error.message);
             //   if (error.response) {
@@ -79,76 +85,48 @@
             //     console.error("Сообщение об ошибке:", error.message);
             //   }
             // })
-            .catch(function (error) {
-              console.log(error.toJSON());
-            });
-        console.log("authenticate что-то получила");
-        // if (this.login === 'user' && this.password === 'password') {
+        //     .catch(function (error) {
+        //       console.log(error.toJSON());
+        //     });
+        // console.log("authenticate что-то получила");
+        // // if (this.login === 'user' && this.password === 'password') {
         //   // Успешная авторизация
         //   this.$router.push('/main'); // Переход на основную страницу
         // } else {
         //   alert('Неверный логин или пароль');
         // }
-      },
-      register() {
-        this.sendDataRegistration()
-        console.log("registration что-то получила");
-        // // Проверки перед регистрацией
-        // if (this.password !== this.confirmPassword) {
-        //   alert('Пароли не совпадают');
-        //   return;
-        // }
-        // if (!this.login || !this.email || !this.phone || !this.role) {
-        //   alert('Заполните все поля');
-        //   return;
-        // }
-        //
-        // // Успешная регистрация
-        // alert('Регистрация прошла успешно');
-        // this.isRegister = false; // Возвращаемся к форме авторизации после успешной регистрации
-      },
-      async sendDataRegistration() {
-        // Формируем JSON-объект
+      async register() {
         const dataToSend = {
-          login: this.login,
-          password: this.password,
           email: this.email,
-          phone: this.phone,
-          confirmPassword: this.confirmPassword,
-          role: this.role
-        };
-  
-        try {
-          // Отправляем данные на сервер
-          const response = await axios.post('http://app-backend:8000/api/auth/register', dataToSend, {
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          });
-          console.log('Data sent successfully:', response.data);
-        } catch (error) {
-          console.error('Error sending data:', error);
-        }
-      },
-      async sendDataAuthorisation() {
-        // Формируем JSON-объект
-        const dataToSend = {
-          login: this.login,
+          name: this.name,
+          lastname: this.lastname,
+          middlename: this.middlename,
           password: this.password,
-        };
-        // Отправляем данные на сервер
-        axios.post('http://app-backend:8000/api/auth/login', dataToSend, {
-          headers: {
-            'Content-Type': 'application/json'
+          role: this.role
+        }
+
+        axios.post('http://172.18.0.4:8000/api/auth/register', dataToSend,
+            {     headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              withCredentials: true
+            }
+        )
+            .then(res => {
+              console.log(res);
+            })
+        .catch(error => {
+          console.error("Ошибка сети:", error.message);
+          if (error.response) {
+            console.error("Данные ответа:", error.response.data);
+          } else if (error.request) {
+            console.error("Запрос:", error.request);
+          } else {
+            console.error("Сообщение об ошибке:", error.message);
           }
         })
-            .then(res => {
-          console.log(res);
-        })
-            .catch(function (error) {
-              console.log(error);
-            });
-      }
+      },
     }
   };
   </script>
