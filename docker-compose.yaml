@@ -10,6 +10,8 @@ services:
       - "27017:27017"
     volumes:
       - mongo:/data/db
+    networks:
+      - app-network
 
   app-backend:
     container_name: repair-backend
@@ -22,6 +24,8 @@ services:
       - "./backend:/app"
     depends_on:
       - mongo_db
+    networks:
+      - app-network
   
   app-frontend:
     container_name: repair-frontend
@@ -33,9 +37,15 @@ services:
       - "/app/node_modules"
     ports:
       - "8080:8080"
+    networks:
+      - app-network
 
 
 volumes:
   mongo:
+    
+networks:
+  app-network:
+    driver: bridge
         
         
