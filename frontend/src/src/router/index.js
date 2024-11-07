@@ -13,6 +13,9 @@ import RiskFormComponent from '../components/risk/RiskFormComponent.vue';
 import RiskDetails from '../components/risk/RiskDetails.vue';
 import MaterialDetail from '../components/material/MaterialDetail.vue';
 import MaterialEditAdd from '../components/material/MaterialEditAdd.vue';
+import TasksListPage from '../components/task/TasksListPage.vue';
+import TaskPage from '../components/task/TaskPage.vue';
+import AddStagePage from '../components/stage/AddStagePage.vue';
 
 
 const routes = [
@@ -32,6 +35,9 @@ const routes = [
   { path: '/material/:id', component: MaterialDetail},
   { path: '/material/edit/:id', component: MaterialEditAdd},
   { path: '/add-material', component: MaterialEditAdd},
+  { path: '/tasks/:stageId', component: TasksListPage},
+  { path: '/tasks/:stageId/:taskId', component: TaskPage},
+  { path: '/add-stage', name: 'add-stage', component: AddStagePage },
 ];
 
 const router = createRouter({
