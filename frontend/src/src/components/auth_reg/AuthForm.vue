@@ -163,7 +163,7 @@ export default {
       };
 
       try {
-        const res = await axios.post('http://172.18.0.4:8000/api/auth/login', dataToSend, {
+        const res = await axios.post('/api/auth/login', dataToSend, {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -172,7 +172,7 @@ export default {
         });
         console.log(res);
         this.$router.push("/main");
-        axios.get('http://172.18.0.4:8000/api/auth/me').then(res => {
+        axios.get('/api/auth/me').then(res => {
           console.log(res);
         })
             .catch(err => {
