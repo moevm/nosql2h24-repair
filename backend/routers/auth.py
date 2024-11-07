@@ -47,7 +47,12 @@ async def login_user(response: Response, user_data: UserLoginSchema) -> dict:
             detail='Неверный пароль'
         )
     access_token = create_access_token({"sub": user.id})
-    response.set_cookie(key="users_access_token", value=access_token, httponly=True, samesite='none')
+    response.set_cookie(
+        key="users_access_token",
+        value=access_token,
+        secure=False,
+        httponly=True,
+        samesite='lax')
     return {'access_token': access_token, 'refresh_token': None}
 
 
