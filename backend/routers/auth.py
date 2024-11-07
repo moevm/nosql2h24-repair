@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, status, Response, Depends
 
 from config import settings
 from dao.user import find_all_users, find_user_by_email, create_user
-from schemas.user import UserCreateSchema, UserLoginSchema, UserResponseSchema, UserDao
+from schemas.user import UserCreateSchema, UserLoginSchema, UserDao, UserBaseSchema
 from utils.password import verify_password, create_access_token, get_password_hash
 from utils.token import get_current_user
 
@@ -22,20 +22,13 @@ async def register_user(user_data: UserCreateSchema) -> dict:
             detail='Пользователь уже существует'
         )
 
-    if user_data.password != user_data.passwordConfirmed:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail='Пароли не совпадают'
-        )
-
     user_data.password = get_password_hash(user_data.password)
-    del user_data.passwordConfirmed
     user_id = await create_user(user_data)
     return {"status": "success", "user_id": user_id}
 
 
 @router.get("/get")
-async def get_users() -> dict[str, List[UserResponseSchema]]:
+async def get_users() -> dict[str, List[UserBaseSchema]]:
     users = await find_all_users()
     return {"users": users}
 

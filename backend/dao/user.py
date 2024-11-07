@@ -2,7 +2,7 @@ from bson import ObjectId
 from pydantic import BaseModel
 
 from database import db
-from schemas.user import UserResponseSchema, UserCreateSchema, UserDao
+from schemas.user import UserCreateSchema, UserDao, UserBaseSchema
 
 
 def object_id_to_str(user) -> dict[str, str]:
@@ -28,13 +28,13 @@ async def find_user_by_id(user_id: ObjectId) -> UserDao | None:
     return UserDao(**user)
 
 
-async def find_all_users() -> list[UserResponseSchema]:
+async def find_all_users() -> list[UserBaseSchema]:
     users_collection = db.get_collection('user')
     users = users_collection.find()
     users_list = []
     for user in await users.to_list():
         user = object_id_to_str(user)
-        users_list.append(UserResponseSchema(**user))
+        users_list.append(UserBaseSchema(**user))
     return users_list
 
 
