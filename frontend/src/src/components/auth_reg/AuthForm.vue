@@ -59,42 +59,33 @@
         this.isRegister = !this.isRegister;
       },
       async authenticate() {
+        const dataToSend = {
+          email: this.email,
+          password: this.password,
+        }
+        axios.post('http://172.18.0.4:8000/api/auth/login', dataToSend,
+            {     headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              withCredentials: true
+            }
+        )
+            .then(res => {
+              console.log(res);
+            })
+            .catch(error => {
+              console.error("Ошибка сети:", error.message);
+              if (error.response) {
+                console.error("Данные ответа:", error.response.data);
+              } else if (error.request) {
+                console.error("Запрос:", error.request);
+              } else {
+                console.error("Сообщение об ошибке:", error.message);
+              }
+            })
 
       },
-        // Логика авторизации
-  
-        // axios.post('http://172.18.0.4:8000/api/auth/login',
-        //     { email: "example@example.com", password: "password123" },
-        //     {     headers: {
-        //         'Content-Type': 'application/json',
-        //         'Accept': 'application/json'
-        //       },
-        //       withCredentials: true
-        //     }
-        // )
-        //     .then(res => {
-        //       console.log(res);
-        //     })
-            // .catch(error => {
-            //   console.error("Ошибка сети:", error.message);
-            //   if (error.response) {
-            //     console.error("Данные ответа:", error.response.data);
-            //   } else if (error.request) {
-            //     console.error("Запрос:", error.request);
-            //   } else {
-            //     console.error("Сообщение об ошибке:", error.message);
-            //   }
-            // })
-        //     .catch(function (error) {
-        //       console.log(error.toJSON());
-        //     });
-        // console.log("authenticate что-то получила");
-        // // if (this.login === 'user' && this.password === 'password') {
-        //   // Успешная авторизация
-        //   this.$router.push('/main'); // Переход на основную страницу
-        // } else {
-        //   alert('Неверный логин или пароль');
-        // }
       async register() {
         const dataToSend = {
           email: this.email,
