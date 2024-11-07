@@ -171,6 +171,7 @@ export default {
           withCredentials: true,
         });
         console.log(res);
+        this.$router.push("/main");
         axios.get('http://172.18.0.4:8000/api/auth/me').then(res => {
           console.log(res);
         })
