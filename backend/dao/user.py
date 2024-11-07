@@ -1,6 +1,5 @@
 from bson import ObjectId
-from pydantic import BaseModel
-
+from datetime import datetime, timezone
 from database import db
 from schemas.user import UserCreateSchema, UserDao, UserBaseSchema
 
@@ -40,5 +39,8 @@ async def find_all_users() -> list[UserBaseSchema]:
 
 async def create_user(user: UserCreateSchema):
     users_collection = db.get_collection('user')
-    result = await users_collection.insert_one(user.model_dump())
+    user_dict = user.model_dump()
+    user_dict['created_at'] = datetime.now(timezone.utc)
+    user_dict['updated_at'] = datetime.now(timezone.utc)
+    result = await users_collection.insert_one(user_dict)
     return str(result.inserted_id)
