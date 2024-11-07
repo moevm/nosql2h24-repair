@@ -23,7 +23,7 @@
     methods: {
       goToPhases() {
         // Логика перехода на страницу этапов
-        this.$router.push('/project/phases');
+        this.$router.push('/project/stages');
       },
       goToRisks() {
         // Логика перехода на страницу рисков
