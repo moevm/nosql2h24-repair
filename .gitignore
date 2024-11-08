@@ -5,3 +5,4 @@ instance/*
 .idea
 __pycache__/ *.py[cod]
 __pycache__/
+frontend/node_modules
