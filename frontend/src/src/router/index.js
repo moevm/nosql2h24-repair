@@ -35,8 +35,8 @@ const routes = [
   { path: '/material/:id', component: MaterialDetail},
   { path: '/material/edit/:id', component: MaterialEditAdd},
   { path: '/add-material', component: MaterialEditAdd},
-  { path: '/tasks/:stageId', component: TasksListPage},
-  { path: '/tasks/:stageId/:taskId', component: TaskPage},
+  { path: '/tasks/:stageId', component: TasksListPage, props: true},
+  { path: '/tasks/:stageId/:taskId', component: TaskPage, props: true},
   { path: '/add-stage', name: 'add-stage', component: AddStagePage },
 ];
 
