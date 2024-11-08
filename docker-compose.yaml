@@ -1,0 +1,51 @@
+services:
+  mongo_db:
+    image: mongo:latest
+    container_name: mongo_db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password123
+      - MONGO_INITDB_DATABASE=fastapi
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo:/data/db
+    networks:
+      - app-network
+
+  app-backend:
+    container_name: repair-backend
+    image: app
+    restart: on-failure
+    ports:
+      - "8000:8000"
+    build: ./backend
+    volumes:
+      - "./backend:/app"
+    depends_on:
+      - mongo_db
+    networks:
+      - app-network
+  
+  app-frontend:
+    container_name: repair-frontend
+    image: app_vue
+    restart: on-failure
+    build: ./frontend
+    volumes:
+      - "./frontend:/app"
+      - "/app/node_modules"
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+
+
+volumes:
+  mongo:
+    
+networks:
+  app-network:
+    driver: bridge
+        
+        
