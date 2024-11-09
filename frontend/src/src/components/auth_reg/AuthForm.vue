@@ -171,9 +171,9 @@ export default {
           withCredentials: true,
         });
         console.log(res);
-        this.$router.push("/main");
         axios.get('/api/auth/me').then(res => {
           console.log(res);
+          this.$router.push("/main");
         })
             .catch(err => {
               console.log(err);

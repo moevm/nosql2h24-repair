@@ -14,16 +14,23 @@
       </div>
     </header>
   </template>
-  
+
   <script>
+  import axios from 'axios';
+
   export default {
     data() {
       return {
-        userName: 'Иванов Иван Иванович', // ФИО пользователя
+        userName: '', // ФИО пользователя
         currentDateTime: new Date().toLocaleString(), // Дата и время, динамически обновляется
+        loading: true, // Состояние загрузки
       };
     },
     created() {
+      axios.get('/api/auth/me').then(res => {
+        console.log("Iam");
+        this.userName = res.data.name + ' ' + res.data.lastname + ' ' + res.data.middlename;
+      })
       this.updateDateTime();
     },
     methods: {
@@ -35,11 +42,11 @@
         setInterval(() => {
           this.currentDateTime = new Date().toLocaleString();
         }, 1000);
-      }
+      },
     }
   };
   </script>
-  
+
   <style scoped>
   .header {
     position: fixed;
@@ -53,35 +60,34 @@
     background-color: #ebebeb;
     padding: 0 20px;
   }
-  
+
   .left-section {
     display: flex;
     align-items: center;
   }
-  
+
   .avatar-icon {
     width: 40px;
     height: 40px;
     border-radius: 50%;
     margin-right: 10px;
   }
-  
+
   .user-info {
     display: flex;
     align-items: center;
   }
-  
+
   .user-name {
     font-size: 16px;
     margin-right: 10px;
   }
-  
+
   .messages-icon {
     cursor: pointer;
   }
-  
+
   .right-section {
     font-size: 14px;
   }
   </style>
-  
