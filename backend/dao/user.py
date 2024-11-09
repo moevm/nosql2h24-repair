@@ -2,11 +2,7 @@ from bson import ObjectId
 from datetime import datetime, timezone
 from database import db
 from schemas.user import UserCreateSchema, UserDao, UserBaseSchema
-
-
-def object_id_to_str(user) -> dict[str, str]:
-    user['id'] = str(user['_id'])
-    return user
+from schemas.utils import object_id_to_str
 
 
 async def find_user_by_email(email) -> UserDao | None:
