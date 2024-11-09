@@ -10,11 +10,10 @@ async def create_project(project_crate: ProjectCreate, user: UserDao) -> Project
     project_collection = db.get_collection('project')
     project = Project(**project_crate.model_dump())
     contact = Contact(
-        user_id=user.id,
         username=f'{user.lastname} {user.name} {user.middlename}',
         role=user.role
     )
-    project.add_contact(contact)
+    project.add_contact(user.id, contact)
     result = await project_collection.insert_one(project.model_dump())
     return await get_project_by_id(result.inserted_id)
 
@@ -36,6 +35,15 @@ async def get_project_by_name(project_name: str) -> ProjectResponse | None:
     project = object_id_to_str(project)
     return ProjectResponse(**project)
 
-# async def get_project_by_user(user_id: ObjectId) -> list[Project] | None:
-#     project_collection = db.get_collection('project')
-#
+
+async def get_projects_by_user(user_id: str) -> list[ProjectResponse] | None:
+    project_collection = db.get_collection('project')
+    cursor = project_collection.find(
+        {f"contacts.{user_id}": {"$exists": True}}
+    )
+    projects_list = await cursor.to_list()
+    result = []
+    for project in projects_list:
+        project = object_id_to_str(project)
+        result.append(ProjectResponse(**project))
+    return result

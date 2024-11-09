@@ -78,8 +78,8 @@ class Project(ProjectCreate):
     procurements: Dict[str, Procurement] = {}
     risks: Dict[str, Risk] = {}
 
-    def add_contact(self, contact: Contact):
-        self.contacts[generate_id()] = contact
+    def add_contact(self, contact_id: str, contact: Contact):
+        self.contacts[contact_id] = contact
 
     def add_stage(self, stage: Stage):
         self.stages[generate_id()] = stage

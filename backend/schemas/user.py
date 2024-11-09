@@ -42,7 +42,6 @@ class UserDao(UserBaseSchema):
     
 
 class Contact(BaseModel):
-    user_id: str
     username: str
     role: Role = Role.worker
     created_at: datetime | None = datetime.now(timezone.utc)
