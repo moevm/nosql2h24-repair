@@ -17,10 +17,10 @@
           <Project
               v-if="item.type === 'project'"
               :projectName="item.name"
-              :projectLocation="item.location"
+              :project-location="item.projectLocation"
               :startDate="item.startDate"
               :endDate="item.endDate"
-              :projectPhase="item.phase"
+              :project-phase="item.projectPhase"
               :projectStatus="item.status"
           />
           <NewProjectButton v-if="item.type === 'newProjectButton'" />
@@ -65,17 +65,18 @@ export default {
   methods: {
     async fetchProjects() {
       try {
-        const response = await axios.get('/api/auth/login/main');
+        const response = await axios.get('/api/projects/all');
+        console.log(response.data);
         this.items = [
           { type: 'newProjectButton' },
-          ...response.data.projects.map(project => ({
+          ...response.data.map(project => ({
             type: 'project',
             name: project.name,
-            location: project.location,
-            startDate: project.startDate,
-            endDate: project.endDate,
-            phase: project.phase,
-            status: project.status,
+            startDate: project.start_date,
+            endDate: project.end_date,
+            projectLocation: project.description,
+            projectPhase: project.status,
+            // status: ,
           })),
         ];
       } catch (error) {
