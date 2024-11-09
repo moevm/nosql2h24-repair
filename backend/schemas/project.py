@@ -22,13 +22,12 @@ class Stage(StageCreate):
     id: str
     start_date: datetime
     end_date: datetime
-    tasks: Dict[int, Task] = {}
+    tasks: Dict[str, Task] = {}
     created_at: datetime | None = datetime.now(timezone.utc)
     updated_at: datetime | None = datetime.now(timezone.utc)
 
     def add_task(self, task: Task):
-        task_id = uuid.uuid4().int
-        self.tasks[task_id] = task
+        self.tasks[generate_id()] = task
 
 
 class RiskCreate(BaseModel):
@@ -62,10 +61,10 @@ class Procurement(ProcurementCreate):
 
 class ProjectCreate(BaseModel):
     name: str
-    description: str
-    start_date: str
-    end_date: str
-    status: str
+    description: str | None
+    start_date: str | None = None
+    end_date: str | None = None
+    status: str | None
 
     class Config:
         from_attributes = True

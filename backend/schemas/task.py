@@ -24,7 +24,7 @@ class Task(TaskCreate):
     id: str
     start_date: datetime
     end_date: datetime
-    workers: Dict[int, Worker] = {}
+    workers: Dict[str, Worker] = {}
     created_at: datetime | None = datetime.now(timezone.utc)
     updated_at: datetime | None = datetime.now(timezone.utc)
 
