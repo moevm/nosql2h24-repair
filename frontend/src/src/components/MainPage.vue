@@ -6,22 +6,22 @@
       <div class="header-search">
         <h1>Проекты</h1>
         <input
-          type="text"
-          v-model="searchQuery"
-          placeholder="Поиск проекта"
-          class="search-input"
+            type="text"
+            v-model="searchQuery"
+            placeholder="Поиск проекта"
+            class="search-input"
         />
       </div>
       <div class="projects-container">
         <div v-for="(item, index) in filteredItems" :key="index">
           <Project
-            v-if="item.type === 'project'"
-            :projectName="item.name"
-            :projectLocation="item.location"
-            :startDate="item.startDate"
-            :endDate="item.endDate"
-            :projectPhase="item.phase"
-            :projectStatus="item.status"
+              v-if="item.type === 'project'"
+              :projectName="item.name"
+              :projectLocation="item.location"
+              :startDate="item.startDate"
+              :endDate="item.endDate"
+              :projectPhase="item.phase"
+              :projectStatus="item.status"
           />
           <NewProjectButton v-if="item.type === 'newProjectButton'" />
         </div>
@@ -31,6 +31,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import HeaderComponent from '../components/bars/HeaderComponent.vue';
 import SidebarComponent from '../components/bars/SidebarComponent.vue';
 import NewProjectButton from '../components/project/NewProjectButton.vue';
@@ -50,43 +51,40 @@ export default {
         {
           type: 'newProjectButton',
         },
-        {
-          type: 'project',
-          name: 'Вырастить дерево',
-          location: 'СПбГЭТУ ЛЭТИ',
-          startDate: '2024-01-01',
-          endDate: '2024-06-01',
-          phase: 'Основной этап',
-          status: 'В процессе',
-        },
-        {
-          type: 'project',
-          name: 'Посадить ребенка',
-          location: 'СПбГЭТУ ЛЭТИ',
-          startDate: '2024-02-01',
-          endDate: '2024-07-01',
-          phase: 'Основной этап',
-          status: 'Завершён',
-        },
-        {
-          type: 'project',
-          name: 'Проект 42',
-          location: 'СПбГЭТУ ЛЭТИ',
-          startDate: '2024-03-01',
-          endDate: '2024-08-01',
-          phase: 'Основной этап',
-          status: 'В процессе',
-        },
       ],
     };
   },
   computed: {
     filteredItems() {
       return this.items.filter(item =>
-        item.type === 'newProjectButton' ||
-        (item.type === 'project' && item.name.toLowerCase().includes(this.searchQuery.toLowerCase()))
+          item.type === 'newProjectButton' ||
+          (item.type === 'project' && item.name.toLowerCase().includes(this.searchQuery.toLowerCase()))
       );
     },
+  },
+  methods: {
+    async fetchProjects() {
+      try {
+        const response = await axios.get('/api/auth/login/main');
+        this.items = [
+          { type: 'newProjectButton' },
+          ...response.data.projects.map(project => ({
+            type: 'project',
+            name: project.name,
+            location: project.location,
+            startDate: project.startDate,
+            endDate: project.endDate,
+            phase: project.phase,
+            status: project.status,
+          })),
+        ];
+      } catch (error) {
+        console.error('Ошибка при загрузке проектов:', error);
+      }
+    },
+  },
+  beforeMount() {
+    this.fetchProjects();
   },
 };
 </script>

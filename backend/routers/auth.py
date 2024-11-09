@@ -60,6 +60,9 @@ async def login_user(response: Response, user_data: UserLoginSchema) -> dict:
 async def get_me(user_data: UserDao = Depends(get_current_user)):
     return user_data
 
+@router.get("/main")
+async def get_project(user_data: UserDao = Depends(get_current_user)):
+    pass
 
 @router.post("/logout/")
 async def logout_user(response: Response):
