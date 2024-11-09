@@ -47,3 +47,19 @@ async def get_projects_by_user(user_id: str) -> list[ProjectResponse] | None:
         project = object_id_to_str(project)
         result.append(ProjectResponse(**project))
     return result
+
+
+async def add_contact_to_project(project_id: str, user: UserDao) -> ProjectResponse | None:
+    project_collection = db.get_collection('project')
+    result = await project_collection.update_one(
+        {"_id": ObjectId(project_id)},
+        {
+            "$set": {
+                f"contacts.{user.id}": {
+                    "username": f"{user.lastname} {user.name} {user.middlename}",
+                    "role": user.role,
+                }
+            }
+        },
+    )
+    return await get_project_by_id(project_id)

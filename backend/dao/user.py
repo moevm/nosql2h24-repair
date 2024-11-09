@@ -14,7 +14,7 @@ async def find_user_by_email(email) -> UserDao | None:
     return UserDao(**user)
 
 
-async def find_user_by_id(user_id: ObjectId) -> UserDao | None:
+async def find_user_by_id(user_id: str) -> UserDao | None:
     users = db.get_collection('user')
     user = await users.find_one({'_id': ObjectId(user_id)})
     if not user:

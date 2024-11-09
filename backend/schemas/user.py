@@ -47,6 +47,9 @@ class Contact(BaseModel):
     created_at: datetime | None = datetime.now(timezone.utc)
     updated_at: datetime | None = datetime.now(timezone.utc)
 
+class ContactCreate(BaseModel):
+    user_id: str
+    project_id: str
 
 class Worker(BaseModel):
     id: str
