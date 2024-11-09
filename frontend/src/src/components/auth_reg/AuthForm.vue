@@ -204,7 +204,7 @@ export default {
       };
 
       try {
-        const res = await axios.post('http://172.18.0.4:8000/api/auth/register', dataToSend, {
+        const res = await axios.post('/api/auth/register', dataToSend, {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',

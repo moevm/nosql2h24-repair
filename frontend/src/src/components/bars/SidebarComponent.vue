@@ -11,6 +11,7 @@
   </template>
   
   <script>
+  import axios from 'axios';
   export default {
     data() {
       return {
@@ -22,9 +23,23 @@
         // Логика перехода на страницу статистики
         this.$router.push('/statistics');
       },
-      logOut() {
+      async logOut() {
         // Логика выхода на страницу авторизации
-        this.$router.push('/login');
+        try {
+          const res = await axios.post('/api/auth/logout');
+          console.log(res);
+          this.$router.push('/login');
+          // Дополнительный код для обработки успешной регистрации
+        } catch (error) {
+          console.error("Ошибка сети:", error.message);
+          if (error.response) {
+            console.error("Данные ответа:", error.response.data);
+            // Вывод ошибки с сервера
+            if (error.response.data.detail) {
+              this.serverError = error.response.data.detail; // Сохраняем ошибку с сервера
+            }
+          }
+        }
       }
     }
   };
