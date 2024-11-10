@@ -27,8 +27,8 @@
         </div>
 
         <div class="date-selectors">
-          <DateSelectorComponent label="Начало" date="25.12.2024" />
-          <DateSelectorComponent label="Конец" date="24.02.2025" />
+          <DateSelectorComponent label="Начало" :date="dateStart" />
+          <DateSelectorComponent label="Конец" :date="dateEnd" />
         </div>
 
         <ContactsComponent />
@@ -56,6 +56,8 @@ export default {
       projectId: this.$route.params.id,
       nameProject: '',
       description: '',
+      dateStart:'',
+      dateEnd:'',
       isEditing: false,
       editedDescription: ''
     };
@@ -85,9 +87,18 @@ export default {
         console.log(response.data);
         this.nameProject = response.data.project.name;
         this.description = response.data.project.description;
+        this.dateStart = this.formatDate(response.data.project.created_at);
+        this.dateEnd = this.formatDate(response.data.project.end_date);
       } catch (error) {
         console.error('Ошибка при загрузке проекта:', error);
       }
+    },
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 по 11, поэтому +1
+      const year = date.getFullYear();
+      return `${day}.${month}.${year}`;
     },
   },
 };
