@@ -7,7 +7,8 @@ from schemas.user import UserDao, ContactCreate, Contact, ContactResponse
 from utils.token import get_current_user
 from dao.project import get_project_by_id, create_project, get_project_by_name, get_projects_by_user, \
     add_contact_to_project, add_procurement_to_project, add_stage_to_project, add_risk_to_project, \
-    get_contacts_by_project_id, get_procurements_by_project_id, get_risks_by_project_id, get_stages_by_project_id
+    get_contacts_by_project_id, get_procurements_by_project_id, get_risks_by_project_id, get_stages_by_project_id, \
+    get_procurement_by_id
 
 router = APIRouter()
 
@@ -78,6 +79,17 @@ async def get_procurements(project_id: str, user: UserDao = Depends(get_current_
             detail='Проекта не существует'
         )
     return {"procurements": procurements}
+
+
+@router.get("/{project_id}/get_procurement/{procurement_id}", response_model=dict[str, Procurement])
+async def get_procurement(project_id: str, procurement_id: str, user: UserDao = Depends(get_current_user)):
+    procurement = await get_procurement_by_id(project_id, procurement_id)
+    if procurement is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Закупка не найдена'
+        )
+    return {"updated_procurement": procurement}
 
 
 @router.post("/{project_id}/add_stage", response_model=dict[str, Project | None])
