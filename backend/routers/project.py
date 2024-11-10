@@ -61,7 +61,10 @@ async def get_contacts(project_id: str, user: UserDao = Depends(get_current_user
 
 @router.post("/{project_id}/add_procurement", response_model=dict[str, Project | None])
 async def add_procurement(project_id: str, procurement_data: Procurement, user: UserDao = Depends(get_current_user)):
-    procurement_data.created_by = user.id
+    procurement_data.created_by = Contact(
+        username=f'{user.lastname} {user.name} {user.middlename}',
+        role=user.role
+    )
     project = await add_procurement_to_project(project_id, procurement_data)
     if project is None:
         raise HTTPException(
