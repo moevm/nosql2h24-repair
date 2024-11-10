@@ -76,6 +76,18 @@ async def get_contacts_by_project_id(project_id: str) -> list[ContactResponse] |
     return []
 
 
+async def get_contact_by_id(project_id: str, contact_id: str) -> ContactResponse | None:
+    project_collection = db.get_collection('project')
+    project = await project_collection.find_one({"_id": ObjectId(project_id)})
+    if not project:
+        return None
+
+    contact = project.get("contacts", {}).get(contact_id)
+    if not contact or contact.get("user_id") != ObjectId(contact_id):
+        return None
+    return ContactResponse(**contact)
+
+
 async def add_procurement_to_project(project_id: str, procurement_create: Procurement) -> Project | None:
     project_collection = db.get_collection('project')
     procurement = procurement_create.model_dump()
@@ -119,7 +131,7 @@ async def get_stages_by_project_id(project_id: str) -> list[StageResponse] | lis
     project = await project_collection.find_one({"_id": ObjectId(project_id)}, {"stages": 1})
     if project and "stages" in project:
         stages = [StageResponse(id=stage_id, **stage_data) for stage_id, stage_data in
-                 project["stages"].items()]
+                  project["stages"].items()]
         return stages
     elif project is None:
         return None

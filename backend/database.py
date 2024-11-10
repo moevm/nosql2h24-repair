@@ -4,3 +4,5 @@ from config import settings
 
 client = AsyncIOMotorClient(settings.DATABASE_URL, serverSelectionTimeoutMS=5000)
 db = client.get_database(settings.MONGO_INITDB_DATABASE)
+
+# await collection.create_index("stages.tasks.workers.user_id")

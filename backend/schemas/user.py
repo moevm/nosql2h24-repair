@@ -41,16 +41,22 @@ class UserDao(UserBaseSchema):
 class Contact(BaseModel):
     username: str
     role: Role = Role.worker
-    created_at: Optional[datetime]  = Field(datetime.now(timezone.utc))
-    updated_at: Optional[datetime]  = Field(datetime.now(timezone.utc))
+    created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
+    updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
+
 
 class ContactResponse(Contact):
     id: str
+
 
 class ContactCreate(BaseModel):
     user_id: str
 
 
 class Worker(BaseModel):
-    id: str
     name: str
+    role: Role = Role.worker
+
+
+class WorkerResponse(Worker):
+    id: str
