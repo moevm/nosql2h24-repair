@@ -1,7 +1,7 @@
 <template>
   <div class="main-container">
     <HeaderComponent />
-    <ProjectSidebarComponent :projectId="projectId" :projectName="nameProject"/>
+    <ProjectSidebarComponent :projectId="projectId" :projectName="projectName"/>
 
     <div class="content">
       <div class="task-container">

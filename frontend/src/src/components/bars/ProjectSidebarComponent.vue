@@ -32,16 +32,29 @@
     },
     methods: {
       goToPhases() {
-        // Логика перехода на страницу этапов
-        this.$router.push(`/${this.projectName}/${this.projectId}/stages`);
+        if (this.$route.fullPath === `/${this.projectName}/${this.projectId}/stages`){
+          this.$router.push(`/${this.projectName}/${this.projectId}`);
+        }else {
+          // Логика перехода на страницу этапов
+          this.$router.push(`/${this.projectName}/${this.projectId}/stages`);
+        }
       },
       goToRisks() {
-        // Логика перехода на страницу рисков
-        this.$router.push(`/${this.projectName}/${this.projectId}/risks`);
+        if (this.$route.fullPath === `/${this.projectName}/${this.projectId}/risks`){
+          this.$router.push(`/${this.projectName}/${this.projectId}`);
+        }else {
+          // Логика перехода на страницу рисков
+          this.$router.push(`/${this.projectName}/${this.projectId}/risks`);
+        }
       },
       goToProcurements() {
-        // Логика перехода на страницу закупок
-        this.$router.push(`/${this.projectName}/${this.projectId}/procurements`);
+        if (this.$route.fullPath === `/${this.projectName}/${this.projectId}/procurements`){
+          this.$router.push(`/${this.projectName}/${this.projectId}`);
+        }else {
+          // Логика перехода на страницу закупок
+          this.$router.push(`/${this.projectName}/${this.projectId}/procurements`);
+        }
+
       },
       logOut() {
         // Логика выхода на страницу авторизации
