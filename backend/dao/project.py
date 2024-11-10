@@ -156,6 +156,24 @@ async def get_stages_by_project_id(project_id: str) -> list[StageResponse] | lis
     return []
 
 
+async def get_stage_by_id(project_id: str, stage_id: str) -> StageResponse | None:
+    project_collection = db.get_collection('project')
+    project = await project_collection.find_one(
+        {
+            "_id": ObjectId(project_id),
+            f"stages.{stage_id}": {"$exists": True}
+        },
+        {
+            f"stages.{stage_id}": 1
+        }
+    )
+
+    if project:
+        stage = project["stages"][stage_id]
+        return StageResponse(id=stage_id, **stage)
+    return None
+
+
 async def add_risk_to_project(project_id: str, risk_create: Risk):
     project_collection = db.get_collection('project')
     result = await project_collection.update_one(
