@@ -1,6 +1,5 @@
 from bson import ObjectId
 
-from dao.project import get_project_by_id
 from database import db
 from schemas.task import Task, TaskResponse
 from schemas.user import Worker

@@ -6,16 +6,13 @@ from bson import ObjectId
 from pydantic import BaseModel, Field
 
 class FirstMessage(BaseModel):
-    name_sender: str = Field(...)
-    name_receiver: str = Field(...)
-    id_sender: str = Field(...)
     id_receiver: str = Field(...)
     content: str = Field(...)
 
 
 class Participant(BaseModel):
     name: str
-    lastSeen: Field(datetime.now(timezone.utc))
+    lastSeen: datetime = Field(datetime.now(timezone.utc))
 
 
 class StatusMsg(str, Enum):
@@ -45,6 +42,10 @@ class Chat(BaseModel):
 
 class ChatResponse(Chat):
     id: str
+    
+class CreateChatResponse(BaseModel):
+    chat_id: str
+    message_id: str
     
 class Message(LastMessage):
     chatId: str
