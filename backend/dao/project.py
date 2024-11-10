@@ -115,6 +115,24 @@ async def get_procurements_by_project_id(project_id: str) -> list[ProcurementRes
     return []
 
 
+async def get_procurement_by_id(project_id: str, procurement_id: str) -> ProcurementResponse | None:
+    project_collection = db.get_collection('project')
+    project = await project_collection.find_one(
+        {
+            "_id": ObjectId(project_id),
+            f"procurements.{procurement_id}": {"$exists": True}
+        },
+        {
+            f"procurements.{procurement_id}": 1
+        }
+    )
+
+    if project:
+        procurement = project["procurements"][procurement_id]
+        return ProcurementResponse(id=procurement_id, **procurement)
+    return None
+
+
 async def add_stage_to_project(project_id: str, stage_create: Stage):
     project_collection = db.get_collection('project')
     result = await project_collection.update_one(

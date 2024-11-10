@@ -33,6 +33,11 @@ async def find_all_users() -> list[UserBaseSchema]:
     return users_list
 
 
+async def find_users_by_project(project_id: str) -> list[UserBaseSchema]:
+    users_collection = db.get_collection('user')
+    
+
+
 async def create_user(user: UserCreateSchema):
     users_collection = db.get_collection('user')
     user_dict = user.model_dump()
