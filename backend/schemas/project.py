@@ -1,8 +1,9 @@
 import uuid
 from datetime import datetime, timezone
-from typing import Dict
+from enum import Enum
+from typing import Dict, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from schemas.task import Task
 from schemas.user import Contact
@@ -23,8 +24,8 @@ class Stage(StageCreate):
     start_date: datetime
     end_date: datetime
     tasks: Dict[str, Task] = {}
-    created_at: datetime | None = datetime.now(timezone.utc)
-    updated_at: datetime | None = datetime.now(timezone.utc)
+    created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
+    updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
 
     def add_task(self, task: Task):
         self.tasks[generate_id()] = task
@@ -40,29 +41,34 @@ class RiskCreate(BaseModel):
 
 class Risk(RiskCreate):
     id: str
-    created_at: datetime | None = datetime.now(timezone.utc)
-    updated_at: datetime | None = datetime.now(timezone.utc)
+    created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
+    updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
 
 
 class Procurement(BaseModel):
     item_name: str
     quantity: int
     price: float
-    delivery_date: datetime | None = None
-    created_by: str | None = None
-    created_at: datetime | None = datetime.now(timezone.utc)
-    updated_at: datetime | None = datetime.now(timezone.utc)
+    delivery_date: Optional[datetime] = Field(None)
+    created_by: Optional[str] = Field(None)
+    created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
+    updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
 
+
+class ProjectStatus(str, Enum):
+    in_progress = "В процессе"
+    done = "Готово"
+    lateness = "Опоздание"
 
 
 class ProjectCreate(BaseModel):
     name: str
-    description: str | None
-    start_date: datetime | None = None
-    end_date: datetime | None = None
-    status: str | None
-    created_at: datetime | None = datetime.now(timezone.utc)
-    updated_at: datetime | None = datetime.now(timezone.utc)
+    description: Optional[str] = Field(None)
+    start_date: Optional[datetime] = Field(None)
+    end_date: Optional[datetime] = Field(None)
+    status: ProjectStatus
+    created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
+    updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
     contacts: Dict[str, Contact] = {}
     stages: Dict[str, Stage] = {}
     procurements: Dict[str, Procurement] = {}
