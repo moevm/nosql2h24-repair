@@ -31,7 +31,7 @@
           <DateSelectorComponent label="Конец" :date="dateEnd" />
         </div>
 
-        <ContactsComponent />
+        <ContactsComponent :contacts="contacts" />
       </div>
     </main>
   </div>
@@ -58,6 +58,9 @@ export default {
       description: '',
       dateStart:'',
       dateEnd:'',
+      contacts:[
+
+      ],
       isEditing: false,
       editedDescription: ''
     };
@@ -89,6 +92,13 @@ export default {
         this.description = response.data.project.description;
         this.dateStart = this.formatDate(response.data.project.created_at);
         this.dateEnd = this.formatDate(response.data.project.end_date);
+        this.contacts = Object.values(response.data.project.contacts).map(contact => ({
+          userName: contact.username,
+          role: contact.role,
+          // createdAt: this.formatDate(contact.created_at),
+          // updatedAt: this.formatDate(contact.updated_at),
+        }));
+        console.log(this.contacts);
       } catch (error) {
         console.error('Ошибка при загрузке проекта:', error);
       }

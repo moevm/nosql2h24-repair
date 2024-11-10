@@ -5,10 +5,10 @@
       <button @click="addContact" class="add-button">Добавить</button>
     </div>
     <ul>
-      <li v-for="contact in contacts" :key="contact.name">
+      <li v-for="contact in contacts" :key="contact.userName">
         <img :src="require(`@/assets/icons/avatar.png`)" alt="Avatar Icon" class="contact-avatar">
         <div class="contact-info">
-          <div>{{ contact.name }}</div>
+          <div>{{ contact.userName }}</div>
           <span>{{ contact.role }}</span>
         </div>
       </li>
@@ -18,15 +18,21 @@
 
 <script>
 export default {
-  data() {
-    return {
-      contacts: [
-        { name: 'Каримов С. Н.', role: 'Прораб', avatar: 'avatar1.png' },
-        { name: 'Каримов С. Н.', role: 'Заказчик', avatar: 'avatar2.png' },
-        { name: 'Каримов С. Н.', role: 'Работник', avatar: 'avatar3.png' },
-      ],
-    };
+  props: {
+    contacts: {
+      type: Array,
+      required: true
+    }
   },
+  // data() {
+  //   return {
+  //     contacts: [
+  //       { name: 'Каримов С. Н.', role: 'Прораб', avatar: 'avatar1.png' },
+  //       { name: 'Каримов С. Н.', role: 'Заказчик', avatar: 'avatar2.png' },
+  //       { name: 'Каримов С. Н.', role: 'Работник', avatar: 'avatar3.png' },
+  //     ],
+  //   };
+  // },
   methods: {
     addContact() {
       // Логика для добавления нового контакта
