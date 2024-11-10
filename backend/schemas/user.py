@@ -31,7 +31,6 @@ class UserBaseSchema(UserCreateSchema):
     updated_at: datetime | None = datetime.now(timezone.utc)
 
 
-
 class UserLoginSchema(BaseModel):
     email: EmailStr = Field(..., description="Электронная почта пользователя")
     password: str = Field(min_length=8)
@@ -39,7 +38,7 @@ class UserLoginSchema(BaseModel):
 
 class UserDao(UserBaseSchema):
     password: str = Field(min_length=8)
-    
+
 
 class Contact(BaseModel):
     username: str
@@ -47,9 +46,10 @@ class Contact(BaseModel):
     created_at: datetime | None = datetime.now(timezone.utc)
     updated_at: datetime | None = datetime.now(timezone.utc)
 
+
 class ContactCreate(BaseModel):
     user_id: str
-    project_id: str
+
 
 class Worker(BaseModel):
     id: str

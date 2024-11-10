@@ -44,33 +44,23 @@ class Risk(RiskCreate):
     updated_at: datetime | None = datetime.now(timezone.utc)
 
 
-class ProcurementCreate(BaseModel):
+class Procurement(BaseModel):
     item_name: str
     quantity: int
     price: float
-    delivery_date: str
-    created_by: str
-
-
-class Procurement(ProcurementCreate):
-    id: str
-    delivery_date: datetime
+    delivery_date: datetime | None = None
+    created_by: str | None = None
     created_at: datetime | None = datetime.now(timezone.utc)
     updated_at: datetime | None = datetime.now(timezone.utc)
+
 
 
 class ProjectCreate(BaseModel):
     name: str
     description: str | None
-    start_date: str | None = None
-    end_date: str | None = None
+    start_date: datetime | None = None
+    end_date: datetime | None = None
     status: str | None
-
-    class Config:
-        from_attributes = True
-
-
-class Project(ProjectCreate):
     created_at: datetime | None = datetime.now(timezone.utc)
     updated_at: datetime | None = datetime.now(timezone.utc)
     contacts: Dict[str, Contact] = {}
@@ -90,5 +80,9 @@ class Project(ProjectCreate):
     def add_risk(self, risk: Risk):
         self.risks[generate_id()] = risk
 
-class ProjectResponse(Project):
+    class Config:
+        from_attributes = True
+
+
+class Project(ProjectCreate):
     id: str
