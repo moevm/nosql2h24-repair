@@ -67,7 +67,7 @@ class ProjectCreate(BaseModel):
     description: Optional[str] = Field(None)
     start_date: Optional[datetime] = Field(None)
     end_date: Optional[datetime] = Field(None)
-    status: ProjectStatus
+    status: ProjectStatus = Field(ProjectStatus.in_progress)
     created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
     updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
     contacts: Dict[str, Contact] = {}

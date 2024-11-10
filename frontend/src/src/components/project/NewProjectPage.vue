@@ -4,7 +4,9 @@
   <div class="create-project-page">
     <h1>Опишите проект</h1>
     <input v-model="projectName" type="text" placeholder="Введите название проекта" />
+    <p> Дата начала</p>
     <input v-model="startDate" type="date" placeholder="Дата начала" />
+    <p> Дата конца</p>
     <input v-model="endDate" type="date" placeholder="Дата окончания" />
     <textarea v-model="projectDescription" placeholder="Введите описание проекта"></textarea>
     <button @click="submitProject">Отправить</button>
@@ -13,6 +15,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
 
@@ -31,20 +34,52 @@ export default {
     };
   },
   methods: {
-    submitProject() {
+    formatToDateTime(date) {
+      return `${date}T00:00:00`; // Преобразует в формат `YYYY-MM-DDT00:00:00`
+    },
+    async submitProject() {
       // Проверка, чтобы все поля были заполнены
       if (!this.projectName || !this.startDate || !this.endDate || !this.projectDescription) {
         this.errorMessage = 'Пожалуйста, заполните все поля';
         return;
       }
+
+      const dataToSend = {
+        name: this.projectName,
+        description: this.projectDescription,
+        start_date: this.formatToDateTime(this.startDate),
+        end_date: this.formatToDateTime(this.endDate),
+      };
+
+      try {
+        const res = await axios.post('/api/projects/create', dataToSend, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          withCredentials: true,
+        });
+        alert('Проект успешно создан!');
+        this.$router.push('/main');
+        console.log(res);
+      } catch (error) {
+        console.error("Ошибка сети:", error.message);
+        if (error.response) {
+          console.error("Данные ответа:", error.response.data);
+          // Вывод ошибки с сервера
+          if (error.response.data.detail) {
+            this.errorMessage = error.response.data.detail; // Сохраняем ошибку с сервера
+          }
+        }
+      }
       // Логика отправки проекта
-      console.log('Название проекта:', this.projectName);
-      console.log('Дата начала:', this.startDate);
-      console.log('Дата окончания:', this.endDate);
-      console.log('Описание проекта:', this.projectDescription);
+      // console.log('Название проекта:', this.projectName);
+      // console.log('Дата начала:', this.startDate);
+      // console.log('Дата окончания:', this.endDate);
+      // console.log('Описание проекта:', this.projectDescription);
 
       // Здесь можно добавить логику для отправки данных на сервер
-      this.errorMessage = ''; // Очистка ошибки, если все поля заполнены
+      //this.errorMessage = ''; // Очистка ошибки, если все поля заполнены
     },
   },
 };
