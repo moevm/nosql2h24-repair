@@ -17,7 +17,7 @@ class Stage(BaseModel):
     tasks: Dict[str, Task] = {}
     created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
     updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
-    
+
     def add_task(self, task: Task):
         self.tasks[generate_id()] = task
 
@@ -26,18 +26,14 @@ class Stage(BaseModel):
 
 
 
-class RiskCreate(BaseModel):
+class Risk(BaseModel):
     name: str
     description: str
+    created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
+    updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
 
     class Config:
         from_attributes = True
-
-
-class Risk(RiskCreate):
-    id: str
-    created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
 
 
 class Procurement(BaseModel):
