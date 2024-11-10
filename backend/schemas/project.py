@@ -60,6 +60,7 @@ class ProjectStatus(str, Enum):
     in_progress = "В процессе"
     done = "Готово"
     lateness = "Опоздание"
+    none_status = "Нет статуса"
 
 
 class ProjectCreate(BaseModel):
@@ -67,7 +68,7 @@ class ProjectCreate(BaseModel):
     description: Optional[str] = Field(None)
     start_date: Optional[datetime] = Field(None)
     end_date: Optional[datetime] = Field(None)
-    status: ProjectStatus = Field(ProjectStatus.in_progress)
+    status: ProjectStatus = Field(ProjectStatus.none_status)
     created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
     updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
     contacts: Dict[str, Contact] = {}
