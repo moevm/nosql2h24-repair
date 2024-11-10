@@ -8,7 +8,7 @@ from utils.token import get_current_user
 from dao.project import get_project_by_id, create_project, get_project_by_name, get_projects_by_user, \
     add_contact_to_project, add_procurement_to_project, add_stage_to_project, add_risk_to_project, \
     get_contacts_by_project_id, get_procurements_by_project_id, get_risks_by_project_id, get_stages_by_project_id, \
-    get_procurement_by_id, get_stage_by_id
+    get_procurement_by_id, get_stage_by_id, get_risk_by_id
 
 router = APIRouter()
 
@@ -145,3 +145,14 @@ async def get_risks(project_id: str, user: UserDao = Depends(get_current_user)):
             detail='Проекта не существует'
         )
     return {"risks": risks}
+
+
+@router.get("/{project_id}/get_risk/{risk_id}", response_model=dict[str, RiskResponse])
+async def get_stage(project_id: str, risk_id: str, user: UserDao = Depends(get_current_user)):
+    risk = await get_risk_by_id(project_id, risk_id)
+    if risk is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Риск не найден'
+        )
+    return {"risk": risk}

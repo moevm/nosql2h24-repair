@@ -195,3 +195,22 @@ async def get_risks_by_project_id(project_id: str) -> list[RiskResponse] | list[
     elif project is None:
         return None
     return []
+
+
+
+async def get_risk_by_id(project_id: str, risk_id: str) -> RiskResponse | None:
+    project_collection = db.get_collection('project')
+    project = await project_collection.find_one(
+        {
+            "_id": ObjectId(project_id),
+            f"risks.{risk_id}": {"$exists": True}
+        },
+        {
+            f"risks.{risk_id}": 1
+        }
+    )
+
+    if project:
+        stage = project["risks"][risk_id]
+        return RiskResponse(id=risk_id, **stage)
+    return None
