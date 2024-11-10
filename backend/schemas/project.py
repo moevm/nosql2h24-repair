@@ -23,7 +23,9 @@ class Stage(BaseModel):
 
     class Config:
         from_attributes = True
-
+        
+class StageResponse(Stage):
+    id: str
 
 
 class Risk(BaseModel):
@@ -34,6 +36,10 @@ class Risk(BaseModel):
 
     class Config:
         from_attributes = True
+        
+
+class RiskResponse(Risk):
+    id: str
 
 
 class Procurement(BaseModel):
@@ -44,6 +50,10 @@ class Procurement(BaseModel):
     created_by: Optional[str] = Field(None)
     created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
     updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
+
+
+class ProcurementResponse(Procurement):
+    id: str
 
 
 class ProjectStatus(str, Enum):

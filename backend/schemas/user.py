@@ -44,6 +44,8 @@ class Contact(BaseModel):
     created_at: Optional[datetime]  = Field(datetime.now(timezone.utc))
     updated_at: Optional[datetime]  = Field(datetime.now(timezone.utc))
 
+class ContactResponse(Contact):
+    id: str
 
 class ContactCreate(BaseModel):
     user_id: str

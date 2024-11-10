@@ -1,7 +1,8 @@
 from bson import ObjectId
 from database import db
-from schemas.project import ProjectCreate, Project, Procurement, Stage, Risk
-from schemas.user import UserDao, Contact
+from schemas.project import ProjectCreate, Project, Procurement, Stage, Risk, ProcurementResponse, RiskResponse, \
+    StageResponse
+from schemas.user import UserDao, Contact, ContactResponse
 from schemas.utils import object_id_to_str, generate_id
 
 
@@ -63,11 +64,16 @@ async def add_contact_to_project(project_id: str, user: UserDao) -> Project | No
     return await get_project_by_id(project_id)
 
 
-async def get_contact_by_project_id(project_id: str) -> list[Contact] | None:
+async def get_contacts_by_project_id(project_id: str) -> list[ContactResponse] | list[None] | None:
     project_collection = db.get_collection('project')
-    project = await project_collection.find_one({"_id": ObjectId(project_id)})
-    if project is None:
+    project = await project_collection.find_one({"_id": ObjectId(project_id)}, {"contacts": 1})
+    if project and "contacts" in project:
+        contacts = [ContactResponse(id=contact_id, **contact_data) for contact_id, contact_data in
+                    project["contacts"].items()]
+        return contacts
+    elif project is None:
         return None
+    return []
 
 
 async def add_procurement_to_project(project_id: str, procurement_create: Procurement) -> Project | None:
@@ -84,6 +90,19 @@ async def add_procurement_to_project(project_id: str, procurement_create: Procur
     return await get_project_by_id(project_id)
 
 
+async def get_procurements_by_project_id(project_id: str) -> list[ProcurementResponse] | list[None] | None:
+    project_collection = db.get_collection('project')
+    project = await project_collection.find_one({"_id": ObjectId(project_id)}, {"procurements": 1})
+    if project and "procurements" in project:
+        procurements = [ProcurementResponse(id=procurement_id, **procurement_data) for procurement_id, procurement_data
+                        in
+                        project["procurements"].items()]
+        return procurements
+    elif project is None:
+        return None
+    return []
+
+
 async def add_stage_to_project(project_id: str, stage_create: Stage):
     project_collection = db.get_collection('project')
     result = await project_collection.update_one(
@@ -95,6 +114,18 @@ async def add_stage_to_project(project_id: str, stage_create: Stage):
     return await get_project_by_id(project_id)
 
 
+async def get_stages_by_project_id(project_id: str) -> list[StageResponse] | list[None] | None:
+    project_collection = db.get_collection('project')
+    project = await project_collection.find_one({"_id": ObjectId(project_id)}, {"stages": 1})
+    if project and "stages" in project:
+        stages = [StageResponse(id=stage_id, **stage_data) for stage_id, stage_data in
+                 project["stages"].items()]
+        return stages
+    elif project is None:
+        return None
+    return []
+
+
 async def add_risk_to_project(project_id: str, risk_create: Risk):
     project_collection = db.get_collection('project')
     result = await project_collection.update_one(
@@ -104,3 +135,15 @@ async def add_risk_to_project(project_id: str, risk_create: Risk):
         }
     )
     return await get_project_by_id(project_id)
+
+
+async def get_risks_by_project_id(project_id: str) -> list[RiskResponse] | list[None] | None:
+    project_collection = db.get_collection('project')
+    project = await project_collection.find_one({"_id": ObjectId(project_id)}, {"risks": 1})
+    if project and "risks" in project:
+        risks = [RiskResponse(id=risk_id, **risk_data) for risk_id, risk_data in
+                 project["risks"].items()]
+        return risks
+    elif project is None:
+        return None
+    return []
