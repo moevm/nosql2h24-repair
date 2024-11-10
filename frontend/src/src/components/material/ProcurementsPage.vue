@@ -81,6 +81,8 @@ export default {
           pricePerUnit: procurement.price,
           totalCost: procurement.cost,
           materialId: procurement.id,
+          user: procurement.created_by.username,
+          userRole: procurement.created_by.role,
           inStock: false,
         }));
         console.log(this.procurements);
