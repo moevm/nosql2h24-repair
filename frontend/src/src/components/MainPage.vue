@@ -22,6 +22,7 @@
               :endDate="item.endDate"
               :project-phase="item.projectPhase"
               :projectStatus="item.status"
+              :projectId="item.projectId"
           />
           <NewProjectButton v-if="item.type === 'newProjectButton'" />
         </div>
@@ -74,9 +75,8 @@ export default {
             name: project.name,
             startDate: project.start_date,
             endDate: project.end_date,
-            projectLocation: project.description,
             projectPhase: project.status,
-            // status: ,
+            projectId: project.id,
           })),
         ];
       } catch (error) {
