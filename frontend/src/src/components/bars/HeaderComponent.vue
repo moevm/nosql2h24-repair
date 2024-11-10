@@ -16,21 +16,15 @@
   </template>
 
   <script>
-  import axios from 'axios';
 
   export default {
     data() {
       return {
-        userName: '', // ФИО пользователя
+        userName: this.$store.getters.fullName, // ФИО пользователя
         currentDateTime: new Date().toLocaleString(), // Дата и время, динамически обновляется
-        loading: true, // Состояние загрузки
       };
     },
     created() {
-      axios.get('/api/auth/me').then(res => {
-        console.log("Iam");
-        this.userName = res.data.name + ' ' + res.data.lastname + ' ' + res.data.middlename;
-      })
       this.updateDateTime();
     },
     methods: {

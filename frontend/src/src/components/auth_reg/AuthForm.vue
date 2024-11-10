@@ -173,6 +173,7 @@ export default {
         console.log(res);
         axios.get('/api/auth/me').then(res => {
           console.log(res);
+          this.$store.dispatch('setUserData', res.data);
           this.$router.push("/main");
         })
             .catch(err => {
