@@ -6,7 +6,7 @@
     <p class="project-dates">Конец: {{ endDate }}</p>
     <div class="project-status">
       Статус
-      <span class="phase">{{ projectPhase }}</span>
+<!--      <span class="phase">{{ projectPhase }}</span>-->
       <span class="status">{{ projectStatus }}</span>
     </div>
     <button class="project-button" @click="goToProject">Страница проекта</button>
@@ -21,6 +21,10 @@ export default {
       required: true,
     },
     projectLocation: {
+      type: String,
+      required: true,
+    },
+    projectId:{
       type: String,
       required: true,
     },
@@ -44,7 +48,7 @@ export default {
   methods: {
     goToProject() {
       // Логика перехода на страницу проекта
-      this.$router.push(`/project/${this.projectName}`);
+      this.$router.push(`/project/${this.projectId}`);
     },
   },
 };

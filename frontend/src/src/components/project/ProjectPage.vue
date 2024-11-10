@@ -5,15 +5,15 @@
     <main class="content">
       <div class="main-content">
         <div class="project-description">
-          <h2>Ремонт кафедры МОЭВМ</h2>
-          <p>СПбГЭТУ "ЛЭТИ"</p>
+          <h2> {{ nameProject }}</h2>
+<!--          <p>СПбГЭТУ "ЛЭТИ"</p>-->
 
           <!-- Описание проекта -->
           <div v-if="isEditing">
-            <div 
-              class="edit-description" 
-              contenteditable="true" 
-              v-html="editedDescription" 
+            <div
+              class="edit-description"
+              contenteditable="true"
+              v-html="editedDescription"
               @input="updateDescription">
             </div>
             <button @click="saveDescription" class="save-button">Сохранить</button>
@@ -25,19 +25,20 @@
           </div>
 
         </div>
-        
+
         <div class="date-selectors">
-          <DateSelectorComponent label="Начало" date="25.12.2024" />
-          <DateSelectorComponent label="Конец" date="24.02.2025" />
+          <DateSelectorComponent label="Начало" :date="dateStart" />
+          <DateSelectorComponent label="Конец" :date="dateEnd" />
         </div>
-        
-        <ContactsComponent />
+
+        <ContactsComponent :contacts="contacts" />
       </div>
     </main>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
 import DateSelectorComponent from '../project/DateSelectorComponent.vue';
@@ -52,16 +53,21 @@ export default {
   },
   data() {
     return {
-      description: `Ремонт кафедры МОЭВМ включает три ключевых этапа: подготовка, основной ремонт, оснащение. 
-        Сроки проекта составляют от 2 до 4 месяцев, включая 1-2 недели на подготовку и 2-4 недели на установку оборудования. 
-        В ходе работ заменяются инженерные коммуникации, отделываются стены и полы, устанавливаются современные системы освещения, 
-        вентиляции и учебное оборудование. Материалы: применяются качественные строительные материалы (гипсокартон, ламинат), 
-        энергосберегающие осветительные приборы и высокопроизводительные компьютеры для лабораторий. 
-        Риски: возможны задержки с поставками, непредвиденные работы, влияющие на сроки и бюджет, а также влияние на учебный процесс, 
-        которое требует координации работ.`,
+      projectId: this.$route.params.id,
+      nameProject: '',
+      description: '',
+      dateStart:'',
+      dateEnd:'',
+      contacts:[
+
+      ],
       isEditing: false,
       editedDescription: ''
     };
+  },
+  created() {
+    this.fetchProjectData();
+    console.log(this.nameProject)
   },
   methods: {
     editDescription() {
@@ -77,8 +83,34 @@ export default {
     },
     updateDescription(event) {
       this.editedDescription = event.target.innerHTML;
-    }
-  }
+    },
+    async fetchProjectData() {
+      try {
+        const response = await axios.get(`/api/projects/one/${this.projectId}`);
+        console.log(response.data);
+        this.nameProject = response.data.project.name;
+        this.description = response.data.project.description;
+        this.dateStart = this.formatDate(response.data.project.created_at);
+        this.dateEnd = this.formatDate(response.data.project.end_date);
+        this.contacts = Object.values(response.data.project.contacts).map(contact => ({
+          userName: contact.username,
+          role: contact.role,
+          // createdAt: this.formatDate(contact.created_at),
+          // updatedAt: this.formatDate(contact.updated_at),
+        }));
+        console.log(this.contacts);
+      } catch (error) {
+        console.error('Ошибка при загрузке проекта:', error);
+      }
+    },
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 по 11, поэтому +1
+      const year = date.getFullYear();
+      return `${day}.${month}.${year}`;
+    },
+  },
 };
 </script>
 
@@ -110,7 +142,7 @@ export default {
   border: 1px solid #ddd;
   border-radius: 4px;
   min-height: 150px;
-  resize: none; 
+  resize: none;
   white-space: pre-wrap;
   word-break: break-word;
   overflow-x: hidden;

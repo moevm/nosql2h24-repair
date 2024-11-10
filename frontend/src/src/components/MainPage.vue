@@ -22,6 +22,7 @@
               :endDate="item.endDate"
               :project-phase="item.projectPhase"
               :projectStatus="item.status"
+              :projectId="item.projectId"
           />
           <NewProjectButton v-if="item.type === 'newProjectButton'" />
         </div>
@@ -72,21 +73,28 @@ export default {
           ...response.data.map(project => ({
             type: 'project',
             name: project.name,
-            startDate: project.start_date,
-            endDate: project.end_date,
-            projectLocation: project.description,
+            startDate: this.formatDate(project.start_date),
+            endDate: this.formatDate(project.end_date),
             projectPhase: project.status,
-            // status: ,
+            projectId: project.id,
           })),
         ];
       } catch (error) {
         console.error('Ошибка при загрузке проектов:', error);
       }
     },
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 по 11, поэтому +1
+      const year = date.getFullYear();
+      return `${day}.${month}.${year}`;
+    },
   },
   beforeMount() {
     this.fetchProjects();
   },
+
 };
 </script>
 
