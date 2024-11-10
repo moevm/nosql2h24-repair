@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Dict, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from schemas.task import Task
 from schemas.user import Contact
@@ -23,7 +23,8 @@ class Stage(BaseModel):
 
     class Config:
         from_attributes = True
-        
+
+
 class StageResponse(Stage):
     id: str
 
@@ -36,7 +37,7 @@ class Risk(BaseModel):
 
     class Config:
         from_attributes = True
-        
+
 
 class RiskResponse(Risk):
     id: str
@@ -46,6 +47,7 @@ class Procurement(BaseModel):
     item_name: str
     quantity: int
     price: float
+    units: Optional[str] = Field(None)
     delivery_date: Optional[datetime] = Field(None)
     created_by: Optional[str] = Field(None)
     created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
@@ -54,6 +56,12 @@ class Procurement(BaseModel):
 
 class ProcurementResponse(Procurement):
     id: str
+    cost: Optional[float] = None
+
+    @model_validator(mode='after')
+    def calculate_cost(self):
+        self.cost = self.quantity * self.price
+        return self
 
 
 class ProjectStatus(str, Enum):
