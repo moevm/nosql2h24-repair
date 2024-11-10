@@ -1,8 +1,7 @@
 from bson import ObjectId
-from datetime import datetime, timezone
 from database import db
-from schemas.project import ProjectCreate, Project, Procurement, Procurement
-from schemas.user import UserCreateSchema, UserDao, UserBaseSchema, Contact
+from schemas.project import ProjectCreate, Project, Procurement
+from schemas.user import UserDao, Contact
 from schemas.utils import object_id_to_str, generate_id
 
 
