@@ -50,7 +50,7 @@ class Procurement(BaseModel):
     inStock: Optional[bool] = False
     units: Optional[str] = Field(None)
     delivery_date: Optional[datetime] = Field(None)
-    created_by: Optional[str] = Field(None)
+    created_by: Optional[Contact] = Field(None)
     created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
     updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
 
