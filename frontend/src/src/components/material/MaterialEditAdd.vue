@@ -28,7 +28,7 @@
               <label for="stock">В наличии:</label>
               <input type="checkbox" v-model="material.inStock" id="stock" />
             </div>
-            
+
             <button type="submit" class="save-button">{{ isEditMode ? 'Сохранить изменения' : 'Добавить материал' }}</button>
           </form>
         </div>
@@ -39,7 +39,7 @@
   <script>
   import HeaderComponent from '../bars/HeaderComponent.vue';
   import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
-  
+
   export default {
     components: {
       HeaderComponent,
