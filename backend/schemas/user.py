@@ -1,9 +1,7 @@
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional
-
-from bson import ObjectId
-from pydantic import BaseModel, EmailStr, Field, root_validator, model_validator, field_serializer
+from pydantic import BaseModel, EmailStr, Field
 
 
 class Role(str, Enum):
@@ -43,8 +41,8 @@ class UserDao(UserBaseSchema):
 class Contact(BaseModel):
     username: str
     role: Role = Role.worker
-    created_at: datetime | None = datetime.now(timezone.utc)
-    updated_at: datetime | None = datetime.now(timezone.utc)
+    created_at: Optional[datetime]  = Field(datetime.now(timezone.utc))
+    updated_at: Optional[datetime]  = Field(datetime.now(timezone.utc))
 
 
 class ContactCreate(BaseModel):
