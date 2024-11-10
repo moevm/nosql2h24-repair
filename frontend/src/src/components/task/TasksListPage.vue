@@ -51,12 +51,12 @@ export default {
     HeaderComponent,
     ProjectSidebarComponent,
   },
-  props: {
-    stageId: {
-      type: Number,
-      required: true
-    }
-  },
+  // props: {
+  //   stageId: {
+  //     type: Number,
+  //     required: true
+  //   }
+  // },
   data() {
     return {
       tasks: [
@@ -93,7 +93,25 @@ export default {
     },
     selectTask(taskId) {
       this.selectedTaskId = taskId;
-    }
+    },
+    // async fetchStageData() {
+    //   // try {
+    //   //   const response = await axios.get(`/api/projects/${this.projectId}/get_task`);
+    //   //   console.log(response.data);
+    //   //   // this.stages = Object.values(response.data.stages).map(stage => ({
+    //   //   //   name: stage.name,
+    //   //   //   startDate: this.formatDate(stage.start_date),
+    //   //   //   endDate: this.formatDate(stage.end_date),
+    //   //   //   stageId: stage.id,
+    //   //   // }));
+    //   //   // console.log(this.stages);
+    //   // } catch (error) {
+    //   //   console.error('Ошибка при загрузке Этапов:', error);
+    //   // }
+    // },
+    // beforeMount() {
+    //   this.fetchStageData();
+    // },
   }
 };
 </script>

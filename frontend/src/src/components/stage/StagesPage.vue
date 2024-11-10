@@ -20,7 +20,7 @@
           </div>
         </div>
 
-        <StageComponent
+        <StageComponent :projectId="projectId" :projectName="projectName"
           v-for="stage in filteredStages"
           :key="stage.id"
           :stage="stage"
@@ -50,6 +50,7 @@ export default {
     return {
       projectName: this.$route.params.projectName,
       projectId: this.$route.params.id,
+
       search: '',
       stages: [
       ],
@@ -70,8 +71,8 @@ export default {
     deleteStage(stageId) {
       this.stages = this.stages.filter(stage => stage.id !== stageId);
     },
-    goToTasks(stageId) {
-      this.$router.push(`/tasks-list/${stageId}`);
+    goToTasks() {
+      // this.$router.push(`/tasks-list/${stageId}`);
     },
     goToAddStagePage() {
       this.$router.push(`/${this.projectName}/${this.projectId}/add-stage`);

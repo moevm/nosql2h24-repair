@@ -52,6 +52,14 @@ export default {
       type: Object,
       required: true,
     },
+    projectId:{
+      type: String,
+      required: true,
+    },
+    projectName: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -88,8 +96,8 @@ export default {
         this.$emit("delete", this.stage.id);
       }
     },
-    goToTasks() {
-      this.$router.push(`/tasks/${this.stage.id}`);
+    async goToTasks() {
+      this.$router.push(`/${this.projectName}/${this.projectId}/${this.stage.name}/${this.stage.stageId}/tasks`);
     },
   },
 };

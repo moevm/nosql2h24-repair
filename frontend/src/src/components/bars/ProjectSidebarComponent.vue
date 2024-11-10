@@ -37,11 +37,11 @@
       },
       goToRisks() {
         // Логика перехода на страницу рисков
-        this.$router.push('/project/risks');
+        this.$router.push(`/${this.projectName}/${this.projectId}/risks`);
       },
       goToProcurements() {
         // Логика перехода на страницу закупок
-        this.$router.push('/project/procurements');
+        this.$router.push(`/${this.projectName}/${this.projectId}/procurements`);
       },
       logOut() {
         // Логика выхода на страницу авторизации
