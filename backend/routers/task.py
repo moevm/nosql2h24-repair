@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from dao.project import get_contacts_by_project_id
 from dao.task import add_task, get_all_tasks_by_user, get_task_by_id, add_worker_to_task
+from dao.user import find_user_by_id
 from schemas.task import Task, TaskResponse
 from schemas.user import UserDao, Role, Worker
 from utils.token import get_current_user
@@ -45,11 +46,15 @@ async def get_all_tasks(user: UserDao = Depends(get_current_user)):
 
 
 @router.put('/{project_id}/{stage_id}/{task_id}/{worker_id}', response_model=TaskResponse)
-async def add_worker(project_id: str, stage_id: str, task_id: str, worker_id: str, worker: Worker,
+async def add_worker(project_id: str, stage_id: str, task_id: str, worker_id: str,
                      user: UserDao = Depends(get_current_user)):
     contacts = await get_contacts_by_project_id(project_id)
     for contact in contacts:
         if contact.id == worker_id:
+            worker = Worker(
+                name=contact.username,
+                role=contact.role
+            )
             result = await add_worker_to_task(project_id, stage_id, task_id, worker_id, worker)
             if result:
                 return result
