@@ -1,6 +1,6 @@
 from bson import ObjectId
 from database import db
-from schemas.project import ProjectCreate, Project, Procurement, Stage
+from schemas.project import ProjectCreate, Project, Procurement, Stage, Risk
 from schemas.user import UserDao, Contact
 from schemas.utils import object_id_to_str, generate_id
 
@@ -63,6 +63,13 @@ async def add_contact_to_project(project_id: str, user: UserDao) -> Project | No
     return await get_project_by_id(project_id)
 
 
+async def get_contact_by_project_id(project_id: str) -> list[Contact] | None:
+    project_collection = db.get_collection('project')
+    project = await project_collection.find_one({"_id": ObjectId(project_id)})
+    if project is None:
+        return None
+
+
 async def add_procurement_to_project(project_id: str, procurement_create: Procurement) -> Project | None:
     project_collection = db.get_collection('project')
     procurement = procurement_create.model_dump()
@@ -83,6 +90,17 @@ async def add_stage_to_project(project_id: str, stage_create: Stage):
         {'_id': ObjectId(project_id)},
         {
             "$set": {f"stages.{generate_id()}": stage_create.model_dump()}
+        }
+    )
+    return await get_project_by_id(project_id)
+
+
+async def add_risk_to_project(project_id: str, risk_create: Risk):
+    project_collection = db.get_collection('project')
+    result = await project_collection.update_one(
+        {"_id": ObjectId(project_id)},
+        {
+            "$set": {f"risks.{generate_id()}": risk_create.model_dump()}
         }
     )
     return await get_project_by_id(project_id)
