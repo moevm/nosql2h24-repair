@@ -74,7 +74,8 @@ export default {
       this.$router.push(`/tasks-list/${stageId}`);
     },
     goToAddStagePage() {
-      this.$router.push({ name: 'add-stage' });
+      this.$router.push(`/${this.projectName}/${this.projectId}/add-stage`);
+      // this.$router.push({ name: 'add-stage' });
     },
     async fetchStageData() {
       try {
