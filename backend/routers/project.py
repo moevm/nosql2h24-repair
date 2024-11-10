@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from dao.stage import add_stage_to_project
 from dao.user import find_user_by_id
-from schemas.project import Project, ProjectCreate, Procurement
+from schemas.project import Project, ProjectCreate, Procurement, Stage
 from schemas.user import UserDao, ContactCreate
 from utils.token import get_current_user
 from dao.project import get_project_by_id, create_project, get_project_by_name, get_projects_by_user, \
@@ -27,6 +28,7 @@ async def create(project_data: ProjectCreate, user: UserDao = Depends(get_curren
     new_project = await create_project(project_data, user)
     return {"new_project": new_project}
 
+
 @router.get("/all", response_model=list[Project])
 async def get_all(user: UserDao = Depends(get_current_user)):
     return await get_projects_by_user(user.id)
@@ -47,6 +49,17 @@ async def add_contact(project_id: str, contact_data: ContactCreate, user: UserDa
 @router.post("/{project_id}/add_procurement", response_model=dict[str, Project | None])
 async def add_procurement(project_id: str, procurement_data: Procurement, user: UserDao = Depends(get_current_user)):
     project = await add_procurement_to_project(project_id, procurement_data)
+    if project is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Проекта не существует'
+        )
+    return {"updated_project": project}
+
+
+@router.post("/{project_id}/add_stage", response_model=dict[str, Project | None])
+async def add_stage(project_id: str, stage_data: Stage, user: UserDao = Depends(get_current_user)):
+    project = await add_stage_to_project(project_id, stage_data)
     if project is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

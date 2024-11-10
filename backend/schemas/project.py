@@ -10,25 +10,20 @@ from schemas.user import Contact
 from schemas.utils import generate_id
 
 
-class StageCreate(BaseModel):
+class Stage(BaseModel):
     name: str
-    start_date: str
-    end_date: str
-
-    class Config:
-        from_attributes = True
-
-
-class Stage(StageCreate):
-    id: str
     start_date: datetime
     end_date: datetime
     tasks: Dict[str, Task] = {}
     created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
     updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
-
+    
     def add_task(self, task: Task):
         self.tasks[generate_id()] = task
+
+    class Config:
+        from_attributes = True
+
 
 
 class RiskCreate(BaseModel):
