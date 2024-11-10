@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from dao.stage import add_stage_to_project
 from dao.user import find_user_by_id
 from schemas.project import Project, ProjectCreate, Procurement, Stage
 from schemas.user import UserDao, ContactCreate
 from utils.token import get_current_user
 from dao.project import get_project_by_id, create_project, get_project_by_name, get_projects_by_user, \
-    add_contact_to_project, add_procurement_to_project
+    add_contact_to_project, add_procurement_to_project, add_stage_to_project 
 
 router = APIRouter()
 

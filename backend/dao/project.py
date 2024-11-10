@@ -1,6 +1,6 @@
 from bson import ObjectId
 from database import db
-from schemas.project import ProjectCreate, Project, Procurement
+from schemas.project import ProjectCreate, Project, Procurement, Stage
 from schemas.user import UserDao, Contact
 from schemas.utils import object_id_to_str, generate_id
 
@@ -72,6 +72,17 @@ async def add_procurement_to_project(project_id: str, procurement_create: Procur
         {"_id": ObjectId(project_id)},
         {
             "$set": {f"procurements.{generate_id()}": procurement}
+        }
+    )
+    return await get_project_by_id(project_id)
+
+
+async def add_stage_to_project(project_id: str, stage_create: Stage):
+    project_collection = db.get_collection('project')
+    result = await project_collection.update_one(
+        {'_id': ObjectId(project_id)},
+        {
+            "$set": {f"stages.{generate_id()}": stage_create.model_dump()}
         }
     )
     return await get_project_by_id(project_id)
