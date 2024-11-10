@@ -48,7 +48,7 @@ export default {
   methods: {
     goToProject() {
       // Логика перехода на страницу проекта
-      this.$router.push(`/project/${this.projectId}`);
+      this.$router.push(`/${this.projectName}/${this.projectId}`);
     },
   },
 };

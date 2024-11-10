@@ -1,7 +1,7 @@
 <template>
   <div class="project-page">
     <HeaderComponent />
-    <ProjectSidebarComponent />
+    <ProjectSidebarComponent :projectId="projectId" :projectName="nameProject"/>
     <main class="content">
       <div class="main-content">
         <div class="project-description">
@@ -87,7 +87,6 @@ export default {
     async fetchProjectData() {
       try {
         const response = await axios.get(`/api/projects/one/${this.projectId}`);
-        console.log(response.data);
         this.nameProject = response.data.project.name;
         this.description = response.data.project.description;
         this.dateStart = this.formatDate(response.data.project.created_at);
@@ -98,7 +97,6 @@ export default {
           // createdAt: this.formatDate(contact.created_at),
           // updatedAt: this.formatDate(contact.updated_at),
         }));
-        console.log(this.contacts);
       } catch (error) {
         console.error('Ошибка при загрузке проекта:', error);
       }

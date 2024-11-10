@@ -20,10 +20,20 @@
   
   <script>
   export default {
+    props: {
+      projectId:{
+        type: String,
+        required: true,
+      },
+      projectName: {
+        type: String,
+        required: true,
+      },
+    },
     methods: {
       goToPhases() {
         // Логика перехода на страницу этапов
-        this.$router.push('/project/stages');
+        this.$router.push(`/${this.projectName}/${this.projectId}/stages`);
       },
       goToRisks() {
         // Логика перехода на страницу рисков
