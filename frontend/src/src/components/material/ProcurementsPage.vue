@@ -77,9 +77,9 @@ export default {
         this.procurements = Object.values(response.data.procurements).map(procurement => ({
           name: procurement.item_name,
           quantity: procurement.quantity,
-          unit: "Пока нет в бд",
+          unit: procurement.units,
           pricePerUnit: procurement.price,
-          totalCost: "Не посчитано",
+          totalCost: procurement.cost,
           materialId: procurement.id,
           inStock: false,
         }));
