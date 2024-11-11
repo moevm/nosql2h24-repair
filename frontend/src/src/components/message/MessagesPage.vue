@@ -1,6 +1,7 @@
 <template>
     <div class="messages-page">
       <HeaderComponent />
+      <SidebarComponent />
       <main class="content">
         <div class="header-search">
           <h1>Сообщения</h1>
@@ -10,6 +11,7 @@
             placeholder="Поиск пользователя"
             class="search-input"
           />
+          <button v-if="$route.path !== '/user-search'" @click="goToUserSearch">Поиск пользователя</button>
         </div>
         <div class="chats-container">
           <div v-for="(chat, index) in filteredChats" :key="index" class="chat-item" @click="goToChat(chat.userId)">
@@ -26,10 +28,12 @@
   
   <script>
   import HeaderComponent from '../bars/HeaderComponent.vue';
+  import SidebarComponent from '../bars/SidebarComponent.vue';
   
   export default {
     components: {
       HeaderComponent,
+      SidebarComponent,
     },
     data() {
       return {
@@ -62,13 +66,16 @@
       goToChat(userId) {
         this.$router.push(`/chat/${userId}`);
       },
+      goToUserSearch() {
+        this.$router.push('/user-search');
+      },
     },
   };
   </script>
   
   <style scoped>
   .content {
-    margin-left: 50px;
+    margin-left: 150px;
     padding-top: 60px; /* Увеличиваем отступ сверху, чтобы учесть фиксированный заголовок и поле поиска */
   }
   
