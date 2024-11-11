@@ -1,6 +1,6 @@
 <template>
   <HeaderComponent />
-  <SidebarComponent />
+  <StaticSidebarComponent />
   <div class="create-project-page">
     <h1>Опишите проект</h1>
     <input v-model="projectName" type="text" placeholder="Введите название проекта" />
@@ -17,12 +17,12 @@
 <script>
 import axios from 'axios';
 import HeaderComponent from '../bars/HeaderComponent.vue';
-import SidebarComponent from '../bars/SidebarComponent.vue';
+import StaticSidebarComponent from '../bars/StaticSidebarComponent.vue';
 
 export default {
   components: {
     HeaderComponent,
-    SidebarComponent
+    StaticSidebarComponent
   },
   data() {
     return {
