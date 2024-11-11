@@ -70,11 +70,11 @@ export default {
 .purchase-item {
   display: flex;
   justify-content: center;
-  width: 1200px;
-  height: 220px;
+  width: auto;
+  height: auto;
   flex-direction: column;
   background-color: #f1f1f1;
-  padding: 15px;
+  padding: 20px;
   margin: 10px 0;
   border-radius: 5px;
 }
