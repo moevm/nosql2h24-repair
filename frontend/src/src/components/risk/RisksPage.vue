@@ -20,6 +20,9 @@
         <TaskItemComponent
           v-for="risk in filteredTasks"
           :key="risk.id"
+          :riskId="risk.id"
+          :projectId="projectId"
+          :projectName="projectName"
           :title="risk.riskName"
           :description="risk.description"
           @delete="deleteTask(risk.id)"
@@ -70,8 +73,8 @@ export default {
     deleteTask(id) {
       this.risks = this.risks.filter(risk => risk.id !== id);
     },
-    viewDetails(riskId) {
-      this.$router.push({ path: `/risk-details/${riskId}` });
+    viewDetails(id) {
+      this.$router.push(`//${this.projectName}/${this.projectId}/risk-details/${id}`);
     },
     async fetchRisks() {
       try {

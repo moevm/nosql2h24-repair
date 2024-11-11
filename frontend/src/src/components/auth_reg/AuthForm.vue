@@ -212,6 +212,8 @@ export default {
           },
           withCredentials: true,
         });
+        alert("Вы успешно зарегистрировались");
+        this.$router.back();
         console.log(res);
         // Дополнительный код для обработки успешной регистрации
       } catch (error) {
