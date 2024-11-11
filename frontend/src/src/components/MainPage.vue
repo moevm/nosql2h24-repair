@@ -1,7 +1,7 @@
 <template>
   <div class="main-page">
     <HeaderComponent />
-    <SidebarComponent />
+    <StaticSidebarComponent />
     <main class="content">
       <div class="header-search">
         <h1>Проекты</h1>
@@ -34,14 +34,14 @@
 <script>
 import axios from 'axios';
 import HeaderComponent from '../components/bars/HeaderComponent.vue';
-import SidebarComponent from '../components/bars/SidebarComponent.vue';
+import StaticSidebarComponent from '../components/bars/StaticSidebarComponent.vue';
 import NewProjectButton from '../components/project/NewProjectButton.vue';
 import Project from '../components/project/ProjectComponent.vue';
 
 export default {
   components: {
     HeaderComponent,
-    SidebarComponent,
+    StaticSidebarComponent,
     NewProjectButton,
     Project,
   },
