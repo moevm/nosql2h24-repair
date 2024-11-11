@@ -84,7 +84,7 @@ export default {
           materialId: procurement.id,
           user: procurement.created_by.username,
           userRole: procurement.created_by.role,
-          inStock: false,
+          inStock: procurement.inStock,
         }));
         console.log(this.procurements);
       } catch (error) {

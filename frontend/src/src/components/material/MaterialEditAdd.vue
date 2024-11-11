@@ -72,6 +72,7 @@
             inStock: this.material.inStock,
             units: this.material.unit,
           };
+          console.log(dataToSend);
           try {
             const res = await axios.post(`/api/projects/${getProjectId()}/add_procurement`, dataToSend, {
               headers: {
