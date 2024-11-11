@@ -1,6 +1,7 @@
 <template>
     <div class="chat-page">
       <HeaderComponent />
+      <SidebarComponent />
       <main class="content">
         <div class="chat-header">
             <img src="@/assets/icons/avatar.png" alt="Avatar Icon" class="avatar-icon">
@@ -27,10 +28,12 @@
   
   <script>
   import HeaderComponent from '../bars/HeaderComponent.vue';
+  import SidebarComponent from '../bars/SidebarComponent.vue';
   
   export default {
     components: {
       HeaderComponent,
+      SidebarComponent,
     },
     data() {
       return {
@@ -60,7 +63,7 @@
   
   <style scoped>
   .content {
-    margin-left: 50px;
+    margin-left: 150px;
     padding-top: 60px; /* Увеличиваем отступ сверху, чтобы учесть фиксированный заголовок и поле поиска */
   }
   
@@ -132,4 +135,4 @@
   button:hover {
     background-color: #0056b3;
   }
-  </style>  
+  </style> 
