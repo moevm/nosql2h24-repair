@@ -34,7 +34,7 @@ const routes = [
   { path: '/add_risk', component: RiskFormComponent },
   { path: '/risk-details/', component: RiskDetails},
   { path: '/material/:id', component: MaterialDetail},
-  { path: '/procurements/add_procurement', component: MaterialEditAdd},
+  { path: '/add_procurement', component: MaterialEditAdd},
   // { path: '/add-material', component: MaterialEditAdd},
   { path: '/tasks/', component: TasksListPage, props: true},
   { path: '/tasks/:stageId/:taskId', component: TaskPage, props: true},

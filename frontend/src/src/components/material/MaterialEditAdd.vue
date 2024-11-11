@@ -82,7 +82,7 @@
             });
             console.log(res);
             alert('Закупка успешно создана!');
-            this.$router.push(`/${this.projectName}/${this.projectId}/procurements`);
+            this.$router.push(`/procurements`);
           } catch (error) {
             console.error("Ошибка сети:", error.message);
             if (error.response && error.response.data.detail) {
