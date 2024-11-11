@@ -16,6 +16,7 @@ import MaterialEditAdd from '../components/material/MaterialEditAdd.vue';
 import TasksListPage from '../components/task/TasksListPage.vue';
 import TaskPage from '../components/task/TaskPage.vue';
 import AddStagePage from '../components/stage/AddStagePage.vue';
+import UserSearchPage from '../components/message/UserSearchPage.vue';
 
 
 const routes = [
@@ -38,6 +39,7 @@ const routes = [
   { path: '/:projectName/:id/:stageName/:stageId/tasks/', component: TasksListPage, props: true},
   { path: '/tasks/:stageId/:taskId', component: TaskPage, props: true},
   { path: '/:projectName/:id/add-stage', name: 'add-stage', component: AddStagePage },
+  { path: '/user-search', component: UserSearchPage },
 ];
 
 const router = createRouter({
