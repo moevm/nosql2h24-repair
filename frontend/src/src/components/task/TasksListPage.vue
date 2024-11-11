@@ -76,13 +76,15 @@ export default {
   },
   methods: {
     addTask() {
-      this.tasks.push({
+      const newTask = {
         id: this.nextTaskId++,
         title: 'Новая задача',
         startDate: '',
         endDate: '',
         status: 'В процессе'
-      });
+      };
+      this.tasks.push(newTask);
+      this.$router.push(`/tasks/${this.stageId}/${newTask.id}`); // переход на страницу новой задачи
     },
     deleteTask(taskId) {
       this.tasks = this.tasks.filter(task => task.id !== taskId);
