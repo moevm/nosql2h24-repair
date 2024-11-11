@@ -1,7 +1,7 @@
 <template>
   <div class="main-container">
     <HeaderComponent />
-    <ProjectSidebarComponent :projectId="projectId" :projectName="projectName"/>
+    <ProjectSidebarComponent/>
 
     <div class="content">
       <div class="task-container">
@@ -39,6 +39,9 @@ import HeaderComponent from '../bars/HeaderComponent.vue';
 import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
 import TaskItemComponent from '../risk/TaskItemComponent.vue';
 
+import { useCookies } from '@/src/js/useCookies';
+const { getProjectId, getProjectName } = useCookies();
+
 export default {
   components: {
     HeaderComponent,
@@ -47,8 +50,7 @@ export default {
   },
   data() {
     return {
-      projectId: this.$route.params.id,
-      projectName: this.$route.params.projectName,
+      projectName: getProjectName(),
       searchQuery: '',
       risks: [
         // { id: 1, title: 'Износ, поломка', description: 'Студенты могут разбить дорогой кафель. ...' },
@@ -65,7 +67,7 @@ export default {
   },
   methods: {
     goToAddTask() {
-      this.$router.push(`/${this.projectName}/${this.projectId}/risks/add_risk`);
+      this.$router.push(`/add_risk`);
     },
     addTask(newRisk) {
       this.risks.push(newRisk);
@@ -73,12 +75,12 @@ export default {
     deleteTask(id) {
       this.risks = this.risks.filter(risk => risk.id !== id);
     },
-    viewDetails(id) {
-      this.$router.push(`//${this.projectName}/${this.projectId}/risk-details/${id}`);
+    viewDetails() {
+      this.$router.push(`/risk-details`);
     },
     async fetchRisks() {
       try {
-        const response = await axios.get(`/api/projects/${this.projectId}/get_risks`);
+        const response = await axios.get(`/api/projects/${getProjectId()}/get_risks`);
         console.log(response.data);
         this.risks = Object.values(response.data.risks).map(risk => ({
           riskName: risk.name,

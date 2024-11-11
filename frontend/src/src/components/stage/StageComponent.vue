@@ -46,18 +46,13 @@
 </template>
 
 <script>
+import { useCookies } from '@/src/js/useCookies';
+const { setStageID,setStageName } = useCookies();
+
 export default {
   props: {
     stage: {
       type: Object,
-      required: true,
-    },
-    projectId:{
-      type: String,
-      required: true,
-    },
-    projectName: {
-      type: String,
       required: true,
     },
   },
@@ -97,7 +92,9 @@ export default {
       }
     },
     async goToTasks() {
-      this.$router.push(`/${this.projectName}/${this.projectId}/${this.stage.name}/${this.stage.stageId}/tasks`);
+      setStageID(this.stage.stageId);
+      setStageName(this.stage.name);
+      this.$router.push(`/tasks`);
     },
   },
 };

@@ -1,7 +1,7 @@
 <template>
     <div class="main-container">
       <HeaderComponent />
-      <ProjectSidebarComponent :projectId="projectId" :projectName="projectName"/>
+      <ProjectSidebarComponent />
       
       <div class="content">
         <div class="edit-material-container">
@@ -40,7 +40,8 @@
   import HeaderComponent from '../bars/HeaderComponent.vue';
   import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
   import axios from 'axios';
-
+  import { useCookies } from '@/src/js/useCookies';
+  const { getProjectId } = useCookies();
 
   export default {
     components: {
@@ -49,8 +50,6 @@
     },
     data() {
       return {
-        projectName: this.$route.params.projectName,
-        projectId: this.$route.params.id,
         material: {
           name: '',
           quantity: 0,
@@ -60,13 +59,6 @@
         },
         isEditMode: false, // Определяет режим редактирования или добавления
       };
-    },
-    created() {
-      // const materialId = this.$route.params.id;
-      // if (materialId) {
-      //   this.isEditMode = true;
-      //   this.material = this.fetchMaterialById(materialId);
-      // }
     },
     methods: {
       async addProcurement() {
@@ -81,7 +73,7 @@
             units: this.material.unit,
           };
           try {
-            const res = await axios.post(`/api/projects/${this.projectId}/add_procurement`, dataToSend, {
+            const res = await axios.post(`/api/projects/${getProjectId()}/add_procurement`, dataToSend, {
               headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',

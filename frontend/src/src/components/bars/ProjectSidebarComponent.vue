@@ -19,46 +19,60 @@
   </template>
   
   <script>
+  import { clearAllCookies } from '@/src/js/useCookies';
+  const clearCookies = () => {
+    clearAllCookies();
+  };
+  import axios from 'axios';
+
+
   export default {
     props: {
-      projectId:{
-        type: String,
-        required: true,
-      },
-      projectName: {
-        type: String,
-        required: true,
-      },
     },
     methods: {
       goToPhases() {
-        if (this.$route.fullPath === `/${this.projectName}/${this.projectId}/stages`){
-          this.$router.push(`/${this.projectName}/${this.projectId}`);
+        if (this.$route.fullPath === `/stages`){
+          this.$router.push(`/project`);
         }else {
           // Логика перехода на страницу этапов
-          this.$router.push(`/${this.projectName}/${this.projectId}/stages`);
+          this.$router.push(`/stages`);
         }
       },
       goToRisks() {
-        if (this.$route.fullPath === `/${this.projectName}/${this.projectId}/risks`){
-          this.$router.push(`/${this.projectName}/${this.projectId}`);
+        if (this.$route.fullPath === `/risks`){
+          this.$router.push(`/project`);
         }else {
           // Логика перехода на страницу рисков
-          this.$router.push(`/${this.projectName}/${this.projectId}/risks`);
+          this.$router.push(`/risks`);
         }
       },
       goToProcurements() {
-        if (this.$route.fullPath === `/${this.projectName}/${this.projectId}/procurements`){
-          this.$router.push(`/${this.projectName}/${this.projectId}`);
+        if (this.$route.fullPath === `/procurements`){
+          this.$router.push(`/project`);
         }else {
           // Логика перехода на страницу закупок
-          this.$router.push(`/${this.projectName}/${this.projectId}/procurements`);
+          this.$router.push(`/procurements`);
         }
 
       },
-      logOut() {
+      async logOut() {
         // Логика выхода на страницу авторизации
-        this.$router.push('/login');
+        try {
+          const res = await axios.post('/api/auth/logout');
+          console.log(res);
+          clearCookies();
+          this.$router.push('/login');
+          // Дополнительный код для обработки успешной регистрации
+        } catch (error) {
+          console.error("Ошибка сети:", error.message);
+          if (error.response) {
+            console.error("Данные ответа:", error.response.data);
+            // Вывод ошибки с сервера
+            if (error.response.data.detail) {
+              this.serverError = error.response.data.detail; // Сохраняем ошибку с сервера
+            }
+          }
+        }
       }
     }
   };

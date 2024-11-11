@@ -1,7 +1,6 @@
 import { createApp } from 'vue';
 import App from './App.vue';
 import router from './src/router';
-import store from './src/store';
 import axios from 'axios';
 
 axios.defaults.withCredentials = true;
@@ -15,5 +14,4 @@ axios.defaults.headers = {
 
 const app = createApp(App); // Создание экземпляра приложения
 app.use(router); // Использование маршрутизатора
-app.use(store);
 app.mount('#app'); // Монтирование приложения в DOM

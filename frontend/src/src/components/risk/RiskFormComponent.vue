@@ -25,6 +25,8 @@
   import HeaderComponent from '../bars/HeaderComponent.vue';
   import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
   import axios from 'axios';
+  import { useCookies } from '@/src/js/useCookies';
+  const { getProjectId } = useCookies();
   export default {
     components: {
         HeaderComponent,
@@ -32,8 +34,6 @@
     },
     data() {
       return {
-        projectName: this.$route.params.projectName,
-        projectId: this.$route.params.id,
         name: '',
         description: '',
         errorMessage: '',
@@ -48,7 +48,7 @@
             description: this.description,
           };
           try {
-            const res = await axios.post(`/api/projects/${this.projectId}/add_risk`, dataToSend, {
+            const res = await axios.post(`/api/projects/${getProjectId()}/add_risk`, dataToSend, {
               headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
@@ -57,7 +57,7 @@
             });
             console.log(res);
             alert('Риск успешно создан!');
-            this.$router.push(`/${this.projectName}/${this.projectId}/risks`);
+            this.$router.push(`/risks`);
           } catch (error) {
             console.error("Ошибка сети:", error.message);
             if (error.response && error.response.data.detail) {

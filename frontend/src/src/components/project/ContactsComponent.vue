@@ -24,15 +24,6 @@ export default {
       required: true
     }
   },
-  // data() {
-  //   return {
-  //     contacts: [
-  //       { name: 'Каримов С. Н.', role: 'Прораб', avatar: 'avatar1.png' },
-  //       { name: 'Каримов С. Н.', role: 'Заказчик', avatar: 'avatar2.png' },
-  //       { name: 'Каримов С. Н.', role: 'Работник', avatar: 'avatar3.png' },
-  //     ],
-  //   };
-  // },
   methods: {
     addContact() {
       // Логика для добавления нового контакта

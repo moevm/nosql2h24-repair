@@ -12,6 +12,10 @@
   
   <script>
   import axios from 'axios';
+  import { clearAllCookies } from '@/src/js/useCookies';
+  const clearCookies = () => {
+    clearAllCookies();
+  };
   export default {
     data() {
       return {
@@ -28,6 +32,7 @@
         try {
           const res = await axios.post('/api/auth/logout');
           console.log(res);
+          clearCookies();
           this.$router.push('/login');
           // Дополнительный код для обработки успешной регистрации
         } catch (error) {

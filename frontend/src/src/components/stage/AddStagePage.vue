@@ -1,7 +1,7 @@
 <template>
   <div class="add-stage-page">
     <HeaderComponent />
-    <ProjectSidebarComponent :projectId="projectId" :projectName="projectName"/>
+    <ProjectSidebarComponent />
     <div class="main-content">
       <div class="add-stage-container">
         <h2>Добавить этап</h2>
@@ -39,6 +39,8 @@
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
 import axios from 'axios';
+import { useCookies } from '@/src/js/useCookies';
+const { getProjectId } = useCookies();
 
 export default {
   components: {
@@ -47,8 +49,6 @@ export default {
   },
   data() {
     return {
-      projectName: this.$route.params.projectName,
-      projectId: this.$route.params.id,
       newStageName: '',
       newStageStartDate: '',
       newStageEndDate: '',
@@ -67,7 +67,7 @@ export default {
           end_date: this.formatToDateTime(this.newStageEndDate),
         };
         try {
-          const res = await axios.post(`/api/projects/${this.projectId}/add_stage`, dataToSend, {
+          const res = await axios.post(`/api/projects/${getProjectId()}/add_stage`, dataToSend, {
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
@@ -76,7 +76,7 @@ export default {
           });
           console.log(res);
           alert('Этап успешно создан!');
-          this.$router.push(`/${this.projectName}/${this.projectId}/stages`);
+          this.$router.push(`/stages`);
         } catch (error) {
           console.error("Ошибка сети:", error.message);
           if (error.response && error.response.data.detail) {

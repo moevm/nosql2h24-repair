@@ -1,7 +1,7 @@
 <template>
   <div class="project-page">
     <HeaderComponent />
-    <ProjectSidebarComponent :projectId="projectId" :projectName="nameProject"/>
+    <ProjectSidebarComponent/>
     <main class="content">
       <div class="main-content">
         <div class="project-description">
@@ -44,6 +44,9 @@ import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
 import DateSelectorComponent from '../project/DateSelectorComponent.vue';
 import ContactsComponent from '../project/ContactsComponent.vue';
 
+import { useCookies } from '@/src/js/useCookies';
+const { getProjectId } = useCookies();
+
 export default {
   components: {
     HeaderComponent,
@@ -53,7 +56,6 @@ export default {
   },
   data() {
     return {
-      projectId: this.$route.params.id,
       nameProject: '',
       description: '',
       dateStart:'',
@@ -86,7 +88,7 @@ export default {
     },
     async fetchProjectData() {
       try {
-        const response = await axios.get(`/api/projects/one/${this.projectId}`);
+        const response = await axios.get(`/api/projects/one/${getProjectId()}`);
         this.nameProject = response.data.project.name;
         this.description = response.data.project.description;
         this.dateStart = this.formatDate(response.data.project.created_at);
@@ -94,8 +96,6 @@ export default {
         this.contacts = Object.values(response.data.project.contacts).map(contact => ({
           userName: contact.username,
           role: contact.role,
-          // createdAt: this.formatDate(contact.created_at),
-          // updatedAt: this.formatDate(contact.updated_at),
         }));
       } catch (error) {
         console.error('Ошибка при загрузке проекта:', error);

@@ -17,11 +17,13 @@
   </template>
 
   <script>
+  import { useCookies } from '@/src/js/useCookies';
+  const { getUserName } = useCookies();
 
   export default {
     data() {
       return {
-        userName: this.$store.getters.fullName, // ФИО пользователя
+        userName: getUserName(), // ФИО пользователя
         currentDateTime: new Date().toLocaleString(), // Дата и время, динамически обновляется
       };
     },

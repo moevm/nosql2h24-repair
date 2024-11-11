@@ -14,6 +14,9 @@
 </template>
 
 <script>
+import { useCookies } from '@/src/js/useCookies';
+const { setProjectId, setProjectName } = useCookies();
+
 export default {
   props: {
     projectName: {
@@ -48,7 +51,9 @@ export default {
   methods: {
     goToProject() {
       // Логика перехода на страницу проекта
-      this.$router.push(`/${this.projectName}/${this.projectId}`);
+      setProjectId(this.projectId);
+      setProjectName(this.projectName);
+      this.$router.push(`/project`);
     },
   },
 };

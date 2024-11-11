@@ -1,7 +1,7 @@
 <template>
   <div class="main-container">
     <HeaderComponent />
-    <ProjectSidebarComponent :projectId="projectId" :projectName="projectName"/>
+    <ProjectSidebarComponent/>
 
     <div class="content">
       <div class="purchases-container">
@@ -37,6 +37,8 @@ import HeaderComponent from '../bars/HeaderComponent.vue';
 import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
 import ProcurementsItemComponent from '../material/ProcurementsItemComponent.vue';
 import axios from 'axios';
+import { useCookies } from '@/src/js/useCookies';
+const { getProjectId, getProjectName } = useCookies();
 
 export default {
   components: {
@@ -46,8 +48,7 @@ export default {
   },
   data() {
     return {
-      projectName: this.$route.params.projectName,
-      projectId: this.$route.params.id,
+      projectName: getProjectName(),
       searchQuery: '',
       procurements: [
       ],
@@ -62,7 +63,7 @@ export default {
   },
   methods: {
     goToAddMaterial() {
-      this.$router.push(`/${this.projectName}/${this.projectId}/procurements/add_procurement`);
+      this.$router.push(`/add_procurement`);
     },
     viewDetails() {
       // this.$router.push({ path: `/material-details/${materialId}` });
@@ -72,7 +73,7 @@ export default {
     },
     async fetchStageData() {
       try {
-        const response = await axios.get(`/api/projects/${this.projectId}/get_procurements`);
+        const response = await axios.get(`/api/projects/${getProjectId()}/get_procurements`);
         console.log(response.data);
         this.procurements = Object.values(response.data.procurements).map(procurement => ({
           name: procurement.item_name,

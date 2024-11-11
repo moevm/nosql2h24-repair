@@ -1,7 +1,7 @@
 <template>
   <div class="stages-page">
     <HeaderComponent />
-    <ProjectSidebarComponent :projectId="projectId" :projectName="projectName" />
+    <ProjectSidebarComponent />
     <div class="main-content">
       <div class="stages-container">
         <div class="header-container">
@@ -38,6 +38,8 @@ import HeaderComponent from '../bars/HeaderComponent.vue';
 import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
 import StageComponent from './StageComponent.vue';
 import axios from 'axios';
+import { useCookies } from '@/src/js/useCookies';
+const { getProjectId, getProjectName } = useCookies();
 
 export default {
   components: {
@@ -48,9 +50,7 @@ export default {
 
   data() {
     return {
-      projectName: this.$route.params.projectName,
-      projectId: this.$route.params.id,
-
+      projectName: getProjectName(),
       search: '',
       stages: [
       ],
@@ -75,13 +75,12 @@ export default {
       // this.$router.push(`/tasks-list/${stageId}`);
     },
     goToAddStagePage() {
-      this.$router.push(`/${this.projectName}/${this.projectId}/add-stage`);
+      this.$router.push(`/add-stage`);
       // this.$router.push({ name: 'add-stage' });
     },
     async fetchStageData() {
       try {
-        const response = await axios.get(`/api/projects/${this.projectId}/get_stages`);
-        // console.log(response.data);
+        const response = await axios.get(`/api/projects/${getProjectId()}/get_stages`);
         this.stages = Object.values(response.data.stages).map(stage => ({
           name: stage.name,
           startDate: this.formatDate(stage.start_date),
