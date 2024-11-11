@@ -53,6 +53,7 @@
     align-items: center;
     background-color: #ebebeb;
     padding: 0 20px;
+    z-index: 1000;
   }
 
   .left-section {
