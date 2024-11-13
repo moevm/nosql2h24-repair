@@ -18,6 +18,7 @@ import TaskPage from '../components/task/TaskPage.vue';
 import AddStagePage from '../components/stage/AddStagePage.vue';
 import UserSearchPage from '../components/message/UserSearchPage.vue';
 import AddTaskPage from '../components/task/TaskAddPage.vue';
+import AddContactPage from "@/src/components/message/AddContactPage.vue";
 
 const routes = [
   { path: '/', component: LoginPage }, // Начальная страница - страница логина
@@ -36,6 +37,7 @@ const routes = [
   { path: '/material/:id', component: MaterialDetail},
   { path: '/add_procurement', component: MaterialEditAdd},
   { path: '/add_task', component: AddTaskPage},
+  { path: '/add_contact', component: AddContactPage},
   // { path: '/add-material', component: MaterialEditAdd},
   { path: '/tasks', component: TasksListPage, props: true},
   { path: '/tasks/viewRedactorTask', component: TaskPage, props: true},

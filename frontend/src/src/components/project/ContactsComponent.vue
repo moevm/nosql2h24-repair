@@ -17,6 +17,8 @@
 </template>
 
 <script>
+import router from "@/src/router";
+
 export default {
   props: {
     contacts: {
@@ -26,7 +28,7 @@ export default {
   },
   methods: {
     addContact() {
-      // Логика для добавления нового контакта
+      router.push(`/add_contact`);
       console.log('Добавить контакт');
     },
   },
