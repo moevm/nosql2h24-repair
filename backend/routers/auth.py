@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, status, Response, Depends
 
 from config import settings
-from dao.user import find_all_users, find_user_by_email, create_user
+from dao.user import find_all_users, find_user_by_email, create_user, find_user_by_id
 from schemas.user import UserCreateSchema, UserLoginSchema, UserDao, UserBaseSchema
 from utils.password import verify_password, create_access_token, get_password_hash
 from utils.token import get_current_user
@@ -65,3 +65,13 @@ async def get_me(user_data: UserDao = Depends(get_current_user)):
 async def logout_user(response: Response):
     response.delete_cookie(key="users_access_token")
     return {'message': 'Пользователь успешно вышел из системы'}
+
+
+@router.get("/get_user/{user_id}", response_model=UserDao)
+async def get_user(user_id: str, ser: UserDao = Depends(get_current_user)):
+    finded_user = await find_user_by_id(user_id)
+    if finded_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    del finded_user.password
+    return finded_user
