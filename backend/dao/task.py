@@ -37,6 +37,26 @@ async def get_task_by_id(project_id: str, stage_id: str, task_id: str) -> TaskRe
         return TaskResponse(id=task_id, **task)
     return None
 
+async def get_tasks_by_stage_id(project_id: str, stage_id: str) -> list[TaskResponse] | list[None]:
+    project_collection = db.get_collection('project')
+    project = await project_collection.find_one(
+        {
+            "_id": ObjectId(project_id),
+            f"stages.{stage_id}.tasks": {"$exists": True}
+        }
+    )
+    
+    stage_tasks = []
+    if not project or "stages" not in project or stage_id not in project["stages"]:
+        return []
+
+    tasks = project["stages"][stage_id].get("tasks", {})
+
+    tasks_list = [
+        TaskResponse(id=task_id, **task_data) for task_id, task_data in tasks.items()
+    ]
+    return tasks_list
+
 
 async def get_all_tasks_by_user(user_id: str) -> list[Task] | list[None]:
     project_collection = db.get_collection('project')

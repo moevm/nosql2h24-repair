@@ -3,7 +3,7 @@ import asyncio
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from dao.project import get_contacts_by_project_id
-from dao.task import add_task, get_all_tasks_by_user, get_task_by_id, add_worker_to_task
+from dao.task import add_task, get_all_tasks_by_user, get_task_by_id, add_worker_to_task, get_tasks_by_stage_id
 from dao.user import find_user_by_id
 from schemas.task import Task, TaskResponse
 from schemas.user import UserDao, Role, Worker
@@ -28,7 +28,7 @@ async def create_task(project_id: str, stage_id: str, task_data: Task, user: Use
     return new_task
 
 
-@router.get('/{project_id}/{stage_id}/{task_id}', response_model=TaskResponse)
+@router.get('/get_task/{project_id}/{stage_id}/{task_id}', response_model=TaskResponse)
 async def get_task(project_id: str, stage_id: str, task_id: str, user: UserDao = Depends(get_current_user)):
     task = await get_task_by_id(project_id, stage_id, task_id)
     if task is None:
@@ -37,6 +37,12 @@ async def get_task(project_id: str, stage_id: str, task_id: str, user: UserDao =
             detail='Задача не найдена'
         )
     return task
+
+
+@router.get('/get_stage_tasks/{project_id}/{stage_id}', response_model=list[TaskResponse] | list[None])
+async def get_stage_tasks(project_id: str, stage_id: str):
+    tasks = await get_tasks_by_stage_id(project_id, stage_id)
+    return tasks
 
 
 @router.get('/get_all', response_model=list[TaskResponse] | list[None])
