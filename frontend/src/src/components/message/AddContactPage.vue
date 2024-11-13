@@ -1,0 +1,215 @@
+<template>
+  <HeaderComponent />
+  <SidebarComponent />
+  <div class="user-search-page">
+    <h1>Поиск пользователя</h1>
+    <div class="search-filters">
+      <input v-model="lastname" placeholder="Фамилия" class="input-field" />
+      <input v-model="name" placeholder="Имя" class="input-field" />
+      <input v-model="middelname" placeholder="Отчество" class="input-field" />
+      <select v-model="selectedRole" class="select-field">
+        <option value="">Все должности</option>
+        <option value="Рабочий">Рабочий</option>
+        <option value="Заказчик">Заказчик</option>
+        <option value="Прораб">Прораб</option>
+        <option value="Администратор">Администратор</option>
+      </select>
+      <button @click="searchUsers">Поиск</button>
+    </div>
+
+    <!-- Отображаем список пользователей только если хотя бы один фильтр изменен -->
+    <div v-if="hasFilters" class="user-list">
+      <div v-for="user in filteredUsers" :key="user.id" class="user-item">
+        <div>
+          <p>{{ user.lastname }} {{ user.name }} {{ user.middlename }}</p>
+          <p>Должность - {{ user.role }}</p>
+        </div>
+        <div class="user-item-actions">
+          <button @click="addToContacts(user)">Добавить в контакты</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import HeaderComponent from '../bars/HeaderComponent.vue';
+import SidebarComponent from '../bars/SidebarComponent.vue';
+import axios from 'axios';
+import { useCookies } from '@/src/js/useCookies';
+const { getProjectId } = useCookies();
+
+
+export default {
+  components: {
+    HeaderComponent,
+    SidebarComponent,
+  },
+  data() {
+    return {
+      lastname: '',
+      name: '',
+      middelname: '',
+      selectedRole: '',
+      users: [
+        { id: "6731ccd729ebfd89e5eb0b86", name: "Илья", lastname: "Ильичевич", middlename: "Ильич", role: "Администратор" },
+      ],
+    };
+  },
+  computed: {
+    // Фильтруем пользователей по введенным значениям
+    filteredUsers() {
+      return this.users.filter(user =>
+          (!this.lastname || user.lastname.includes(this.lastname)) &&
+          (!this.name || user.name.includes(this.name)) &&
+          (!this.middelname || user.middlename.includes(this.middelname)) &&
+          (!this.selectedRole || user.role === this.selectedRole)
+      );
+    },
+    // Проверка, были ли изменения в фильтрах
+    hasFilters() {
+      return this.lastname || this.name || this.middelname || this.selectedRole;
+    },
+  },
+  methods: {
+    // async fetchContactData() {
+    //   try {
+    //     const response = await axios.get(`/api/projects/${getProjectId()}/get_stages`);
+    //     this.stages = Object.values(response.data.stages).map(stage => ({
+    //       name: stage.name,
+    //       startDate: this.formatDate(stage.start_date),
+    //       endDate: this.formatDate(stage.end_date),
+    //       stageId: stage.id,
+    //     }));
+    //     // console.log(this.stages);
+    //   } catch (error) {
+    //     console.error('Ошибка при загрузке Этапов:', error);
+    //   }
+    // },
+    async addToContacts(user) {
+      const dataToSend = {
+        user_id: user.id,
+      };
+      console.log(dataToSend.user_id);
+      try {
+        const res = await axios.post(`/api/projects/${getProjectId()}/add_contact`, dataToSend, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          withCredentials: true,
+        });
+        console.log(res);
+        alert(`Пользователь ${user.lastname} ${user.name} ${user.middlename}добавлен в контакты`);
+        this.$router.push(`/project`);
+      } catch (error) {
+        console.error("Ошибка сети:", error.message);
+        if (error.response && error.response.data.detail) {
+          this.errorMessage = error.response.data.detail;
+        }
+      }
+    },
+    searchUsers() {
+      // Метод для обработки поиска при нажатии кнопки "Поиск"
+      // Фильтрация выполняется автоматически в computed property `filteredUsers`
+    },
+  },
+  // beforeMount() {
+  //   this.fetchContactData();
+  // },
+};
+</script>
+
+<style scoped>
+.user-search-page {
+  margin-left: 150px;
+  padding-top: 60px;
+}
+
+.search-filters {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.input-field {
+  width: 150px;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.input-field:focus {
+  border-color: #007BFF;
+  outline: none;
+}
+
+.select-field {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.select-field:focus {
+  border-color: #007BFF;
+  outline: none;
+}
+
+.user-item {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-item p {
+  margin: 0;
+}
+
+.user-item-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.user-item button {
+  background-color: #007BFF;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.user-item button:hover {
+  background-color: #0056b3;
+}
+
+.search-filters button {
+  background-color: #007BFF;
+  color: #fff;
+  padding: 8px 15px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.search-filters button:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+.search-filters button:active {
+  transform: scale(1);
+}
+</style>

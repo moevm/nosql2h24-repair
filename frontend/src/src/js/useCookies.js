@@ -45,14 +45,27 @@ export function useCookies() {
         return Cookies.get('stageName');
     };
 
-    const setStageID = (stageID) => {
-        Cookies.set('stageID', stageID, { expires: 1 }); // Устанавливаем куку на 7 дней
+    const setStageId = (stageId) => {
+        Cookies.set('stageId', stageId, { expires: 1 }); // Устанавливаем куку на 7 дней
     };
 
-    const getStageID = () => {
-        return Cookies.get('stageID');
+    const getStageId = () => {
+        return Cookies.get('stageId');
+    };
+    const setTaskId = (taskId) => {
+        Cookies.set('taskId', taskId, { expires: 1 }); // Устанавливаем куку на 7 дней
     };
 
+    const getTaskId = () => {
+        return Cookies.get('taskId');
+    };
+    const setRiskId = (riskId) => {
+        Cookies.set('riskId', riskId, { expires: 1 }); // Устанавливаем куку на 7 дней
+    };
+
+    const getRiskId = () => {
+        return Cookies.get('riskId');
+    };
 
     return {
         setProjectId,
@@ -63,7 +76,11 @@ export function useCookies() {
         getUserName,
         setStageName,
         getStageName,
-        setStageID,
-        getStageID,
+        setStageId,
+        getStageId,
+        getTaskId,
+        setTaskId,
+        getRiskId,
+        setRiskId,
     };
 }
