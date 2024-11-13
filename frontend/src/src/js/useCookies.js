@@ -67,6 +67,22 @@ export function useCookies() {
         return Cookies.get('riskId');
     };
 
+    const setReceiverId = (receiverId) => {
+        Cookies.set('receiverId', receiverId, { expires: 1 }); // Устанавливаем куку на 7 дней
+    };
+
+    const getReceiverId = () => {
+        return Cookies.get('receiverId');
+    };
+
+    const setReceiverName = (receiverName) => {
+        Cookies.set('receiverName', receiverName, { expires: 1 }); // Устанавливаем куку на 7 дней
+    };
+
+    const getReceiverName = () => {
+        return Cookies.get('receiverName');
+    };
+
     return {
         setProjectId,
         getProjectId,
@@ -82,5 +98,9 @@ export function useCookies() {
         setTaskId,
         getRiskId,
         setRiskId,
+        setReceiverId,
+        getReceiverId,
+        setReceiverName,
+        getReceiverName,
     };
 }

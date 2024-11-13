@@ -18,7 +18,6 @@
     </div>
 
     <!-- Отображаем список пользователей только если хотя бы один фильтр изменен -->
-    <div v-if="hasFilters" class="user-list">
       <div v-for="user in users" :key="user.id" class="user-item">
         <div>
           <p>{{ user.lastname }} {{ user.name }} {{ user.middlename }}</p>
@@ -28,14 +27,15 @@
           <button @click="goToChat()">Перейти в чат</button>
         </div>
       </div>
-    </div>
   </div>
 </template>
 
 <script>
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
-// import axios from 'axios';
+import axios from 'axios';
+// import { useCookies } from '@/src/js/useCookies';
+// const { setReceiverId, setChatName } = useCookies();
 
 
 export default {
@@ -50,48 +50,37 @@ export default {
       middelname: '',
       selectedRole: '',
       users: [
-        {
-          id: "6731ccd729ebfd89e5eb0b86",
-          name: "Илья",
-          lastname: "Ильичевич",
-          middlename: "Ильич",
-          role: "Администратор"
-        },
       ],
     };
   },
-  computed: {
-    // Проверка, были ли изменения в фильтрах
-    hasFilters() {
-      return this.lastname || this.name || this.middelname || this.selectedRole;
-    },
-  },
   methods: {
-    // async fetchContactData() {
-    //   try {
-    //     const response = await axios.get(`/api/projects/${getProjectId()}/get_stages`);
-    //     this.stages = Object.values(response.data.stages).map(stage => ({
-    //       name: stage.name,
-    //       startDate: this.formatDate(stage.start_date),
-    //       endDate: this.formatDate(stage.end_date),
-    //       stageId: stage.id,
-    //     }));
-    //     // console.log(this.stages);
-    //   } catch (error) {
-    //     console.error('Ошибка при загрузке Этапов:', error);
-    //   }
-    // },
+    async searchUsers() {
+      this.users = [];
+      try {
+        console.log(this.lastname);
+        const response = await axios.get(`/api/auth/get_user/${this.lastname}`);
+        // console.log(response.data);
+        this.users.push(response.data);
+        // this.users = Object.values(response.data).map(user => ({
+        //   name: user.name,
+        //   lastname: user.lastname,
+        //   middlename: user.middlename,
+        //   id: user.id,
+        //   role: user.role,
+        // }));
+        console.log(this.users);
+      } catch (error) {
+        console.error('Ошибка при загрузке контактов:', error);
+        if (error.response && error.response.data.detail) {
+          this.errorMessage = error.response.data.detail;
+        }
+      }
+    },
     goToChat() {
+
       this.$router.push(`/chat`);
     },
-    searchUsers() {
-      // Метод для обработки поиска при нажатии кнопки "Поиск"
-      // Фильтрация выполняется автоматически в computed property `filteredUsers`
-    },
   },
-  // beforeMount() {
-  //   this.fetchContactData();
-  // },
 };
 </script>
 

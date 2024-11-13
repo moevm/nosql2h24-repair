@@ -1,7 +1,7 @@
 <template>
   <div class="chat-container">
     <header class="chat-header">
-      <div class="contact-name">Иванов И.</div>
+      <div class="contact-name"></div>
     </header>
 
     <div class="messages">

@@ -29,7 +29,6 @@
   <script>
   import HeaderComponent from '../bars/HeaderComponent.vue';
   import SidebarComponent from '../bars/SidebarComponent.vue';
-  
   export default {
     components: {
       HeaderComponent,
