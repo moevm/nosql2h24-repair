@@ -2,7 +2,6 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Dict, Optional
 
-from bson import ObjectId
 from pydantic import BaseModel, Field
 
 class FirstMessage(BaseModel):
@@ -50,3 +49,8 @@ class CreateChatResponse(BaseModel):
 class Message(LastMessage):
     chatId: str
     receiver: str
+    
+class CreateMessage(BaseModel):
+    chatId: str
+    receiver: str
+    content: str

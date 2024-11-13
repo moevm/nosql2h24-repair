@@ -47,7 +47,7 @@ class Procurement(BaseModel):
     item_name: str
     quantity: int
     price: float
-    inStock: Optional[bool] = False
+    inStock: Optional[bool] = Field(False)
     units: Optional[str] = Field(None)
     delivery_date: Optional[datetime] = Field(None)
     created_by: Optional[Contact] = Field(None)

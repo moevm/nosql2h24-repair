@@ -1,6 +1,11 @@
-from dao.user import find_user_by_id
+from datetime import datetime, timezone
+
+from bson import ObjectId
+from dns.opcode import STATUS
+
 from database import db
-from schemas.messager import FirstMessage, Participant, LastMessage, Chat, Message, CreateChatResponse, ChatResponse
+from schemas.messager import Participant, LastMessage, Chat, Message, CreateChatResponse, ChatResponse, CreateMessage, \
+    StatusMsg
 from schemas.user import UserDao
 
 
@@ -55,6 +60,64 @@ async def get_chats_by_user_id(user_id: str) -> list[ChatResponse]:
     chat_list = [
         ChatResponse(id=str(chat["_id"]), **chat) for chat in chats
     ]
-    
+
     return chat_list
+
+
+async def add_message_to_chat(user_id: str, message_data: CreateMessage) -> str | None:
+    chat_collection = db.get_collection('chat')
+
+    chat = await chat_collection.find_one(
+        {
+            "_id": ObjectId(message_data.chatId),
+            "$and": [
+                {"participants." + user_id: {"$exists": True}},
+                {"participants." + message_data.receiver: {"$exists": True}},
+            ]
+        },
+    )
     
+    if chat is None:
+        return None
+
+    last_message = LastMessage(
+        content=message_data.content,
+        sender=user_id,
+        status=StatusMsg.unread
+    )
+
+    result = await chat_collection.find_one_and_update(
+        {"_id": ObjectId(message_data.chatId)},
+        {
+            "$set": {
+                "lastMessage": last_message.model_dump(),
+                "updated_at": datetime.now(timezone.utc)
+            }
+        },
+        return_document=True
+    )
+
+    if result is None:
+        return None
+
+    return str(result["_id"])
+
+
+async def create_message(user_id: str, message_data: CreateMessage):
+    message_collection = db.get_collection('message')
+
+    message = Message(
+        chatId=message_data.chatId,
+        receiver=message_data.receiver,
+        sender=user_id,
+        content=message_data.content,
+        status=StatusMsg.unread,
+        timestamp=datetime.now(timezone.utc)
+    )
+
+    insert_result = await message_collection.insert_one(message.model_dump())
+
+    if not insert_result.acknowledged:
+        return None
+
+    return str(insert_result.inserted_id)

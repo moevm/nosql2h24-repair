@@ -3,9 +3,9 @@ from typing import List
 from fastapi import APIRouter, HTTPException, status
 from fastapi.params import Depends
 
-from dao.messager import create_chat, get_chats_by_user_id
+from dao.messager import create_chat, get_chats_by_user_id, add_message_to_chat, create_message
 from dao.user import find_user_by_id
-from schemas.messager import CreateChatResponse, FirstMessage, ChatResponse
+from schemas.messager import CreateChatResponse, FirstMessage, ChatResponse, CreateMessage
 from schemas.user import UserDao
 from utils.token import get_current_user
 
@@ -35,3 +35,21 @@ async def get_chats(user: UserDao = Depends(get_current_user)):
     chats = await get_chats_by_user_id(user.id)
     return chats
 
+
+@router.post("/create_message", response_model=CreateChatResponse)
+async def new_message(message_data: CreateMessage, user: UserDao = Depends(get_current_user)):
+    chat_id = await add_message_to_chat(user.id, message_data)
+    if chat_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Чата не существует"
+        )
+
+    message_id = await create_message(user.id, message_data)
+    if message_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ошибка при добавлении сообщения"
+        )
+
+    return CreateChatResponse(chat_id=chat_id, message_id=message_id)
