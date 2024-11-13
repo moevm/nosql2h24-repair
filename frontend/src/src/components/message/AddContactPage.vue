@@ -18,8 +18,7 @@
     </div>
 
     <!-- Отображаем список пользователей только если хотя бы один фильтр изменен -->
-    <div v-if="hasFilters" class="user-list">
-      <div v-for="user in filteredUsers" :key="user.id" class="user-item">
+      <div v-for="user in users" :key="user.id" class="user-item">
         <div>
           <p>{{ user.lastname }} {{ user.name }} {{ user.middlename }}</p>
           <p>Должность - {{ user.role }}</p>
@@ -28,7 +27,6 @@
           <button @click="addToContacts(user)">Добавить в контакты</button>
         </div>
       </div>
-    </div>
   </div>
 </template>
 
@@ -52,40 +50,36 @@ export default {
       middelname: '',
       selectedRole: '',
       users: [
-        { id: "6731ccd729ebfd89e5eb0b86", name: "Илья", lastname: "Ильичевич", middlename: "Ильич", role: "Администратор" },
+        // { id: "6731ccd729ebfd89e5eb0b86", name: "Илья", lastname: "Ильичевич", middlename: "Ильич", role: "Администратор" },
       ],
     };
   },
   computed: {
     // Фильтруем пользователей по введенным значениям
-    filteredUsers() {
-      return this.users.filter(user =>
-          (!this.lastname || user.lastname.includes(this.lastname)) &&
-          (!this.name || user.name.includes(this.name)) &&
-          (!this.middelname || user.middlename.includes(this.middelname)) &&
-          (!this.selectedRole || user.role === this.selectedRole)
-      );
-    },
-    // Проверка, были ли изменения в фильтрах
-    hasFilters() {
-      return this.lastname || this.name || this.middelname || this.selectedRole;
-    },
   },
   methods: {
-    // async fetchContactData() {
-    //   try {
-    //     const response = await axios.get(`/api/projects/${getProjectId()}/get_stages`);
-    //     this.stages = Object.values(response.data.stages).map(stage => ({
-    //       name: stage.name,
-    //       startDate: this.formatDate(stage.start_date),
-    //       endDate: this.formatDate(stage.end_date),
-    //       stageId: stage.id,
-    //     }));
-    //     // console.log(this.stages);
-    //   } catch (error) {
-    //     console.error('Ошибка при загрузке Этапов:', error);
-    //   }
-    // },
+    async searchUsers() {
+      this.users = [];
+      try {
+        console.log(this.lastname);
+        const response = await axios.get(`/api/auth/get_user/${this.lastname}`);
+        // console.log(response.data);
+        this.users.push(response.data);
+        // this.users = Object.values(response.data).map(user => ({
+        //   name: user.name,
+        //   lastname: user.lastname,
+        //   middlename: user.middlename,
+        //   id: user.id,
+        //   role: user.role,
+        // }));
+        console.log(this.users);
+      } catch (error) {
+        console.error('Ошибка при загрузке контактов:', error);
+        if (error.response && error.response.data.detail) {
+          this.errorMessage = error.response.data.detail;
+        }
+      }
+    },
     async addToContacts(user) {
       const dataToSend = {
         user_id: user.id,
@@ -100,7 +94,7 @@ export default {
           withCredentials: true,
         });
         console.log(res);
-        alert(`Пользователь ${user.lastname} ${user.name} ${user.middlename}добавлен в контакты`);
+        alert(`Пользователь ${user.lastname} ${user.name} ${user.middlename} добавлен в контакты`);
         this.$router.push(`/project`);
       } catch (error) {
         console.error("Ошибка сети:", error.message);
@@ -109,10 +103,10 @@ export default {
         }
       }
     },
-    searchUsers() {
-      // Метод для обработки поиска при нажатии кнопки "Поиск"
-      // Фильтрация выполняется автоматически в computed property `filteredUsers`
-    },
+    // searchUsers() {
+    //   // Метод для обработки поиска при нажатии кнопки "Поиск"
+    //   // Фильтрация выполняется автоматически в computed property `filteredUsers`
+    // },
   },
   // beforeMount() {
   //   this.fetchContactData();

@@ -31,7 +31,7 @@ const routes = [
   { path: '/risks', component: RisksPage},
   { path: '/procurements', component: ProcurementsPage},
   { path: '/messages', component: MessagesPage},
-  { path: '/chat/:userId', component: ChatPage},
+  { path: '/chat', component: ChatPage},
   { path: '/add_risk', component: RiskFormComponent },
   { path: '/risk-details/', component: RiskDetails},
   { path: '/material/:id', component: MaterialDetail},
