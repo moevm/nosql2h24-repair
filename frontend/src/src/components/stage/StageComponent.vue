@@ -47,7 +47,7 @@
 
 <script>
 import { useCookies } from '@/src/js/useCookies';
-const { setStageID,setStageName } = useCookies();
+const { setStageId,setStageName } = useCookies();
 
 export default {
   props: {
@@ -92,7 +92,7 @@ export default {
       }
     },
     async goToTasks() {
-      setStageID(this.stage.stageId);
+      setStageId(this.stage.stageId);
       setStageName(this.stage.name);
       this.$router.push(`/tasks`);
     },

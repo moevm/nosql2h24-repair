@@ -19,11 +19,11 @@
         <tbody>
           <tr 
             v-for="task in tasks" 
-            :key="task.id"
-            :class="{ selected: selectedTaskId === task.id }"
-            @click="selectTask(task.id)"
+            :key="task.taskId"
+            :class="{ selected: selectedTaskId === task.taskId }"
+            @click="selectTask(task.taskId)"
           >
-            <td>{{ task.title }}</td>
+            <td>{{ task.taskName }}</td>
             <td>{{ task.startDate }}</td>
             <td>{{ task.endDate }}</td>
             <td>{{ task.status }}</td>
@@ -45,76 +45,66 @@
 <script>
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
+import axios from 'axios';
+import { useCookies } from '@/src/js/useCookies';
+const { getProjectId, getStageId, getStageName,setTaskId } = useCookies();
 
 export default {
   components: {
     HeaderComponent,
     ProjectSidebarComponent,
   },
-  // props: {
-  //   stageId: {
-  //     type: Number,
-  //     required: true
-  //   }
-  // },
   data() {
     return {
+      stageName: getStageName(),
       tasks: [
-        { id: 1, title: 'Задача 1', startDate: '2024-01-01', endDate: '2024-01-10', status: 'В процессе' },
-        { id: 2, title: 'Задача 2', startDate: '2024-01-05', endDate: '2024-01-15', status: 'Опоздание' },
-        { id: 3, title: 'Задача 3', startDate: '2024-01-12', endDate: '2024-01-20', status: 'Готово' }
       ],
-      nextTaskId: 4,
       selectedTaskId: null  // для отслеживания выбранной задачи
     };
   },
-  computed: {
-    stageName() {
-      const stage = this.$route.params.stageId;
-      return `Этап ${stage}`;
-    }
-  },
   methods: {
     addTask() {
-      const newTask = {
-        id: this.nextTaskId++,
-        title: 'Новая задача',
-        startDate: '',
-        endDate: '',
-        status: 'В процессе'
-      };
-      this.tasks.push(newTask);
-      this.$router.push(`/tasks/${this.stageId}/${newTask.id}`); // переход на страницу новой задачи
+      this.$router.push(`/add_task`); // переход на страницу новой задачи
     },
     deleteTask(taskId) {
       this.tasks = this.tasks.filter(task => task.id !== taskId);
       this.selectedTaskId = null;  // сбрасываем выбор после удаления
     },
-    viewTask(taskId) {
-      this.$router.push(`/tasks/${this.stageId}/${taskId}`);
+    viewTask() {
+      setTaskId(this.selectedTaskId);
+      this.$router.push(`/tasks/viewRedactorTask`);
     },
     selectTask(taskId) {
       this.selectedTaskId = taskId;
     },
-    // async fetchStageData() {
-    //   // try {
-    //   //   const response = await axios.get(`/api/projects/${this.projectId}/get_task`);
-    //   //   console.log(response.data);
-    //   //   // this.stages = Object.values(response.data.stages).map(stage => ({
-    //   //   //   name: stage.name,
-    //   //   //   startDate: this.formatDate(stage.start_date),
-    //   //   //   endDate: this.formatDate(stage.end_date),
-    //   //   //   stageId: stage.id,
-    //   //   // }));
-    //   //   // console.log(this.stages);
-    //   // } catch (error) {
-    //   //   console.error('Ошибка при загрузке Этапов:', error);
-    //   // }
-    // },
-    // beforeMount() {
-    //   this.fetchStageData();
-    // },
-  }
+    async fetchTaskData() {
+      try {
+        const response = await axios.get(`/api/tasks/get_stage_tasks/${getProjectId()}/${getStageId()}`);
+        // console.log(response.data);
+        this.tasks = Object.values(response.data).map(task => ({
+          taskName: task.name,
+          startDate: this.formatDate(task.start_date),
+          endDate: this.formatDate(task.end_date),
+          status: task.status,
+          taskDescription: task.description,
+          taskId: task.id
+        }));
+        console.log(this.tasks);
+      } catch (error) {
+        console.error('Ошибка при загрузке Этапов:', error);
+      }
+    },
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 по 11, поэтому +1
+      const year = date.getFullYear();
+      return `${day}.${month}.${year}`;
+    },
+  },
+  beforeMount() {
+    this.fetchTaskData();
+  },
 };
 </script>
 
