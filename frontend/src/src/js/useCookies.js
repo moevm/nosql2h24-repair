@@ -59,6 +59,13 @@ export function useCookies() {
     const getTaskId = () => {
         return Cookies.get('taskId');
     };
+    const setRiskId = (riskId) => {
+        Cookies.set('riskId', riskId, { expires: 1 }); // Устанавливаем куку на 7 дней
+    };
+
+    const getRiskId = () => {
+        return Cookies.get('riskId');
+    };
 
     return {
         setProjectId,
@@ -73,5 +80,7 @@ export function useCookies() {
         getStageId,
         getTaskId,
         setTaskId,
+        getRiskId,
+        setRiskId,
     };
 }

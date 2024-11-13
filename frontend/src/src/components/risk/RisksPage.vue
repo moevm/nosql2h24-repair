@@ -19,14 +19,13 @@
         <!-- Список задач -->
         <TaskItemComponent
           v-for="risk in filteredTasks"
-          :key="risk.id"
-          :riskId="risk.id"
+          :key="risk.riskId"
           :projectId="projectId"
           :projectName="projectName"
           :title="risk.riskName"
           :description="risk.description"
-          @delete="deleteTask(risk.id)"
-          @details="viewDetails(risk.id)"
+          @delete="deleteTask(risk.riskId)"
+          @details="viewDetails(risk.riskId)"
         />
       </div>
     </div>
@@ -40,7 +39,7 @@ import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
 import TaskItemComponent from '../risk/TaskItemComponent.vue';
 
 import { useCookies } from '@/src/js/useCookies';
-const { getProjectId, getProjectName } = useCookies();
+const { getProjectId, getProjectName,setRiskId } = useCookies();
 
 export default {
   components: {
@@ -75,7 +74,9 @@ export default {
     deleteTask(id) {
       this.risks = this.risks.filter(risk => risk.id !== id);
     },
-    viewDetails() {
+    viewDetails(id) {
+      setRiskId(id);
+      console.log("Вызов просмотра риска");
       this.$router.push(`/risk-details`);
     },
     async fetchRisks() {
