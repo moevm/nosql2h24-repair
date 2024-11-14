@@ -75,6 +75,17 @@ async def get_chat_by_id(chat_id: str, user_id: str) -> ChatResponse:
     return ChatResponse(id=str(chat["_id"]), **chat)
 
 
+async def get_chat_by_double_id(first_id: str, second_id: str) -> ChatResponse | None:
+    chat_collection = db.get_collection('chat')
+    chat = await chat_collection.find_one({
+        "participants." + first_id: {"$exists": True},
+        "participants." + second_id: {"$exists": True}
+        })
+    if chat is None:
+        return None
+    return ChatResponse(id=str(chat["_id"]), **chat)
+
+
 async def add_message_to_chat(user_id: str, message_data: CreateMessage) -> str | None:
     chat_collection = db.get_collection('chat')
 
