@@ -49,6 +49,7 @@
         setChatName(user.name);
         setReceiverId(user.receiverId);
         setChatId(user.chatId);
+        console.log(user.chatId);
         this.$router.push(`/chat`);
       },
       goToUserSearch() {
@@ -65,7 +66,7 @@
                 const name = chat.participants[otherUserId].name;
 
                 return {
-                  resiverId: otherUserId,
+                  receiverId: otherUserId,
                   name: name,
                   lastmessage: chat.lastMessage.content,
                   chatId: chat.id,

@@ -37,7 +37,7 @@ import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
 import { useCookies } from '@/src/js/useCookies';
-const { getReceiverId, getChatName } = useCookies();
+const { getReceiverId, getChatName,getChatId,getUserId } = useCookies();
 
 export default {
   components: {
@@ -95,13 +95,28 @@ export default {
     }
   },
   methods: {
+    async fetchChat() {
+      this.chatId = getChatId();
+      try {
+        const response = await axios.get(`/api/message/get_chat/${getChatId()}`);
+        console.log(response.data);
+        this.messages.push({
+          text: response.data.lastMessage.content,
+          date: response.data.lastMessage.timestamp,
+          status: response.data.lastMessage.status,
+          sender: response.data.lastMessage.sender === getUserId() ? "self" : "other"
+        });
+      } catch (error) {
+        console.error('Ошибка при загрузке чата:', error);
+      }
+    },
     async sendMessage() {
       if (this.messages.length === 0 && this.newMessage.trim() !== "") {
         const dataToSend = {
           id_receiver: getReceiverId(),
           content: this.newMessage
         };
-        // console.log(dataToSend);
+        // console.log(this.messages.length);
         try {
           const res = await axios.post(`/api/message/create_chat`, dataToSend, {
             headers: {
@@ -126,7 +141,7 @@ export default {
             receiver: getReceiverId(),
             content: this.newMessage
           };
-          console.log(dataToSend)
+          console.log(dataToSend);
           try {
             const res = await axios.post(`/api/message/create_message`, dataToSend, {
               headers: {
@@ -160,7 +175,12 @@ export default {
       const options = { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" };
       return new Date(date).toLocaleString("ru-RU", options);
     }
-  }
+  },
+  beforeMount() {
+    if(getChatId()){
+      this.fetchChat();
+    }
+  },
 };
 </script>
 
