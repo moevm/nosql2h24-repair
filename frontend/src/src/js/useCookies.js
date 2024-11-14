@@ -75,14 +75,21 @@ export function useCookies() {
         return Cookies.get('receiverId');
     };
 
-    const setReceiverName = (receiverName) => {
-        Cookies.set('receiverName', receiverName, { expires: 1 }); // Устанавливаем куку на 7 дней
+    const setChatName = (chatName) => {
+        Cookies.set('chatName', chatName, { expires: 1 }); // Устанавливаем куку на 7 дней
     };
 
-    const getReceiverName = () => {
-        return Cookies.get('receiverName');
+    const getChatName = () => {
+        return Cookies.get('chatName');
     };
 
+    const setChatId = (chatId) => {
+        Cookies.set('chatId', chatId, { expires: 1 }); // Устанавливаем куку на 7 дней
+    };
+
+    const getChatId = () => {
+        return Cookies.get('chatId');
+    };
     return {
         setProjectId,
         getProjectId,
@@ -100,7 +107,9 @@ export function useCookies() {
         setRiskId,
         setReceiverId,
         getReceiverId,
-        setReceiverName,
-        getReceiverName,
+        setChatName,
+        getChatName,
+        setChatId,
+        getChatId,
     };
 }

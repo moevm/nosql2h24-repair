@@ -24,7 +24,7 @@
           <p>Должность - {{ user.role }}</p>
         </div>
         <div class="user-item-actions">
-          <button @click="goToChat()">Перейти в чат</button>
+          <button @click="goToChat(user)">Перейти в чат</button>
         </div>
       </div>
   </div>
@@ -34,8 +34,8 @@
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
-// import { useCookies } from '@/src/js/useCookies';
-// const { setReceiverId, setChatName } = useCookies();
+import { useCookies } from '@/src/js/useCookies';
+const { setReceiverId, setChatName } = useCookies();
 
 
 export default {
@@ -57,7 +57,7 @@ export default {
     async searchUsers() {
       this.users = [];
       try {
-        console.log(this.lastname);
+        // console.log(this.lastname);
         const response = await axios.get(`/api/auth/get_user/${this.lastname}`);
         // console.log(response.data);
         this.users.push(response.data);
@@ -68,7 +68,7 @@ export default {
         //   id: user.id,
         //   role: user.role,
         // }));
-        console.log(this.users);
+        // console.log(this.users);
       } catch (error) {
         console.error('Ошибка при загрузке контактов:', error);
         if (error.response && error.response.data.detail) {
@@ -76,8 +76,9 @@ export default {
         }
       }
     },
-    goToChat() {
-
+    goToChat(user) {
+      setChatName(`${user.lastname} ${user.name} ${user.middlename}`);
+      setReceiverId(user.id);
       this.$router.push(`/chat`);
     },
   },

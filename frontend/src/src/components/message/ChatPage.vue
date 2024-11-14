@@ -1,7 +1,7 @@
 <template>
   <div class="chat-container">
     <header class="chat-header">
-      <div class="contact-name"></div>
+      <div class="contact-name">{{chatName}}</div>
     </header>
 
     <div class="messages">
@@ -31,10 +31,16 @@
 </template>
 
 <script>
+import axios from 'axios';
+import { useCookies } from '@/src/js/useCookies';
+const { getReceiverId, getChatName } = useCookies();
+
 export default {
   data() {
     return {
-      newMessage: "",
+      chatName: getChatName(),
+      chatId: '',
+      newMessage: '',
       messages: [
         // {
         //   text: "Как обстоят дела с ремонтом, когда завершите?",
@@ -81,7 +87,55 @@ export default {
     }
   },
   methods: {
-    sendMessage() {
+    async sendMessage() {
+      if (this.messages.length === 0 && this.newMessage.trim() !== "") {
+        const dataToSend = {
+          id_receiver: getReceiverId(),
+          content: this.newMessage
+        };
+        // console.log(dataToSend);
+        try {
+          const res = await axios.post(`/api/message/create_chat`, dataToSend, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            withCredentials: true,
+          });
+          // console.log(res);
+          this.chatId = res.data.chat_id;
+        } catch (error) {
+          console.error("Ошибка сети:", error.message);
+          if (error.response && error.response.data.detail) {
+            this.errorMessage = error.response.data.detail;
+          }
+        }
+      }
+      else{
+        if (this.newMessage.trim() !== "") {
+          const dataToSend = {
+            chatId: this.chatId,
+            receiver: getReceiverId(),
+            content: this.newMessage
+          };
+          console.log(dataToSend)
+          try {
+            const res = await axios.post(`/api/message/create_message`, dataToSend, {
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+              withCredentials: true,
+            });
+            console.log(res);
+          } catch (error) {
+            console.error("Ошибка сети:", error.message);
+            if (error.response && error.response.data.detail) {
+              this.errorMessage = error.response.data.detail;
+            }
+          }
+        }
+      }
       if (this.newMessage.trim() !== "") {
         // Добавляем новое сообщение в массив messages
         this.messages.push({
@@ -91,6 +145,7 @@ export default {
           status: "unread"
         });
         this.newMessage = "";
+
       }
     },
     formatDate(date) {
