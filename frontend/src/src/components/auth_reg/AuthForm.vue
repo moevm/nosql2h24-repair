@@ -80,7 +80,7 @@
 <script>
 import axios from 'axios';
 import { useCookies } from '@/src/js/useCookies';
-const { setUserName } = useCookies();
+const { setUserName,setUserId } = useCookies();
 
 export default {
   data() {
@@ -176,6 +176,7 @@ export default {
         axios.get('/api/auth/me').then(res => {
           console.log(res);
           setUserName(res.data.lastname + ' ' + res.data.name + ' ' + res.data.middlename);
+          setUserId(res.data.id)
           this.$router.push("/main");
         })
             .catch(err => {

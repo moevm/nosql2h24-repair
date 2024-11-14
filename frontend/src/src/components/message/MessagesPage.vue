@@ -14,11 +14,11 @@
           <button v-if="$route.path !== '/user-search'" @click="goToUserSearch">Поиск пользователя</button>
         </div>
         <div class="chats-container">
-          <div v-for="(chat, index) in filteredChats" :key="index" class="chat-item" @click="goToChat(chat.userId)">
+          <div v-for="chat in chats" :key="chat.chatId" class="chat-item" @click="goToChat(chat)">
             <img src="@/assets/icons/avatar.png" alt="Avatar Icon" class="avatar-icon">
             <div class="chat-info">
-              <p class="username">{{ chat.username }}</p>
-              <p class="last-message">{{ chat.lastMessage }}</p>
+              <p class="username">{{ chat.name }}</p>
+              <p class="last-message">{{ chat.lastmessage }}</p>
             </div>
           </div>
         </div>
@@ -29,6 +29,9 @@
   <script>
   import HeaderComponent from '../bars/HeaderComponent.vue';
   import SidebarComponent from '../bars/SidebarComponent.vue';
+  import axios from 'axios';
+  import { useCookies } from '@/src/js/useCookies';
+  const { getUserId,setChatId,setChatName,setReceiverId } = useCookies();
   export default {
     components: {
       HeaderComponent,
@@ -38,36 +41,45 @@
       return {
         searchQuery: '',
         chats: [
-          {
-            userId: 1,
-            username: 'Пользователь 1',
-            avatar: 'https://via.placeholder.com/50',
-            lastMessage: 'Привет!',
-          },
-          {
-            userId: 2,
-            username: 'Пользователь 2',
-            avatar: 'https://via.placeholder.com/50',
-            lastMessage: 'Как дела?',
-          },
-          // Добавьте больше чатов по мере необходимости
         ],
       };
     },
-    computed: {
-      filteredChats() {
-        return this.chats.filter(chat =>
-          chat.username.toLowerCase().includes(this.searchQuery.toLowerCase())
-        );
-      },
-    },
     methods: {
-      goToChat(userId) {
-        this.$router.push(`/chat/${userId}`);
+      goToChat(user) {
+        setChatName(user.name);
+        setReceiverId(user.receiverId);
+        setChatId(user.chatId);
+        this.$router.push(`/chat`);
       },
       goToUserSearch() {
         this.$router.push('/user-search');
       },
+      async fetchChats() {
+        try {
+          const response = await axios.get('/api/message/get_chats');
+          console.log(response.data);
+          this.chats = await Promise.all(
+              Object.values(response.data).map(async (chat) => {
+                // Получаем идентификатор другого участника, исключая текущего пользователя
+                const otherUserId = Object.keys(chat.participants).find(id => id !== getUserId());
+                const name = chat.participants[otherUserId].name;
+
+                return {
+                  resiverId: otherUserId,
+                  name: name,
+                  lastmessage: chat.lastMessage.content,
+                  chatId: chat.id,
+                };
+              })
+          );
+          console.log(this.chats);
+        } catch (error) {
+          console.error('Ошибка при загрузке чатов:', error);
+        }
+      },
+    },
+    beforeMount() {
+      this.fetchChats();
     },
   };
   </script>

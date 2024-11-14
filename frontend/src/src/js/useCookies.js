@@ -29,6 +29,14 @@ export function useCookies() {
         return Cookies.get('userName');
     };
 
+    const setUserId = (userId) => {
+        Cookies.set('userId', userId, { expires: 1 }); // Устанавливаем куку на 7 дней
+    };
+
+    const getUserId = () => {
+        return Cookies.get('userId');
+    };
+
     const setProjectName = (projectName) => {
         Cookies.set('projectName', projectName, { expires: 1 }); // Устанавливаем куку на 7 дней
     };
@@ -94,6 +102,8 @@ export function useCookies() {
         setProjectId,
         getProjectId,
         setUserName,
+        setUserId,
+        getUserId,
         getProjectName,
         setProjectName,
         getUserName,
