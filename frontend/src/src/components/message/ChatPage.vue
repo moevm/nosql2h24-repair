@@ -1,4 +1,6 @@
 <template>
+  <HeaderComponent />
+  <SidebarComponent />
   <div class="chat-container">
     <header class="chat-header">
       <div class="contact-name">{{chatName}}</div>
@@ -12,7 +14,7 @@
       >
         <div :class="['message', message.sender === 'self' ? 'self-message' : '']">
           <p>{{ message.text }}</p>
-          <span class="timestamp">{{ formatDate(message.date) }}</span>
+          <span :class="['timestamp', message.sender === 'self' ? 'self-timestamp' : '']">{{ formatDate(message.date) }}</span>
           <span v-if="message.status === 'read'" class="status-check">✔</span>
         </div>
       </div>
@@ -31,53 +33,59 @@
 </template>
 
 <script>
+import HeaderComponent from '../bars/HeaderComponent.vue';
+import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
 import { useCookies } from '@/src/js/useCookies';
 const { getReceiverId, getChatName } = useCookies();
 
 export default {
+  components: {
+    HeaderComponent,
+    SidebarComponent,
+  },
   data() {
     return {
       chatName: getChatName(),
       chatId: '',
       newMessage: '',
       messages: [
-        // {
-        //   text: "Как обстоят дела с ремонтом, когда завершите?",
-        //   date: new Date("2024-10-03T21:37:00"),
-        //   sender: "other",
-        //   status: "read"
-        // },
-        // {
-        //   text: "Работаем, но возникли задержки с поставками материалов. Без них продолжить не можем.",
-        //   date: new Date("2024-10-03T21:38:00"),
-        //   sender: "self",
-        //   status: "read"
-        // },
-        // {
-        //   text: "Опять? Это уже третья неделя идёт!",
-        //   date: new Date("2024-10-03T21:39:00"),
-        //   sender: "other",
-        //   status: "read"
-        // },
-        // {
-        //   text: "К сожалению, задержки по вине поставщика. Мы делаем всё возможное на нашем уровне.",
-        //   date: new Date("2024-10-03T21:40:00"),
-        //   sender: "self",
-        //   status: "read"
-        // },
-        // {
-        //   text: "Хорошо, но постарайтесь уложиться в сроки. Ещё неделя – и начнутся проблемы.",
-        //   date: new Date("2024-10-03T21:41:00"),
-        //   sender: "other",
-        //   status: "read"
-        // },
-        // {
-        //   text: "Приложим максимум усилий, однако если материалы вновь задержатся, это не будет зависеть от нас.",
-        //   date: new Date("2024-10-03T21:42:00"),
-        //   sender: "self",
-        //   status: "unread"
-        // }
+        /*{
+          text: "Как обстоят дела с ремонтом, когда завершите?",
+          date: new Date("2024-10-03T21:37:00"),
+          sender: "other",
+          status: "read"
+        },
+        {
+          text: "Работаем, но возникли задержки с поставками материалов. Без них продолжить не можем.",
+          date: new Date("2024-10-03T21:38:00"),
+          sender: "self",
+          status: "read"
+        },
+        {
+          text: "Опять? Это уже третья неделя идёт!",
+          date: new Date("2024-10-03T21:39:00"),
+          sender: "other",
+          status: "read"
+        },
+        {
+          text: "К сожалению, задержки по вине поставщика. Мы делаем всё возможное на нашем уровне.",
+          date: new Date("2024-10-03T21:40:00"),
+          sender: "self",
+          status: "read"
+        },
+        {
+          text: "Хорошо, но постарайтесь уложиться в сроки. Ещё неделя – и начнутся проблемы.",
+          date: new Date("2024-10-03T21:41:00"),
+          sender: "other",
+          status: "read"
+        },
+        {
+          text: "Приложим максимум усилий, однако если материалы вновь задержатся, это не будет зависеть от нас.",
+          date: new Date("2024-10-03T21:42:00"),
+          sender: "self",
+          status: "unread"
+        }*/
       ]
     };
   },
@@ -162,6 +170,7 @@ export default {
   flex-direction: column;
   max-width: 600px;
   margin: 0 auto;
+  margin-top: 70px;
   border: 1px solid #ddd;
   border-radius: 8px;
   overflow: hidden;
@@ -221,6 +230,10 @@ export default {
   color: gray;
   margin-top: 5px;
   display: block;
+}
+
+.self-timestamp {
+  color: white;
 }
 
 .status-check {
