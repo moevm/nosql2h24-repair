@@ -64,7 +64,7 @@ async def get_chats_by_user_id(user_id: str) -> list[ChatResponse]:
     return chat_list
 
 
-async def get_chat_by_id(chat_id: str) -> ChatResponse:
+async def get_chat_by_id(chat_id: str, user_id: str) -> ChatResponse:
     chat_collection = db.get_collection('chat')
     chat = await chat_collection.find_one({
         '_id': ObjectId(chat_id),

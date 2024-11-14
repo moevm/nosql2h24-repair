@@ -38,7 +38,7 @@ async def get_chats(user: UserDao = Depends(get_current_user)):
 
 @router.get("/get_chat/{chat_id}", response_model=ChatResponse)
 async def get_chat(chat_id: str, user: UserDao = Depends(get_current_user)):
-    chat = await get_chat_by_id(chat_id)
+    chat = await get_chat_by_id(chat_id, user.id)
     if chat is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
