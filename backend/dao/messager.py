@@ -72,7 +72,7 @@ async def get_chat_by_id(chat_id: str, user_id: str) -> ChatResponse:
         })
     if chat is None:
         return None
-    return ChatResponse(**chat)
+    return ChatResponse(id=str(chat["_id"]), **chat)
 
 
 async def add_message_to_chat(user_id: str, message_data: CreateMessage) -> str | None:
