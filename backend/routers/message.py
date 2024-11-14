@@ -44,6 +44,7 @@ async def get_chat(chat_id: str, user: UserDao = Depends(get_current_user)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Чата не существует"
         )
+    return chat
 
 
 @router.post("/create_message", response_model=CreateChatResponse)
