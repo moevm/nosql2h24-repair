@@ -21,10 +21,9 @@ async def new_chat(first_message: FirstMessage, user: UserDao = Depends(get_curr
             detail="Получатель не найден"
         )
 
-    # @todo
-    # chat = get_chat_by_double_id(user.id, user_receiver.id)
-    # if chat:
-    #     return ChatResponse()
+    existing_chat = await get_chat_by_double_id(user.id, user_receiver.id)
+    if existing_chat:
+        return existing_chat
 
     chat = await create_chat(user, user_receiver, first_message.content)
     if chat is None:
@@ -32,7 +31,7 @@ async def new_chat(first_message: FirstMessage, user: UserDao = Depends(get_curr
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Ошибка в создании чата",
         )
-    return ChatResponse(**chat)
+    return chat
 
 
 @router.get("/get_chats", response_model=List[ChatResponse])
