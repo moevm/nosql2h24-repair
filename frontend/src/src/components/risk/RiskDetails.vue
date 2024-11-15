@@ -1,52 +1,137 @@
 <template>
-    <div class="risk-details">
-      <h1>Детали риска</h1>
-      <div v-if="risk">
-        <h2>{{ risk.title }}</h2>
-        <p>{{ risk.description }}</p>
+  <HeaderComponent />
+  <ProjectSidebarComponent />
+  <div class="risk-details">
+    <h1>Детали риска</h1>
+    <div v-if="riskName">
+      <div v-if="isEditing">
+        <input v-model="riskName" class="edit-title" />
+        <textarea v-model="riskDescription" class="edit-description"></textarea>
+        <div class="button-group">
+          <button @click="saveRisk" class="button">Сохранить</button>
+          <button @click="cancelEdit" class="cancel-button">Отмена</button>
+        </div>
       </div>
       <div v-else>
-        <p>Риск не найден.</p>
+        <h2>{{ riskName }}</h2>
+        <p>{{ riskDescription }}</p>
+        <div class="button-group">
+          <button @click="editRisk" class="button">Редактировать</button>
+          <button @click="goBack" class="button">Назад</button>
+        </div>
       </div>
-      <button @click="goBack">Назад</button>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    data() {
-      return {
-        risk: null,
-        tasks: [
-          { id: 1, title: 'Износ, поломка', description: 'Студенты могут разбить дорогой кафель...' },
-          { id: 2, title: 'Задержка в работах', description: 'Из-за санкций некоторые материалы...' },
-          // Добавьте дополнительные риски сюда
-        ],
-      };
+    <div v-else>
+      <p>Риск не найден.</p>
+    </div>
+  </div>
+</template>
+
+<script>
+import HeaderComponent from '../bars/HeaderComponent.vue';
+import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
+import axios from 'axios';
+import { useCookies } from '@/src/js/useCookies';
+const { getProjectId,getRiskId } = useCookies();
+
+export default {
+  components: {
+    HeaderComponent,
+    ProjectSidebarComponent,
+  },
+  data() {
+    return {
+      riskName:"",
+      riskDescription:"",
+      risk: null,
+      editedRisk: null,
+      isEditing: false,
+      // tasks: [
+      //   // { id: 1, title: 'Износ, поломка', description: 'Студенты могут разбить дорогой кафель...' },
+      //   // { id: 2, title: 'Задержка в работах', description: 'Из-за санкций некоторые материалы...' },
+      //   // Добавьте дополнительные риски сюда
+      // ],
+    };
+  },
+  // created() {
+  //   const taskId = parseInt(this.$route.params.taskId);
+  //   this.risk = this.tasks.find(task => task.id === taskId);
+  // },
+  methods: {
+    goBack() {
+      this.$router.push('/risks');
     },
-    created() {
-      const taskId = parseInt(this.$route.params.taskId);
-      this.risk = this.tasks.find(task => task.id === taskId);
+    editRisk() {
+      this.isEditing = true;
+      this.editedRisk = { ...this.risk };
     },
-    methods: {
-      goBack() {
-        this.$router.push('/project/risks');
-      },
+    saveRisk() {
+      this.risk.title = this.editedRisk.title;
+      this.risk.description = this.editedRisk.description;
+      this.isEditing = false;
     },
-  };
-  </script>
-  
-  <style scoped>
-  .risk-details {
-    padding: 20px;
-  }
-  
-  button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    cursor: pointer;
-  }
-  </style>  
+    cancelEdit() {
+      this.isEditing = false;
+      this.editedRisk = null;
+    },
+    async fetchRiskData() {
+      try {
+        const response = await axios.get(`/api/projects/${getProjectId()}/get_risk/${getRiskId()}`);
+        console.log(response.data);
+        this.riskName = response.data.risk.name;
+        this.riskDescription = response.data.risk.description;
+        // console.log(this.riskName);
+      } catch (error) {
+        console.error('Ошибка при загрузке Риска:', error);
+      }
+    },
+  },
+  beforeMount() {
+    this.fetchRiskData();
+  },
+};
+</script>
+
+<style scoped>
+.risk-details {
+  padding: 20px;
+  margin-left: 150px;
+  margin-top: 60px;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px; /* Увеличение расстояния между кнопками */
+  margin-top: 10px;
+}
+
+.button {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.cancel-button {
+  padding: 8px 16px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.edit-title {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+.edit-description {
+  width: 100%;
+  height: 100px;
+  padding: 8px;
+  margin-bottom: 10px;
+  resize: vertical;
+}
+</style>

@@ -16,6 +16,10 @@
           <span class="label">Ед. изм:</span>
           <p class="value">{{ material.unit }}</p>
         </div>
+        <div class="item-row">
+          <span class="label">Создатель Закупки</span>
+          <p class="value">{{ material.user }}</p>
+        </div>
       </div>
 
       <!-- Вторая группа элементов -->
@@ -31,6 +35,10 @@
         <div class="item-row">
           <span class="label">В наличии:</span>
           <p class="value">{{ material.inStock ? 'Да' : 'Нет' }}</p>
+        </div>
+        <div class="item-row">
+          <span class="label">Роль Создателя</span>
+          <p class="value">{{ material.userRole }}</p>
         </div>
       </div>
     </div>
@@ -52,7 +60,7 @@ export default {
   methods: {
     // Метод для перехода на страницу о материале
     viewDetails() {
-      this.$router.push(`/material/${this.material.id}`);
+      // this.$router.push(`/material/${this.material.id}`);
     },
   },
 };
@@ -62,11 +70,11 @@ export default {
 .purchase-item {
   display: flex;
   justify-content: center;
-  width: 1200px;
-  height: 220px;
+  width: auto;
+  height: auto;
   flex-direction: column;
   background-color: #f1f1f1;
-  padding: 15px;
+  padding: 20px;
   margin: 10px 0;
   border-radius: 5px;
 }

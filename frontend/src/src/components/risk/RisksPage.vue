@@ -1,14 +1,14 @@
 <template>
   <div class="main-container">
     <HeaderComponent />
-    <ProjectSidebarComponent />
+    <ProjectSidebarComponent/>
 
     <div class="content">
       <div class="task-container">
         <div class="search-bar">
           <div>
-            <h1>Ремонт кафедры МОЭВМ</h1>
-            <p>СПбГЭТУ "ЛЭТИ"</p>
+            <h1>{{projectName}}</h1>
+<!--            <p>СПбГЭТУ "ЛЭТИ"</p>-->
           </div>
           <input type="text" placeholder="Название риска" v-model="searchQuery" class="search-input" />
         </div>
@@ -18,12 +18,14 @@
         
         <!-- Список задач -->
         <TaskItemComponent
-          v-for="task in filteredTasks"
-          :key="task.id"
-          :title="task.title"
-          :description="task.description"
-          @delete="deleteTask(task.id)"
-          @details="viewDetails(task.id)"
+          v-for="risk in filteredTasks"
+          :key="risk.riskId"
+          :projectId="projectId"
+          :projectName="projectName"
+          :title="risk.riskName"
+          :description="risk.description"
+          @delete="deleteTask(risk.riskId)"
+          @details="viewDetails(risk.riskId)"
         />
       </div>
     </div>
@@ -31,9 +33,13 @@
 </template>
 
 <script>
+import axios from 'axios';
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
 import TaskItemComponent from '../risk/TaskItemComponent.vue';
+
+import { useCookies } from '@/src/js/useCookies';
+const { getProjectId, getProjectName,setRiskId } = useCookies();
 
 export default {
   components: {
@@ -43,34 +49,54 @@ export default {
   },
   data() {
     return {
+      projectName: getProjectName(),
       searchQuery: '',
-      tasks: [
-        { id: 1, title: 'Износ, поломка', description: 'Студенты могут разбить дорогой кафель. ...' },
-        { id: 2, title: 'Задержка в работах', description: 'Из-за санкций некоторые материалы ...' },
+      risks: [
+        // { id: 1, title: 'Износ, поломка', description: 'Студенты могут разбить дорогой кафель. ...' },
+        // { id: 2, title: 'Задержка в работах', description: 'Из-за санкций некоторые материалы ...' },
       ],
     };
   },
   computed: {
     filteredTasks() {
-      return this.tasks.filter(task => 
-        task.title.toLowerCase().includes(this.searchQuery.toLowerCase())
+      return this.risks.filter(risk =>
+        risk.riskName.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
   },
   methods: {
     goToAddTask() {
-      this.$router.push({ path: '/add-risk', query: { editing: false } });
+      this.$router.push(`/add_risk`);
     },
-    addTask(newTask) {
-      this.tasks.push(newTask);
+    addTask(newRisk) {
+      this.risks.push(newRisk);
     },
     deleteTask(id) {
-      this.tasks = this.tasks.filter(task => task.id !== id);
+      this.risks = this.risks.filter(risk => risk.id !== id);
     },
-    viewDetails(taskId) {
-      this.$router.push({ path: `/risk-details/${taskId}` });
+    viewDetails(id) {
+      setRiskId(id);
+      console.log("Вызов просмотра риска");
+      this.$router.push(`/risk-details`);
+    },
+    async fetchRisks() {
+      try {
+        const response = await axios.get(`/api/projects/${getProjectId()}/get_risks`);
+        console.log(response.data);
+        this.risks = Object.values(response.data.risks).map(risk => ({
+          riskName: risk.name,
+          description: risk.description,
+          riskId: risk.id,
+        }));
+        console.log(this.risks);
+      } catch (error) {
+        console.error('Ошибка при загрузке проектов:', error);
+      }
     },
   },
+  beforeMount() {
+    this.fetchRisks();
+  }
 };
 </script>
 

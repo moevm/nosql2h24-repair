@@ -1,13 +1,13 @@
 <template>
     <HeaderComponent />
-    <ProjectSidebarComponent />
+    <ProjectSidebarComponent :projectId="projectId" :projectName="nameProject"/>
     <div class="form-container">
       <h2>{{ taskId ? 'Редактировать риск' : 'Новая карточка риска' }}</h2>
       
       <form @submit.prevent="submitForm">
         <div class="form-group">
           <label for="title">Название</label>
-          <input type="text" id="title" v-model="title" required />
+          <input type="text" id="title" v-model="name" required />
         </div>
   
         <div class="form-group">
@@ -16,6 +16,7 @@
         </div>
         
         <button type="submit">Сохранить</button>
+        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
       </form>
     </div>
   </template>
@@ -23,45 +24,50 @@
   <script>
   import HeaderComponent from '../bars/HeaderComponent.vue';
   import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
-
+  import axios from 'axios';
+  import { useCookies } from '@/src/js/useCookies';
+  const { getProjectId } = useCookies();
   export default {
     components: {
         HeaderComponent,
         ProjectSidebarComponent,
     },
-    props: {
-      taskId: {
-        type: Number,
-        default: null,
-      },
-    },
     data() {
       return {
-        title: '',
+        name: '',
         description: '',
+        errorMessage: '',
+        showErrors: false,
       };
     },
-    created() {
-      // Если taskId передан, находим задачу и заполняем форму данными
-      if (this.taskId) {
-        const task = this.$root.$data.tasks.find(task => task.id === this.taskId);
-        if (task) {
-          this.title = task.title;
-          this.description = task.description;
-        }
-      }
-    },
     methods: {
-      submitForm() {
-        const task = {
-          id: this.taskId || Date.now(),
-          title: this.title,
-          description: this.description,
-        };
-        this.$emit(this.taskId ? 'update-task' : 'add-task', task);
-        this.$router.push('/project/risks');
+      async submitForm() {
+        this.showErrors = true;
+          const dataToSend = {
+            name: this.name,
+            description: this.description,
+          };
+          try {
+            const res = await axios.post(`/api/projects/${getProjectId()}/add_risk`, dataToSend, {
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+              withCredentials: true,
+            });
+            console.log(res);
+            alert('Риск успешно создан!');
+            this.$router.push(`/risks`);
+          } catch (error) {
+            console.error("Ошибка сети:", error.message);
+            if (error.response && error.response.data.detail) {
+              this.errorMessage = error.response.data.detail;
+            }
+          }
+
+        }
+
       },
-    },
   };
   </script>
   

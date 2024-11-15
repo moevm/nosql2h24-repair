@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field
@@ -25,8 +25,8 @@ class UserCreateSchema(BaseModel):
 
 class UserBaseSchema(UserCreateSchema):
     id: str
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
+    created_at: datetime | None = datetime.now(timezone.utc)
+    updated_at: datetime | None = datetime.now(timezone.utc)
 
 
 class UserLoginSchema(BaseModel):
@@ -36,3 +36,27 @@ class UserLoginSchema(BaseModel):
 
 class UserDao(UserBaseSchema):
     password: str = Field(min_length=8)
+
+
+class Contact(BaseModel):
+    username: str
+    role: Role = Role.worker
+    created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
+    updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
+
+
+class ContactResponse(Contact):
+    id: str
+
+
+class ContactCreate(BaseModel):
+    user_id: str
+
+
+class Worker(BaseModel):
+    name: str
+    role: Role = Role.worker
+
+
+class WorkerResponse(Worker):
+    id: str

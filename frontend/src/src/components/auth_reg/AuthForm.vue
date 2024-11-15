@@ -79,6 +79,8 @@
 
 <script>
 import axios from 'axios';
+import { useCookies } from '@/src/js/useCookies';
+const { setUserName,setUserId } = useCookies();
 
 export default {
   data() {
@@ -171,9 +173,11 @@ export default {
           withCredentials: true,
         });
         console.log(res);
-        this.$router.push("/main");
         axios.get('/api/auth/me').then(res => {
           console.log(res);
+          setUserName(res.data.lastname + ' ' + res.data.name + ' ' + res.data.middlename);
+          setUserId(res.data.id)
+          this.$router.push("/main");
         })
             .catch(err => {
               console.log(err);
@@ -204,13 +208,16 @@ export default {
       };
 
       try {
-        const res = await axios.post('http://172.18.0.4:8000/api/auth/register', dataToSend, {
+        const res = await axios.post('/api/auth/register', dataToSend, {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
           withCredentials: true,
         });
+        alert("Вы успешно зарегистрировались");
+        this.isRegister = false;
+        this.$router.push("/");
         console.log(res);
         // Дополнительный код для обработки успешной регистрации
       } catch (error) {

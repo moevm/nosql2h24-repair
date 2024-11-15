@@ -46,6 +46,9 @@
 </template>
 
 <script>
+import { useCookies } from '@/src/js/useCookies';
+const { setStageId,setStageName } = useCookies();
+
 export default {
   props: {
     stage: {
@@ -88,8 +91,10 @@ export default {
         this.$emit("delete", this.stage.id);
       }
     },
-    goToTasks() {
-      this.$router.push(`/tasks/${this.stage.id}`);
+    async goToTasks() {
+      setStageId(this.stage.stageId);
+      setStageName(this.stage.name);
+      this.$router.push(`/tasks`);
     },
   },
 };

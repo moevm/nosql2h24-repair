@@ -6,7 +6,7 @@
     <p class="project-dates">Конец: {{ endDate }}</p>
     <div class="project-status">
       Статус
-      <span class="phase">{{ projectPhase }}</span>
+<!--      <span class="phase">{{ projectPhase }}</span>-->
       <span class="status">{{ projectStatus }}</span>
     </div>
     <button class="project-button" @click="goToProject">Страница проекта</button>
@@ -14,6 +14,9 @@
 </template>
 
 <script>
+import { useCookies } from '@/src/js/useCookies';
+const { setProjectId, setProjectName } = useCookies();
+
 export default {
   props: {
     projectName: {
@@ -21,6 +24,10 @@ export default {
       required: true,
     },
     projectLocation: {
+      type: String,
+      required: true,
+    },
+    projectId:{
       type: String,
       required: true,
     },
@@ -44,7 +51,9 @@ export default {
   methods: {
     goToProject() {
       // Логика перехода на страницу проекта
-      this.$router.push(`/project/${this.projectName}`);
+      setProjectId(this.projectId);
+      setProjectName(this.projectName);
+      this.$router.push(`/project`);
     },
   },
 };

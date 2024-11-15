@@ -1,27 +1,28 @@
 <template>
   <div class="main-page">
     <HeaderComponent />
-    <SidebarComponent />
+    <StaticSidebarComponent />
     <main class="content">
       <div class="header-search">
         <h1>Проекты</h1>
         <input
-          type="text"
-          v-model="searchQuery"
-          placeholder="Поиск проекта"
-          class="search-input"
+            type="text"
+            v-model="searchQuery"
+            placeholder="Поиск проекта"
+            class="search-input"
         />
       </div>
       <div class="projects-container">
         <div v-for="(item, index) in filteredItems" :key="index">
           <Project
-            v-if="item.type === 'project'"
-            :projectName="item.name"
-            :projectLocation="item.location"
-            :startDate="item.startDate"
-            :endDate="item.endDate"
-            :projectPhase="item.phase"
-            :projectStatus="item.status"
+              v-if="item.type === 'project'"
+              :projectName="item.name"
+              :project-location="item.projectLocation"
+              :startDate="item.startDate"
+              :endDate="item.endDate"
+              :project-phase="item.projectPhase"
+              :projectStatus="item.status"
+              :projectId="item.projectId"
           />
           <NewProjectButton v-if="item.type === 'newProjectButton'" />
         </div>
@@ -31,15 +32,16 @@
 </template>
 
 <script>
+import axios from 'axios';
 import HeaderComponent from '../components/bars/HeaderComponent.vue';
-import SidebarComponent from '../components/bars/SidebarComponent.vue';
+import StaticSidebarComponent from '../components/bars/StaticSidebarComponent.vue';
 import NewProjectButton from '../components/project/NewProjectButton.vue';
 import Project from '../components/project/ProjectComponent.vue';
 
 export default {
   components: {
     HeaderComponent,
-    SidebarComponent,
+    StaticSidebarComponent,
     NewProjectButton,
     Project,
   },
@@ -50,44 +52,49 @@ export default {
         {
           type: 'newProjectButton',
         },
-        {
-          type: 'project',
-          name: 'Вырастить дерево',
-          location: 'СПбГЭТУ ЛЭТИ',
-          startDate: '2024-01-01',
-          endDate: '2024-06-01',
-          phase: 'Основной этап',
-          status: 'В процессе',
-        },
-        {
-          type: 'project',
-          name: 'Посадить ребенка',
-          location: 'СПбГЭТУ ЛЭТИ',
-          startDate: '2024-02-01',
-          endDate: '2024-07-01',
-          phase: 'Основной этап',
-          status: 'Завершён',
-        },
-        {
-          type: 'project',
-          name: 'Проект 42',
-          location: 'СПбГЭТУ ЛЭТИ',
-          startDate: '2024-03-01',
-          endDate: '2024-08-01',
-          phase: 'Основной этап',
-          status: 'В процессе',
-        },
       ],
     };
   },
   computed: {
     filteredItems() {
       return this.items.filter(item =>
-        item.type === 'newProjectButton' ||
-        (item.type === 'project' && item.name.toLowerCase().includes(this.searchQuery.toLowerCase()))
+          item.type === 'newProjectButton' ||
+          (item.type === 'project' && item.name.toLowerCase().includes(this.searchQuery.toLowerCase()))
       );
     },
   },
+  methods: {
+    async fetchProjects() {
+      try {
+        const response = await axios.get('/api/projects/all');
+        console.log(response.data);
+        this.items = [
+          { type: 'newProjectButton' },
+          ...response.data.map(project => ({
+            type: 'project',
+            name: project.name,
+            startDate: this.formatDate(project.start_date),
+            endDate: this.formatDate(project.end_date),
+            projectPhase: project.status,
+            projectId: project.id,
+          })),
+        ];
+      } catch (error) {
+        console.error('Ошибка при загрузке проектов:', error);
+      }
+    },
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 по 11, поэтому +1
+      const year = date.getFullYear();
+      return `${day}.${month}.${year}`;
+    },
+  },
+  beforeMount() {
+    this.fetchProjects();
+  },
+
 };
 </script>
 

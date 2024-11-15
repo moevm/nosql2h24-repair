@@ -1,12 +1,12 @@
 <template>
   <div class="main-container">
     <HeaderComponent />
-    <ProjectSidebarComponent />
+    <ProjectSidebarComponent/>
 
     <div class="content">
       <div class="purchases-container">
-        <h1>Ремонт кафедры МОЭВМ</h1>
-        <p>Итоговая стоимость: 3,100,000 руб</p>
+        <h1>{{projectName}}</h1>
+<!--        <p>Итоговая стоимость: 3,100,000 руб</p>-->
         
         <div class="search-add-container">
           <input
@@ -36,6 +36,9 @@
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
 import ProcurementsItemComponent from '../material/ProcurementsItemComponent.vue';
+import axios from 'axios';
+import { useCookies } from '@/src/js/useCookies';
+const { getProjectId, getProjectName } = useCookies();
 
 export default {
   components: {
@@ -45,31 +48,52 @@ export default {
   },
   data() {
     return {
+      projectName: getProjectName(),
       searchQuery: '',
-      materials: [
-        { id: 1, name: 'краска бежевая', quantity: 20, unit: 'банка 5 л.', pricePerUnit: 5000, totalCost: 100000, inStock: true },
-        { id: 2, name: 'богемский кафель', quantity: 1500, unit: 'шт', pricePerUnit: 20000, totalCost: 3000000, inStock: false },
-        // Добавьте другие материалы здесь
+      procurements: [
       ],
     };
   },
   computed: {
     filteredMaterials() {
-      return this.materials.filter(material => 
-        material.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+      return this.procurements.filter(procurement =>
+        procurement.name.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
   },
   methods: {
     goToAddMaterial() {
-      this.$router.push({ path: '/add-material' });
+      this.$router.push(`/add_procurement`);
     },
-    viewDetails(materialId) {
-      this.$router.push({ path: `/material-details/${materialId}` });
+    viewDetails() {
+      // this.$router.push({ path: `/material-details/${materialId}` });
     },
     deleteMaterial(materialId) {
       this.materials = this.materials.filter(material => material.id !== materialId);
     },
+    async fetchStageData() {
+      try {
+        const response = await axios.get(`/api/projects/${getProjectId()}/get_procurements`);
+        console.log(response.data);
+        this.procurements = Object.values(response.data.procurements).map(procurement => ({
+          name: procurement.item_name,
+          quantity: procurement.quantity,
+          unit: procurement.units,
+          pricePerUnit: procurement.price,
+          totalCost: procurement.cost,
+          materialId: procurement.id,
+          user: procurement.created_by.username,
+          userRole: procurement.created_by.role,
+          inStock: procurement.inStock,
+        }));
+        console.log(this.procurements);
+      } catch (error) {
+        console.error('Ошибка при загрузке Закупок:', error);
+      }
+    }
+  },
+  beforeMount() {
+    this.fetchStageData();
   },
 };
 </script>

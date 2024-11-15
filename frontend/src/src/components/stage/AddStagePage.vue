@@ -1,108 +1,143 @@
 <template>
-    <div class="add-stage-page">
-      <HeaderComponent />
-      <ProjectSidebarComponent />
-      <div class="main-content">
-        <div class="add-stage-container">
-          <h2>Добавить этап</h2>
-  
-          <div class="add-stage-form">
-            <input
+  <div class="add-stage-page">
+    <HeaderComponent />
+    <ProjectSidebarComponent />
+    <div class="main-content">
+      <div class="add-stage-container">
+        <h2>Добавить этап</h2>
+
+        <div class="add-stage-form">
+          <input
               v-model="newStageName"
+              :class="{'input-error': !newStageName && showErrors}"
               type="text"
               placeholder="Название нового этапа"
               class="stage-name-input"
-            />
-            <input
+          />
+          <input
               v-model="newStageStartDate"
+              :class="{'input-error': !newStageStartDate && showErrors}"
               type="date"
               class="stage-date-input"
-            />
-            <input
+          />
+          <input
               v-model="newStageEndDate"
+              :class="{'input-error': !newStageEndDate && showErrors}"
               type="date"
               class="stage-date-input"
-            />
-            <button @click="addStage">Добавить этап</button>
-          </div>
+          />
+          <button @click="addStage">Добавить этап</button>
+
+          <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
         </div>
       </div>
     </div>
-  </template>
-  
-  <script>
-  import HeaderComponent from '../bars/HeaderComponent.vue';
-  import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
-  
-  export default {
-    components: {
-      HeaderComponent,
-      ProjectSidebarComponent,
-    },
-    data() {
-      return {
-        newStageName: '',
-        newStageStartDate: '',
-        newStageEndDate: '',
-      };
-    },
-    methods: {
-      addStage() {
-        if (this.newStageName && this.newStageStartDate && this.newStageEndDate) {
-          const newStage = {
-            id: Date.now(), // Используем текущее время для уникальности
-            name: this.newStageName,
-            startDate: this.newStageStartDate,
-            endDate: this.newStageEndDate,
-          };
-          
-          // Этап добавляется в родительский компонент
-          this.$router.push({ name: 'stages' }); // Возвращаемся на страницу этапов
-          this.$emit('add-stage', newStage); // Отправляем событие в родительский компонент
-        } else {
-          alert('Пожалуйста, заполните все поля.');
+  </div>
+</template>
+
+<script>
+import HeaderComponent from '../bars/HeaderComponent.vue';
+import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
+import axios from 'axios';
+import { useCookies } from '@/src/js/useCookies';
+const { getProjectId } = useCookies();
+
+export default {
+  components: {
+    HeaderComponent,
+    ProjectSidebarComponent,
+  },
+  data() {
+    return {
+      newStageName: '',
+      newStageStartDate: '',
+      newStageEndDate: '',
+      errorMessage: '',
+      showErrors: false,
+    };
+  },
+  methods: {
+    async addStage() {
+      this.showErrors = true;
+
+      if (this.newStageName && this.newStageStartDate && this.newStageEndDate) {
+        const dataToSend = {
+          name: this.newStageName,
+          start_date: this.formatToDateTime(this.newStageStartDate),
+          end_date: this.formatToDateTime(this.newStageEndDate),
+        };
+        try {
+          const res = await axios.post(`/api/projects/${getProjectId()}/add_stage`, dataToSend, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            withCredentials: true,
+          });
+          console.log(res);
+          alert('Этап успешно создан!');
+          this.$router.push(`/stages`);
+        } catch (error) {
+          console.error("Ошибка сети:", error.message);
+          if (error.response && error.response.data.detail) {
+            this.errorMessage = error.response.data.detail;
+          }
         }
-      },
+      } else {
+        this.errorMessage='Пожалуйста, заполните все поля.';
+      }
     },
-  };
-  </script>
-  
-  <style scoped>
-  .add-stage-page {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-  .main-content {
-    display: flex;
-    margin-left: 150px;
-    padding-top: 60px;
-    width: calc(100% - 150px);
-  }
-  .add-stage-container {
-    flex: 1;
-    padding: 16px;
-  }
-  .add-stage-form {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 16px;
-  }
-  .add-stage-form input {
-    margin-bottom: 8px;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  .add-stage-form button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 8px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  .add-stage-form button:hover {
-    background-color: #45a049;
-  }
-  </style>  
+    formatToDateTime(date) {
+      return `${date}T00:00:00`;
+    },
+  },
+};
+</script>
+
+<style scoped>
+.add-stage-page {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.main-content {
+  display: flex;
+  margin-left: 150px;
+  padding-top: 60px;
+  width: calc(100% - 150px);
+}
+.add-stage-container {
+  flex: 1;
+  padding: 16px;
+}
+.add-stage-form {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+.add-stage-form input {
+  margin-bottom: 8px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.add-stage-form button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.add-stage-form button:hover {
+  background-color: #45a049;
+}
+.input-error {
+  border-color: red;
+}
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}
+</style>

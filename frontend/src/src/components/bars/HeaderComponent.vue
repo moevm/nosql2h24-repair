@@ -14,12 +14,15 @@
       </div>
     </header>
   </template>
-  
+
   <script>
+  import { useCookies } from '@/src/js/useCookies';
+  const { getUserName } = useCookies();
+
   export default {
     data() {
       return {
-        userName: 'Иванов Иван Иванович', // ФИО пользователя
+        userName: getUserName(), // ФИО пользователя
         currentDateTime: new Date().toLocaleString(), // Дата и время, динамически обновляется
       };
     },
@@ -27,19 +30,19 @@
       this.updateDateTime();
     },
     methods: {
-      goToMessages() {
-        // Логика перехода на страницу сообщений
-        this.$router.push('/messages');
-      },
-      updateDateTime() {
-        setInterval(() => {
-          this.currentDateTime = new Date().toLocaleString();
-        }, 1000);
-      }
+        goToMessages() {
+            // Логика перехода на страницу сообщений
+            this.$router.push('/messages');
+        },
+        updateDateTime() {
+            setInterval(() => {
+              this.currentDateTime = new Date().toLocaleString();
+            }, 1000);
+        },
     }
   };
   </script>
-  
+
   <style scoped>
   .header {
     position: fixed;
@@ -52,36 +55,36 @@
     align-items: center;
     background-color: #ebebeb;
     padding: 0 20px;
+    z-index: 1000;
   }
-  
+
   .left-section {
     display: flex;
     align-items: center;
   }
-  
+
   .avatar-icon {
     width: 40px;
     height: 40px;
     border-radius: 50%;
     margin-right: 10px;
   }
-  
+
   .user-info {
     display: flex;
     align-items: center;
   }
-  
+
   .user-name {
     font-size: 16px;
     margin-right: 10px;
   }
-  
+
   .messages-icon {
     cursor: pointer;
   }
-  
+
   .right-section {
     font-size: 14px;
   }
   </style>
-  

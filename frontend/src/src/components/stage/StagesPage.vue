@@ -7,8 +7,8 @@
         <div class="header-container">
           <!-- Контейнер для заголовка -->
           <div class="header-left">
-            <h2>Ремонт кафедры МОЭВМ</h2>
-            <p>СПбГЭТУ "ЛЭТИ"</p>
+            <h2>{{projectName}}</h2>
+<!--            <p>СПбГЭТУ "ЛЭТИ"</p>-->
           </div>
 
           <!-- Контейнер для поля поиска и кнопки -->
@@ -20,7 +20,7 @@
           </div>
         </div>
 
-        <StageComponent
+        <StageComponent :projectId="projectId" :projectName="projectName"
           v-for="stage in filteredStages"
           :key="stage.id"
           :stage="stage"
@@ -37,6 +37,9 @@
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
 import StageComponent from './StageComponent.vue';
+import axios from 'axios';
+import { useCookies } from '@/src/js/useCookies';
+const { getProjectId, getProjectName } = useCookies();
 
 export default {
   components: {
@@ -44,13 +47,12 @@ export default {
     ProjectSidebarComponent,
     StageComponent,
   },
+
   data() {
     return {
+      projectName: getProjectName(),
       search: '',
       stages: [
-        { id: 1, name: "Покрасить", startDate: "2024-12-25", endDate: "2024-12-26" },
-        { id: 2, name: "Вырастить", startDate: "2024-12-02", endDate: "2024-12-25" },
-        { id: 3, name: "Родить", startDate: "2024-12-25", endDate: "2024-12-25" },
       ],
     };
   },
@@ -69,12 +71,37 @@ export default {
     deleteStage(stageId) {
       this.stages = this.stages.filter(stage => stage.id !== stageId);
     },
-    goToTasks(stageId) {
-      this.$router.push(`/tasks-list/${stageId}`);
+    goToTasks() {
+      // this.$router.push(`/tasks-list/${stageId}`);
     },
     goToAddStagePage() {
-      this.$router.push({ name: 'add-stage' });
+      this.$router.push(`/add-stage`);
+      // this.$router.push({ name: 'add-stage' });
     },
+    async fetchStageData() {
+      try {
+        const response = await axios.get(`/api/projects/${getProjectId()}/get_stages`);
+        this.stages = Object.values(response.data.stages).map(stage => ({
+          name: stage.name,
+          startDate: this.formatDate(stage.start_date),
+          endDate: this.formatDate(stage.end_date),
+          stageId: stage.id,
+        }));
+        // console.log(this.stages);
+      } catch (error) {
+        console.error('Ошибка при загрузке Этапов:', error);
+      }
+    },
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 по 11, поэтому +1
+      const year = date.getFullYear();
+      return `${day}.${month}.${year}`;
+    },
+  },
+  beforeMount() {
+    this.fetchStageData();
   },
 };
 </script>

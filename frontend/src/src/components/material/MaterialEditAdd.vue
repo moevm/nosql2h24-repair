@@ -28,8 +28,8 @@
               <label for="stock">В наличии:</label>
               <input type="checkbox" v-model="material.inStock" id="stock" />
             </div>
-            
-            <button type="submit" class="save-button">{{ isEditMode ? 'Сохранить изменения' : 'Добавить материал' }}</button>
+
+            <button type="submit" class="save-button" @click="addProcurement">Сохранить изменения</button>
           </form>
         </div>
       </div>
@@ -39,7 +39,10 @@
   <script>
   import HeaderComponent from '../bars/HeaderComponent.vue';
   import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
-  
+  import axios from 'axios';
+  import { useCookies } from '@/src/js/useCookies';
+  const { getProjectId } = useCookies();
+
   export default {
     components: {
       HeaderComponent,
@@ -57,31 +60,58 @@
         isEditMode: false, // Определяет режим редактирования или добавления
       };
     },
-    created() {
-      const materialId = this.$route.params.id;
-      if (materialId) {
-        this.isEditMode = true;
-        this.material = this.fetchMaterialById(materialId);
-      }
-    },
     methods: {
-      fetchMaterialById(id) {
-        const materials = [
-          { id: 1, name: 'краска бежевая', quantity: 20, unit: 'банка 5 л.', pricePerUnit: 5000, totalCost: 100000, inStock: true },
-          { id: 2, name: 'богемский кафель', quantity: 1500, unit: 'шт', pricePerUnit: 20000, totalCost: 3000000, inStock: false },
-        ];
-        return materials.find(material => material.id === parseInt(id)) || {};
-      },
-      saveMaterial() {
-        if (this.isEditMode) {
-          // Сохраняем изменения (например, обновляем материал в базе данных)
-          console.log('Material updated:', this.material);
+      async addProcurement() {
+        this.showErrors = true;
+
+        if (this.material.name) {
+          const dataToSend = {
+            item_name: this.material.name,
+            quantity: this.material.quantity,
+            price: this.material.pricePerUnit,
+            inStock: this.material.inStock,
+            units: this.material.unit,
+          };
+          console.log(dataToSend);
+          try {
+            const res = await axios.post(`/api/projects/${getProjectId()}/add_procurement`, dataToSend, {
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+              withCredentials: true,
+            });
+            console.log(res);
+            alert('Закупка успешно создана!');
+            this.$router.push(`/procurements`);
+          } catch (error) {
+            console.error("Ошибка сети:", error.message);
+            if (error.response && error.response.data.detail) {
+              this.errorMessage = error.response.data.detail;
+            }
+          }
         } else {
-          // Добавляем новый материал (например, сохраняем в базу данных)
-          console.log('New material added:', this.material);
+          this.errorMessage='Пожалуйста, заполните все поля.';
         }
-        this.$router.push({ path: '/project/procurements' }); // Переход на главную страницу после сохранения
       },
+      // fetchMaterialById(id) {
+      //   const materials = [
+      //     { id: 1, name: 'краска бежевая', quantity: 20, unit: 'банка 5 л.', pricePerUnit: 5000, totalCost: 100000, inStock: true },
+      //     { id: 2, name: 'богемский кафель', quantity: 1500, unit: 'шт', pricePerUnit: 20000, totalCost: 3000000, inStock: false },
+      //   ];
+      //   return materials.find(material => material.id === parseInt(id)) || {};
+      // },
+      // saveMaterial() {
+      //   if (this.isEditMode) {
+      //     // Сохраняем изменения (например, обновляем материал в базе данных)
+      //     console.log('Material updated:', this.material);
+      //   } else {
+
+        //   // Добавляем новый материал (например, сохраняем в базу данных)
+        //   console.log('New material added:', this.material);
+        // }
+        // this.$router.push({ path: '/project/procurements' }); // Переход на главную страницу после сохранения
+    //   },
     },
   };
   </script>
