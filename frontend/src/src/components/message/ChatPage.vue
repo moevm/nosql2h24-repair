@@ -3,8 +3,8 @@
   <SidebarComponent />
   <div class="chat-container">
     <header class="chat-header">
-      <div class="contact-name">{{chatName}}</div>
       <button class="back-button" @click="goBack">Назад</button>
+      <div class="contact-name">{{chatName}}</div>
     </header>
 
     <div class="messages">
@@ -230,6 +230,8 @@ export default {
 }
 
 .contact-name {
+  flex: 1;
+  text-align: center;
   font-size: 1.1em;
 }
 
@@ -241,7 +243,7 @@ export default {
   padding: 5px 10px;
   border-radius: 5px;
   cursor: pointer;
-  margin-left: auto;
+  margin-right: auto;
 }
 
 .messages {
