@@ -4,6 +4,7 @@
   <div class="chat-container">
     <header class="chat-header">
       <div class="contact-name">{{chatName}}</div>
+      <button class="back-button" @click="goBack">Назад</button>
     </header>
 
     <div class="messages">
@@ -174,6 +175,9 @@ export default {
     formatDate(date) {
       const options = { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" };
       return new Date(date).toLocaleString("ru-RU", options);
+    },
+    goBack(){
+    	this.$router.push('/messages');
     }
   },
   beforeMount() {
@@ -206,6 +210,17 @@ export default {
 
 .contact-name {
   font-size: 1.1em;
+}
+
+.back-button {
+  background-color: #7161ef;
+  border: none;
+  color: white;
+  font-size: 1em;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: auto;
 }
 
 .messages {
