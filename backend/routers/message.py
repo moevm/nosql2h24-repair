@@ -6,7 +6,7 @@ from fastapi.params import Depends
 from dao.messager import create_chat, get_chats_by_user_id, get_chat_by_id, get_chat_by_double_id, add_message_to_chat, \
     create_message, get_chat_messages
 from dao.user import find_user_by_id
-from schemas.messager import CreateChatResponse, FirstMessage, ChatResponse, CreateMessage, Message
+from schemas.messager import CreateChatResponse, FirstMessage, ChatResponse, CreateMessage, Message, MessageResponse
 from schemas.user import UserDao
 from utils.token import get_current_user
 
@@ -52,6 +52,17 @@ async def get_chat(chat_id: str, user: UserDao = Depends(get_current_user)):
     return chat
 
 
+@router.get("/check_chat/{user_id}", response_model=ChatResponse | None)
+async def get_chat(user_id: str, user: UserDao = Depends(get_current_user)):
+    if user_id == user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Одинаковые id пользователей"
+        )
+    chat = await get_chat_by_double_id(user_id, user.id)
+    return chat
+
+
 @router.get("/get_messages/{chat_id}", response_model=list[Message])
 async def get_messages(chat_id: str, limit: int = 10, user: UserDao = Depends(get_current_user)):
     messages = await get_chat_messages(chat_id, user.id, limit)
@@ -63,7 +74,7 @@ async def get_messages(chat_id: str, limit: int = 10, user: UserDao = Depends(ge
     return messages
 
 
-@router.post("/create_message", response_model=CreateChatResponse)
+@router.post("/create_message", response_model=MessageResponse)
 async def new_message(message_data: CreateMessage, user: UserDao = Depends(get_current_user)):
     chat_id = await add_message_to_chat(user.id, message_data)
     if chat_id is None:
@@ -72,11 +83,11 @@ async def new_message(message_data: CreateMessage, user: UserDao = Depends(get_c
             detail="Чата не существует"
         )
 
-    message_id = await create_message(user.id, message_data)
-    if message_id is None:
+    message = await create_message(user.id, message_data)
+    if message is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Ошибка при добавлении сообщения"
         )
 
-    return CreateChatResponse(chat_id=chat_id, message_id=message_id)
+    return Message

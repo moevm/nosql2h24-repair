@@ -4,6 +4,7 @@ from typing import Dict, Optional
 
 from pydantic import BaseModel, Field
 
+
 class FirstMessage(BaseModel):
     id_receiver: str = Field(...)
     content: str = Field(...)
@@ -41,15 +42,22 @@ class Chat(BaseModel):
 
 class ChatResponse(Chat):
     id: str
-    
+
+
 class CreateChatResponse(BaseModel):
     chat_id: str
     message_id: str
-    
+
+
 class Message(LastMessage):
     chatId: str
     receiver: str
-    
+
+
+class MessageResponse(Message):
+    id: str
+
+
 class CreateMessage(BaseModel):
     chatId: str
     receiver: str

@@ -4,7 +4,7 @@ from fastapi.params import Depends
 
 from database import db
 from schemas.messager import Participant, LastMessage, Chat, Message, CreateChatResponse, ChatResponse, CreateMessage, \
-    StatusMsg
+    StatusMsg, MessageResponse
 from schemas.user import UserDao
 
 
@@ -152,7 +152,7 @@ async def add_message_to_chat(user_id: str, message_data: CreateMessage) -> str 
     return str(result["_id"])
 
 
-async def create_message(user_id: str, message_data: CreateMessage):
+async def create_message(user_id: str, message_data: CreateMessage) -> MessageResponse | None:
     message_collection = db.get_collection('message')
 
     message = Message(
@@ -169,4 +169,4 @@ async def create_message(user_id: str, message_data: CreateMessage):
     if not insert_result.acknowledged:
         return None
 
-    return str(insert_result.inserted_id)
+    return MessageResponse(id=str(insert_result.inserted_id), **message.model_dump())
