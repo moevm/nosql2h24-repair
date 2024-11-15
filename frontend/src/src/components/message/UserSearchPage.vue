@@ -35,7 +35,7 @@ import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
 import { useCookies } from '@/src/js/useCookies';
-const { setReceiverId, setChatName } = useCookies();
+const { setReceiverId, setChatName, setChatId } = useCookies();
 
 
 export default {
@@ -79,6 +79,7 @@ export default {
     goToChat(user) {
       setChatName(`${user.lastname} ${user.name} ${user.middlename}`);
       setReceiverId(user.id);
+      setChatId("");
       this.$router.push(`/chat`);
     },
   },

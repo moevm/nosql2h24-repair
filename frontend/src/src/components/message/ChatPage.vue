@@ -98,21 +98,21 @@ export default {
   methods: {
     async fetchChat() {
       this.chatId = getChatId();
-      try {
-        const response = await axios.get(`/api/message/get_chat/${getChatId()}`);
-        console.log(response.data);
-        this.messages.push({
-          text: response.data.lastMessage.content,
-          date: response.data.lastMessage.timestamp,
-          status: response.data.lastMessage.status,
-          sender: response.data.lastMessage.sender === getUserId() ? "self" : "other"
-        });
-      } catch (error) {
-        console.error('Ошибка при загрузке чата:', error);
+      if(getChatId()){
+        try {
+          const response = await axios.get(`/api/message/get_chat/${getChatId()}`);
+          console.log(response.data);
+          this.messages.push({
+            text: response.data.lastMessage.content,
+            date: response.data.lastMessage.timestamp,
+            status: response.data.lastMessage.status,
+            sender: response.data.lastMessage.sender === getUserId() ? "self" : "other"
+          });
+        } catch (error) {
+          console.error('Ошибка при загрузке чата:', error);
+        }
       }
-    },
-    async sendMessage() {
-      if (this.messages.length === 0 && this.newMessage.trim() !== "") {
+      if (this.messages.length === 0) {
         const dataToSend = {
           id_receiver: getReceiverId(),
           content: this.newMessage
@@ -126,8 +126,16 @@ export default {
             },
             withCredentials: true,
           });
-          // console.log(res);
-          this.chatId = res.data.chat_id;
+          // console.log(res.data.id);
+          if(res.data.id){
+            this.chatId = res.data.id;
+            this.messages.push({
+              text: res.data.lastMessage.content,
+              date: res.data.lastMessage.timestamp,
+              status: res.data.lastMessage.status,
+              sender: res.data.lastMessage.sender === getUserId() ? "self" : "other"
+            });
+          }
         } catch (error) {
           console.error("Ошибка сети:", error.message);
           if (error.response && error.response.data.detail) {
@@ -135,28 +143,28 @@ export default {
           }
         }
       }
-      else{
-        if (this.newMessage.trim() !== "") {
-          const dataToSend = {
-            chatId: this.chatId,
-            receiver: getReceiverId(),
-            content: this.newMessage
-          };
-          console.log(dataToSend);
-          try {
-            const res = await axios.post(`/api/message/create_message`, dataToSend, {
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-              },
-              withCredentials: true,
-            });
-            console.log(res);
-          } catch (error) {
-            console.error("Ошибка сети:", error.message);
-            if (error.response && error.response.data.detail) {
-              this.errorMessage = error.response.data.detail;
-            }
+    },
+    async sendMessage() {
+      if (this.newMessage.trim() !== "") {
+        const dataToSend = {
+          chatId: this.chatId,
+          receiver: getReceiverId(),
+          content: this.newMessage
+        };
+        console.log(dataToSend);
+        try {
+          const res = await axios.post(`/api/message/create_message`, dataToSend, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            withCredentials: true,
+          });
+          console.log(res);
+        } catch (error) {
+          console.error("Ошибка сети:", error.message);
+          if (error.response && error.response.data.detail) {
+            this.errorMessage = error.response.data.detail;
           }
         }
       }
@@ -177,13 +185,11 @@ export default {
       return new Date(date).toLocaleString("ru-RU", options);
     },
     goBack(){
-    	this.$router.push('/messages');
-    }
+      this.$router.push('/messages');
+    },
   },
   beforeMount() {
-    if(getChatId()){
-      this.fetchChat();
-    }
+    this.fetchChat();
   },
 };
 </script>
