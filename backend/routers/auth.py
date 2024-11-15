@@ -35,7 +35,7 @@ async def get_users() -> dict[str, List[UserBaseSchema]]:
 
 @router.post("/login")
 async def login_user(response: Response, user_data: UserLoginSchema) -> dict:
-    user = await find_user_by_email(user_data.email.lower())
+    user = await find_user_by_email(user_data.email)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
