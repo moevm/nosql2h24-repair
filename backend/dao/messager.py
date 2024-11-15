@@ -9,7 +9,7 @@ from schemas.messager import Participant, LastMessage, Chat, Message, CreateChat
 from schemas.user import UserDao
 
 
-async def create_chat(user_sender: UserDao, user_receiver: UserDao, content: str) -> CreateChatResponse | None:
+async def create_chat(user_sender: UserDao, user_receiver: UserDao, content: str) -> ChatResponse | None:
     chat_collection = db.get_collection('chat')
     message_collection = db.get_collection('message')
 
@@ -47,9 +47,9 @@ async def create_chat(user_sender: UserDao, user_receiver: UserDao, content: str
     if not result_message.acknowledged:
         return None
 
-    return CreateChatResponse(
-        chat_id=str(result_chat.inserted_id),
-        message_id=str(result_message.inserted_id),
+    return ChatResponse(
+        id=str(result_chat.inserted_id),
+        **new_chat.model_dump()
     )
 
 
@@ -64,11 +64,22 @@ async def get_chats_by_user_id(user_id: str) -> list[ChatResponse]:
     return chat_list
 
 
-async def get_chat_by_id(chat_id: str, user_id: str) -> ChatResponse:
+async def get_chat_by_id(chat_id: str, user_id: str) -> ChatResponse | None:
     chat_collection = db.get_collection('chat')
     chat = await chat_collection.find_one({
         '_id': ObjectId(chat_id),
         "participants." + user_id: {"$exists": True}
+        })
+    if chat is None:
+        return None
+    return ChatResponse(id=str(chat["_id"]), **chat)
+
+
+async def get_chat_by_double_id(first_id: str, second_id: str) -> ChatResponse | None:
+    chat_collection = db.get_collection('chat')
+    chat = await chat_collection.find_one({
+        "participants." + first_id: {"$exists": True},
+        "participants." + second_id: {"$exists": True}
         })
     if chat is None:
         return None

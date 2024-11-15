@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, status
 from fastapi.params import Depends
 
-from dao.messager import create_chat, get_chats_by_user_id, get_chat_by_id, add_message_to_chat, create_message
+from dao.messager import create_chat, get_chats_by_user_id, get_chat_by_id, get_chat_by_double_id, add_message_to_chat, create_message
 from dao.user import find_user_by_id
 from schemas.messager import CreateChatResponse, FirstMessage, ChatResponse, CreateMessage
 from schemas.user import UserDao
@@ -12,7 +12,7 @@ from utils.token import get_current_user
 router = APIRouter()
 
 
-@router.post("/create_chat", response_model=CreateChatResponse)
+@router.post("/create_chat", response_model=ChatResponse)
 async def new_chat(first_message: FirstMessage, user: UserDao = Depends(get_current_user)):
     user_receiver = await find_user_by_id(first_message.id_receiver)
     if user_receiver is None:
@@ -20,6 +20,10 @@ async def new_chat(first_message: FirstMessage, user: UserDao = Depends(get_curr
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Получатель не найден"
         )
+
+    existing_chat = await get_chat_by_double_id(user.id, user_receiver.id)
+    if existing_chat:
+        return existing_chat
 
     chat = await create_chat(user, user_receiver, first_message.content)
     if chat is None:
