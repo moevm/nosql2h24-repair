@@ -1,5 +1,6 @@
 <template>
     <aside class="sidebar">
+      <button v-if="!isMainPage" @click="goToMain" class="to-main-button">На основную</button>
       <div class="menu-item" @click="logOut">
         <img src="@/assets/icons/logout.png" alt="Logout Icon" class="logout-icon">
       </div>
@@ -13,7 +14,15 @@
   };
   import axios from 'axios';
   export default {
+    computed: {
+      isMainPage() {
+        return this.$route.path === '/main';
+      },
+    },
     methods: {
+      goToMain() {
+        this.$router.push('/main');
+      },
       async logOut() {
         // Логика выхода на страницу авторизации
         try {
@@ -39,28 +48,29 @@
   
   <style scoped>
   .sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 90vh;
     width: 100px;
-    height: 100vh;
     position: fixed;
     top: 60px;
     left: 0;
     background-color: #f4f4f4;
     padding: 20px;
+    text-align: center;
   }
   
   .menu-item {
     cursor: pointer;
+    margin-top: auto;
     padding: 10px 0;
     font-size: 16px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     flex-direction: column; /* Размещает элементы в столбец */
-    align-items: center; /* Центрирует элементы по горизонтали */
     cursor: pointer;
   }
 
   .logout-item {
+    text-align: center;
     margin-top: auto; /* Перемещает элемент вниз */
   }
-  </style>  
+  </style>
