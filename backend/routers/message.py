@@ -90,4 +90,4 @@ async def new_message(message_data: CreateMessage, user: UserDao = Depends(get_c
             detail="Ошибка при добавлении сообщения"
         )
 
-    return Message
+    return message
