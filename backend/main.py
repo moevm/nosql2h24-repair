@@ -4,15 +4,16 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from database import db
+from database import db, create_indexation
+from init_users import create_users
 from routers import auth, user, project, task, message
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.database = db
-    
-    # await collection.create_index("stages.tasks.workers.user_id")
+    await create_indexation()
+    await create_users()
     yield 
 
 
