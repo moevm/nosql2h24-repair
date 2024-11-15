@@ -222,6 +222,7 @@ export default {
 }
 
 .chat-header {
+  display: flex;
   padding: 10px;
   background-color: #e9e9e9;
   text-align: center;
