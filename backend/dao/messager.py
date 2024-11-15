@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
-
 from bson import ObjectId
-from dns.opcode import STATUS
+from fastapi.params import Depends
 
 from database import db
 from schemas.messager import Participant, LastMessage, Chat, Message, CreateChatResponse, ChatResponse, CreateMessage, \
@@ -69,10 +68,38 @@ async def get_chat_by_id(chat_id: str, user_id: str) -> ChatResponse | None:
     chat = await chat_collection.find_one({
         '_id': ObjectId(chat_id),
         "participants." + user_id: {"$exists": True}
-        })
+    })
     if chat is None:
         return None
     return ChatResponse(id=str(chat["_id"]), **chat)
+
+
+async def get_chat_messages(chat_id: str, user_id: str, limit: int = 10) -> list[Message] | list[None] | None:
+    chat = await get_chat_by_id(chat_id, user_id)
+    if chat is None:
+        return None
+    message_collection = db.get_collection('message')
+
+    try:
+        # Запрос для получения последних сообщений
+        cursor = message_collection.find(
+            {"chatId": chat_id}
+        ).sort("timestamp", 1).limit(limit)
+
+        # Извлечение сообщений и их сортировка от старого к новому
+        messages = await cursor.to_list(length=limit)
+
+        # Преобразуем в список объектов MessageResponse
+        return [
+            Message(
+                id=str(msg["_id"]),
+                **msg
+            )
+            for msg in messages
+        ]
+    except Exception as e:
+        print(f"Ошибка при получении сообщений: {e}")
+        return None
 
 
 async def get_chat_by_double_id(first_id: str, second_id: str) -> ChatResponse | None:
@@ -80,7 +107,7 @@ async def get_chat_by_double_id(first_id: str, second_id: str) -> ChatResponse |
     chat = await chat_collection.find_one({
         "participants." + first_id: {"$exists": True},
         "participants." + second_id: {"$exists": True}
-        })
+    })
     if chat is None:
         return None
     return ChatResponse(id=str(chat["_id"]), **chat)
@@ -98,7 +125,7 @@ async def add_message_to_chat(user_id: str, message_data: CreateMessage) -> str 
             ]
         },
     )
-    
+
     if chat is None:
         return None
 
