@@ -10,7 +10,6 @@
         </div>
       </div>
       <div class="right-section">
-        <button v-if="!isMainPage" @click="goToMain" class="to-main-button">На основную</button>
         <p class="date-time">{{ currentDateTime }}</p>
       </div>
     </header>
@@ -30,18 +29,10 @@
     created() {
       this.updateDateTime();
     },
-    computed: {
-        isMainPage() {
-            return this.$route.path === '/main';
-        },
-    },
     methods: {
         goToMessages() {
             // Логика перехода на страницу сообщений
             this.$router.push('/messages');
-        },
-        goToMain() {
-            this.$router.push('/main');
         },
         updateDateTime() {
             setInterval(() => {
