@@ -50,6 +50,7 @@ export default {
       chatName: getChatName(),
       chatId: '',
       newMessage: '',
+      errorMessage: '',
       messages: [
         /*{
           text: "Как обстоят дела с ремонтом, когда завершите?",
@@ -98,86 +99,99 @@ export default {
   methods: {
     async fetchChat() {
       this.chatId = getChatId();
-      if(getChatId()){
+      if(!this.chatId){
         try {
-          const response = await axios.get(`/api/message/get_chat/${getChatId()}`);
-          console.log(response.data);
-          this.messages.push({
-            text: response.data.lastMessage.content,
-            date: response.data.lastMessage.timestamp,
-            status: response.data.lastMessage.status,
-            sender: response.data.lastMessage.sender === getUserId() ? "self" : "other"
-          });
+          const response = await axios.get(`/api/message/check_chat/${getReceiverId()}`);
+          if(response.data){
+            this.chatId = response.data.id;
+          }
         } catch (error) {
+          this.errorMessage = error;
           console.error('Ошибка при загрузке чата:', error);
         }
       }
-      if (this.messages.length === 0) {
-        const dataToSend = {
-          id_receiver: getReceiverId(),
-          content: this.newMessage
-        };
-        // console.log(this.messages.length);
+      if(this.chatId) {
         try {
-          const res = await axios.post(`/api/message/create_chat`, dataToSend, {
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            withCredentials: true,
-          });
-          // console.log(res.data.id);
-          if(res.data.id){
-            this.chatId = res.data.id;
-            this.messages.push({
-              text: res.data.lastMessage.content,
-              date: res.data.lastMessage.timestamp,
-              status: res.data.lastMessage.status,
-              sender: res.data.lastMessage.sender === getUserId() ? "self" : "other"
-            });
-          }
+          const response = await axios.get(`/api/message/get_messages/${this.chatId}`);
+          console.log(response.data);
+          this.messages = Object.values(response.data).map(message => ({
+            text: message.content,
+              date: message.timestamp,
+              status: message.status,
+              sender: message.sender === getUserId() ? "self" : "other"
+          }));
         } catch (error) {
-          console.error("Ошибка сети:", error.message);
-          if (error.response && error.response.data.detail) {
-            this.errorMessage = error.response.data.detail;
-          }
+          this.errorMessage = error;
+          console.error('Ошибка при загрузке чата:', error);
         }
       }
     },
     async sendMessage() {
-      if (this.newMessage.trim() !== "") {
-        const dataToSend = {
-          chatId: this.chatId,
-          receiver: getReceiverId(),
-          content: this.newMessage
-        };
-        console.log(dataToSend);
-        try {
-          const res = await axios.post(`/api/message/create_message`, dataToSend, {
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            withCredentials: true,
-          });
-          console.log(res);
-        } catch (error) {
-          console.error("Ошибка сети:", error.message);
-          if (error.response && error.response.data.detail) {
-            this.errorMessage = error.response.data.detail;
+      if(!this.chatId){
+        if (this.messages.length === 0) {
+          const dataToSend = {
+            id_receiver: getReceiverId(),
+            content: this.newMessage
+          };
+          // console.log(this.messages.length);
+          try {
+            const res = await axios.post(`/api/message/create_chat`, dataToSend, {
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+              withCredentials: true,
+            });
+            // console.log(res.data.id);
+            if(res.data.id){
+              this.chatId = res.data.id;
+              this.messages.push({
+                text: res.data.lastMessage.content,
+                date: res.data.lastMessage.timestamp,
+                status: res.data.lastMessage.status,
+                sender: res.data.lastMessage.sender === getUserId() ? "self" : "other"
+              });
+            }
+          } catch (error) {
+            this.errorMessage = error;
+            console.error("Ошибка сети:", error.message);
+            if (error.response && error.response.data.detail) {
+              this.errorMessage = error.response.data.detail;
+            }
           }
         }
       }
-      if (this.newMessage.trim() !== "") {
-        // Добавляем новое сообщение в массив messages
-        this.messages.push({
-          text: this.newMessage,
-          date: new Date(),
-          sender: "self",
-          status: "unread"
-        });
-        this.newMessage = "";
-
+      else{
+        if (this.newMessage.trim() !== "") {
+          const dataToSend = {
+            chatId: this.chatId,
+            receiver: getReceiverId(),
+            content: this.newMessage
+          };
+          // console.log(dataToSend);
+          try {
+            const res = await axios.post(`/api/message/create_message`, dataToSend, {
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+              withCredentials: true,
+            });
+            this.messages.push({
+              text: res.data.content,
+              date: res.data.timestamp,
+              sender: res.data.sender === getUserId() ? "self" : "other",
+              status: res.data.status,
+            });
+            this.newMessage = "";
+          } catch (error) {
+            this.errorMessage = error;
+            console.error("Ошибка сети:", error.message);
+            if (error.response && error.response.data.detail) {
+              this.errorMessage = error.response.data.detail;
+            }
+          }
+        }
       }
     },
     formatDate(date) {
