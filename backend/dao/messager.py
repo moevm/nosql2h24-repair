@@ -81,15 +81,13 @@ async def get_chat_messages(chat_id: str, user_id: str, limit: int = 10) -> list
     message_collection = db.get_collection('message')
 
     try:
-        # Запрос для получения последних сообщений
         cursor = message_collection.find(
             {"chatId": chat_id}
-        ).sort("timestamp", 1).limit(limit)
+        ).sort("timestamp", -1).limit(limit)
 
-        # Извлечение сообщений и их сортировка от старого к новому
         messages = await cursor.to_list(length=limit)
+        messages.reverse()
 
-        # Преобразуем в список объектов MessageResponse
         return [
             Message(
                 id=str(msg["_id"]),
