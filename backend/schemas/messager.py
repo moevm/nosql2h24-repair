@@ -4,6 +4,8 @@ from typing import Dict, Optional
 
 from pydantic import BaseModel, Field
 
+from schemas.utils import get_date_now
+
 
 class FirstMessage(BaseModel):
     id_receiver: str = Field(...)
@@ -12,7 +14,7 @@ class FirstMessage(BaseModel):
 
 class Participant(BaseModel):
     name: str
-    lastSeen: datetime = Field(datetime.now(timezone.utc))
+    lastSeen: datetime = Field(get_date_now())
 
 
 class StatusMsg(str, Enum):
@@ -24,14 +26,14 @@ class LastMessage(BaseModel):
     content: str
     sender: str
     status: StatusMsg = StatusMsg.unread
-    timestamp: Optional[datetime] = Field(datetime.now(timezone.utc))
+    timestamp: Optional[datetime] = Field(get_date_now())
 
 
 class Chat(BaseModel):
     participants: Dict[str, Participant] = {}
     lastMessage: LastMessage
-    created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
+    created_at: Optional[datetime] = Field(get_date_now())
+    updated_at: Optional[datetime] = Field(get_date_now())
 
     class Config:
         from_attributes = True

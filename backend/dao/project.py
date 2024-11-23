@@ -1,12 +1,13 @@
 from bson import ObjectId
 from database import db
-from schemas.project import ProjectCreate, Project, Procurement, Stage, Risk, ProcurementResponse, RiskResponse, \
+from schemas.projectresponse import ProjectCreate, ProjectResponse, Procurement, Stage, Risk, ProcurementResponse, \
+    RiskResponse, \
     StageResponse
 from schemas.user import UserDao, Contact, ContactResponse
 from schemas.utils import object_id_to_str, generate_id
 
 
-async def create_project(project_crate: ProjectCreate, user: UserDao) -> Project:
+async def create_project(project_crate: ProjectCreate, user: UserDao) -> ProjectResponse:
     project_collection = db.get_collection('project')
     contact = Contact(
         username=f'{user.lastname} {user.name} {user.middlename}',
@@ -17,25 +18,36 @@ async def create_project(project_crate: ProjectCreate, user: UserDao) -> Project
     return await get_project_by_id(result.inserted_id)
 
 
-async def get_project_by_id(project_id: str) -> Project | None:
+async def get_project_by_id(project_id: str) -> ProjectResponse | None:
     project_collection = db.get_collection('project')
     project = await project_collection.find_one({'_id': ObjectId(project_id)})
     if project is None:
         return None
     project = object_id_to_str(project)
-    return Project(**project)
+    return ProjectResponse(**project)
 
 
-async def get_project_by_name(project_name: str) -> Project | None:
+async def get_project_by_name(project_name: str) -> ProjectResponse | None:
     project_collection = db.get_collection('project')
     project = await project_collection.find_one({'name': project_name})
     if project is None:
         return None
     project = object_id_to_str(project)
-    return Project(**project)
+    return ProjectResponse(**project)
 
 
-async def get_projects_by_user(user_id: str) -> list[Project] | None:
+async def get_all_projects() -> list[ProjectResponse] | list[None]:
+    project_collection = db.get_collection('project')
+    cursor = project_collection.find()
+    projects_list = await cursor.to_list()
+    result = []
+    for project in projects_list:
+        project = object_id_to_str(project)
+        result.append(ProjectResponse(**project))
+    return result
+
+
+async def get_projects_by_user(user_id: str) -> list[ProjectResponse] | list[None]:
     project_collection = db.get_collection('project')
     cursor = project_collection.find(
         {f"contacts.{user_id}": {"$exists": True}}
@@ -44,11 +56,11 @@ async def get_projects_by_user(user_id: str) -> list[Project] | None:
     result = []
     for project in projects_list:
         project = object_id_to_str(project)
-        result.append(Project(**project))
+        result.append(ProjectResponse(**project))
     return result
 
 
-async def add_contact_to_project(project_id: str, user: UserDao) -> Project | None:
+async def add_contact_to_project(project_id: str, user: UserDao) -> ProjectResponse | None:
     project_collection = db.get_collection('project')
     result = await project_collection.update_one(
         {"_id": ObjectId(project_id)},
@@ -88,7 +100,7 @@ async def get_contact_by_id(project_id: str, contact_id: str) -> ContactResponse
     return ContactResponse(**contact)
 
 
-async def add_procurement_to_project(project_id: str, procurement_create: Procurement) -> Project | None:
+async def add_procurement_to_project(project_id: str, procurement_create: Procurement) -> ProjectResponse | None:
     project_collection = db.get_collection('project')
     procurement = procurement_create.model_dump()
     procurement['quantity'] = str(procurement['quantity'])
@@ -195,7 +207,6 @@ async def get_risks_by_project_id(project_id: str) -> list[RiskResponse] | list[
     elif project is None:
         return None
     return []
-
 
 
 async def get_risk_by_id(project_id: str, risk_id: str) -> RiskResponse | None:

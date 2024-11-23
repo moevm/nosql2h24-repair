@@ -1,5 +1,6 @@
 from dao.user import create_user, find_user_by_email
 from schemas.user import UserCreateSchema, Role
+from utils.password import get_password_hash
 
 
 async def create_users():
@@ -8,7 +9,7 @@ async def create_users():
         lastname='Петров',
         middlename='Александрович',
         email='ivan.petrov@example.com',
-        password='admin123',
+        password=get_password_hash('admin123'),
         role=Role.admin
     )
 
@@ -17,7 +18,7 @@ async def create_users():
         lastname='Смирнова',
         middlename='Ивановна',
         email='maria.smirnova@example.com',
-        password='securepassword1',
+        password=get_password_hash('securepassword1'),
         role=Role.foreman
     )
 
@@ -26,7 +27,7 @@ async def create_users():
         lastname='Кузнецов',
         middlename='Петрович',
         email='dmitry.kuznetsov@example.com',
-        password='securepassword2',
+        password=get_password_hash('securepassword2'),
         role=Role.worker
     )
 
@@ -35,7 +36,7 @@ async def create_users():
         lastname='Сидоров',
         middlename='Леонидович',
         email='alex.sidorov@example.com',
-        password='securepassword3',
+        password=get_password_hash('securepassword3'),
         role=Role.customer
     )
 

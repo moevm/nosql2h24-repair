@@ -5,6 +5,7 @@ from config import settings
 from dao.user import find_all_users, find_user_by_email, create_user, find_user_by_id
 from schemas.user import UserCreateSchema, UserLoginSchema, UserDao, UserBaseSchema
 from utils.password import verify_password, create_access_token, get_password_hash
+from utils.role import get_admin_role
 from utils.token import get_current_user
 
 router = APIRouter()
@@ -14,7 +15,7 @@ SECRET_KEY = settings.JWT_SECRET_KEY
 
 
 @router.post("/register")
-async def register_user(user_data: UserCreateSchema) -> dict:
+async def register_user(user_data: UserCreateSchema, admin: UserDao = Depends(get_admin_role)) -> dict:
     user = await find_user_by_email(user_data.email.lower())
     if user:
         raise HTTPException(
