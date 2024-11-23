@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from database import db, create_indexation
 from init_users import create_users
-from routers import auth, user, project, task, message
+from routers import auth, user, project, task, message, risk, stage, contact, procurement
 
 
 @asynccontextmanager
@@ -14,12 +14,10 @@ async def lifespan(app: FastAPI):
     app.database = db
     await create_indexation()
     await create_users()
-    yield 
+    yield
 
 
 app = FastAPI(lifespan=lifespan)
-
-
 
 allowed_origins = [
     "http://localhost:8080",
@@ -37,6 +35,10 @@ app.add_middleware(
 app.include_router(auth.router, tags=['Auth'], prefix="/api/auth")
 app.include_router(user.router, tags=['User'], prefix="/api/user")
 app.include_router(project.router, tags=['Project'], prefix="/api/projects")
+app.include_router(risk.router, tags=['Risk'], prefix="/api/projects")
+app.include_router(stage.router, tags=['Stage'], prefix="/api/projects")
+app.include_router(contact.router, tags=['Contact'], prefix="/api/projects")
+app.include_router(procurement.router, tags=['Procurement'], prefix="/api/projects")
 app.include_router(task.router, tags=['Task'], prefix="/api/tasks")
 
 app.include_router(message.router, tags=['Message'], prefix="/api/message")
