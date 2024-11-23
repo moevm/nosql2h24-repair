@@ -133,6 +133,7 @@ export default {
             id_receiver: getReceiverId(),
             content: this.newMessage
           };
+          this.newMessage = "";
           // console.log(this.messages.length);
           try {
             const res = await axios.post(`/api/message/create_chat`, dataToSend, {
@@ -168,6 +169,7 @@ export default {
             receiver: getReceiverId(),
             content: this.newMessage
           };
+          this.newMessage = "";
           // console.log(dataToSend);
           try {
             const res = await axios.post(`/api/message/create_message`, dataToSend, {
@@ -183,7 +185,6 @@ export default {
               sender: res.data.sender === getUserId() ? "self" : "other",
               status: res.data.status,
             });
-            this.newMessage = "";
           } catch (error) {
             this.errorMessage = error;
             console.error("Ошибка сети:", error.message);

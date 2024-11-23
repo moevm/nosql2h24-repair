@@ -7,7 +7,7 @@
     <div class="project-status">
       Статус
 <!--      <span class="phase">{{ projectPhase }}</span>-->
-      <span class="status">{{ projectStatus }}</span>
+      <span class="status">{{ projectPhase }}</span>
     </div>
     <button class="project-button" @click="goToProject">Страница проекта</button>
   </div>
