@@ -3,13 +3,14 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from dao.project import add_risk_to_project, get_risks_by_project_id, get_risk_by_id
 from schemas.projectresponse import ProjectResponse, Risk, RiskResponse
 from schemas.user import UserDao
+from utils.role import get_foreman_role
 from utils.token import get_current_user
 
 
 router = APIRouter()
 
 @router.post("/{project_id}/add_risk", response_model=dict[str, ProjectResponse | None])
-async def add_stage(project_id: str, risk_data: Risk, user: UserDao = Depends(get_current_user)):
+async def add_stage(project_id: str, risk_data: Risk, foreman: UserDao = Depends(get_foreman_role)):
     project = await add_risk_to_project(project_id, risk_data)
     if project is None:
         raise HTTPException(

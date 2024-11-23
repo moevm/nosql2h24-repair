@@ -3,13 +3,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from dao.project import add_stage_to_project, get_stages_by_project_id, get_stage_by_id
 from schemas.projectresponse import ProjectResponse, Stage, StageResponse
 from schemas.user import UserDao
+from utils.role import get_foreman_role
 from utils.token import get_current_user
 
 router = APIRouter()
 
 
 @router.post("/{project_id}/add_stage", response_model=dict[str, ProjectResponse | None])
-async def add_stage(project_id: str, stage_data: Stage, user: UserDao = Depends(get_current_user)):
+async def add_stage(project_id: str, stage_data: Stage, foreman: UserDao = Depends(get_foreman_role)):
     project = await add_stage_to_project(project_id, stage_data)
     if project is None:
         raise HTTPException(

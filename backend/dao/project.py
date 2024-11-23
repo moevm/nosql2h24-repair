@@ -1,6 +1,7 @@
 from bson import ObjectId
 from database import db
-from schemas.projectresponse import ProjectCreate, ProjectResponse, Procurement, Stage, Risk, ProcurementResponse, RiskResponse, \
+from schemas.projectresponse import ProjectCreate, ProjectResponse, Procurement, Stage, Risk, ProcurementResponse, \
+    RiskResponse, \
     StageResponse
 from schemas.user import UserDao, Contact, ContactResponse
 from schemas.utils import object_id_to_str, generate_id
@@ -35,7 +36,18 @@ async def get_project_by_name(project_name: str) -> ProjectResponse | None:
     return ProjectResponse(**project)
 
 
-async def get_projects_by_user(user_id: str) -> list[ProjectResponse] | None:
+async def get_all_projects() -> list[ProjectResponse] | list[None]:
+    project_collection = db.get_collection('project')
+    cursor = project_collection.find()
+    projects_list = await cursor.to_list()
+    result = []
+    for project in projects_list:
+        project = object_id_to_str(project)
+        result.append(ProjectResponse(**project))
+    return result
+
+
+async def get_projects_by_user(user_id: str) -> list[ProjectResponse] | list[None]:
     project_collection = db.get_collection('project')
     cursor = project_collection.find(
         {f"contacts.{user_id}": {"$exists": True}}
@@ -195,7 +207,6 @@ async def get_risks_by_project_id(project_id: str) -> list[RiskResponse] | list[
     elif project is None:
         return None
     return []
-
 
 
 async def get_risk_by_id(project_id: str, risk_id: str) -> RiskResponse | None:

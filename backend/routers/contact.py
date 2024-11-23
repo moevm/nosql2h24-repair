@@ -4,13 +4,14 @@ from dao.project import add_contact_to_project, get_contacts_by_project_id
 from dao.user import find_user_by_id
 from schemas.projectresponse import ProjectResponse
 from schemas.user import UserDao, ContactCreate, ContactResponse
+from utils.role import get_foreman_role
 from utils.token import get_current_user
 
 router = APIRouter()
 
 
 @router.post("/{project_id}/add_contact", response_model=dict[str, ProjectResponse | None])
-async def add_contact(project_id: str, contact_data: ContactCreate, user: UserDao = Depends(get_current_user)):
+async def add_contact(project_id: str, contact_data: ContactCreate, foreman: UserDao = Depends(get_foreman_role)):
     user_to_add = await find_user_by_id(contact_data.user_id)
     if not user_to_add:
         raise HTTPException(

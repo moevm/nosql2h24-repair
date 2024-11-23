@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from schemas.projectresponse import ProjectResponse, ProjectCreate
-from schemas.user import UserDao
+from schemas.user import UserDao, Role
 from utils.role import get_customer_role
 from utils.token import get_current_user
-from dao.project import get_project_by_id, create_project, get_project_by_name, get_projects_by_user
+from dao.project import get_project_by_id, create_project, get_project_by_name, get_projects_by_user, get_all_projects
 
 router = APIRouter()
 
@@ -29,4 +29,6 @@ async def create(project_data: ProjectCreate, customer: UserDao = Depends(get_cu
 
 @router.get("/all", response_model=list[ProjectResponse])
 async def get_all(user: UserDao = Depends(get_current_user)):
+    if user.role == Role.admin:
+        return await get_all_projects()
     return await get_projects_by_user(user.id)
