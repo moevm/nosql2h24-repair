@@ -10,15 +10,10 @@
 
           <!-- Описание проекта -->
           <div v-if="isEditing">
-            <div
-              class="edit-description"
-              contenteditable="true"
-              v-html="editedDescription"
-              @input="updateDescription">
-            </div>
-            <button @click="saveDescription" class="save-button">Сохранить</button>
-            <button @click="cancelEdit" class="cancel-button">Отмена</button>
-          </div>
+              <textarea class="edit-description" v-model="editedDescription"></textarea>
+              <button @click="saveDescription" class="save-button">Сохранить</button>
+              <button @click="cancelEdit" class="cancel-button">Отмена</button>
+          </div> 
           <div v-else>
             <p>{{ description }}</p>
             <button @click="editDescription" class="edit-button">Редактировать описание</button>
