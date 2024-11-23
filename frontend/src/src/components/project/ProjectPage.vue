@@ -6,17 +6,27 @@
       <div class="main-content">
         <div class="project-description">
           <h2> {{ nameProject }}</h2>
-<!--          <p>СПбГЭТУ "ЛЭТИ"</p>-->
 
           <!-- Описание проекта -->
           <div v-if="isEditing">
               <textarea class="edit-description" v-model="editedDescription"></textarea>
-              <button @click="saveDescription" class="save-button">Сохранить</button>
-              <button @click="cancelEdit" class="cancel-button">Отмена</button>
-          </div> 
+              <label for="status" class="status-label">Статус:</label>
+              <select v-model="editedStatus" class="status-select">
+                <option value="В процессе">В процессе</option>
+                <option value="Готово">Готово</option>
+                <option value="Новый">Новый</option>
+                <option value="Опоздание">Опоздание</option>
+                <option value="Нет статуса">Нет статуса</option>
+              </select>
+              <div class="edit-buttons">
+                <button @click="saveChanges" class="save-button">Сохранить</button>
+                <button @click="cancelEdit" class="cancel-button">Отмена</button>
+              </div>
+          </div>
           <div v-else>
             <p>{{ description }}</p>
-            <button @click="editDescription" class="edit-button">Редактировать описание</button>
+            <p class="status-text">Статус: <span class="status-value">{{ status }}</span></p>
+            <button @click="editProject" class="edit-button">Редактировать</button>
           </div>
 
         </div>
@@ -55,11 +65,11 @@ export default {
       description: '',
       dateStart:'',
       dateEnd:'',
-      contacts:[
-
-      ],
+      contacts:[],
       isEditing: false,
-      editedDescription: ''
+      editedDescription: '',
+      status: '',
+      editedStatus: ''
     };
   },
   created() {
@@ -67,19 +77,18 @@ export default {
     console.log(this.nameProject)
   },
   methods: {
-    editDescription() {
+    editProject() {
       this.isEditing = true;
       this.editedDescription = this.description;
+      this.editedStatus = this.status;
     },
-    saveDescription() {
+    saveChanges() {
       this.description = this.editedDescription;
+      this.status = this.editedStatus;
       this.isEditing = false;
     },
     cancelEdit() {
       this.isEditing = false;
-    },
-    updateDescription(event) {
-      this.editedDescription = event.target.innerHTML;
     },
     async fetchProjectData() {
       try {
@@ -88,6 +97,7 @@ export default {
         this.description = response.data.project.description;
         this.dateStart = this.formatDate(response.data.project.created_at);
         this.dateEnd = this.formatDate(response.data.project.end_date);
+        this.status = response.data.project.status || 'Нет статуса';
         this.contacts = Object.values(response.data.project.contacts).map(contact => ({
           userName: contact.username,
           role: contact.role,
@@ -143,7 +153,6 @@ export default {
   box-sizing: border-box;
 }
 
-
 .edit-button, .save-button, .cancel-button {
   margin-top: 10px;
   padding: 5px 10px;
@@ -173,5 +182,39 @@ export default {
 
 .contacts {
   flex: 1;
+}
+
+.edit-buttons {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.status-label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.status-select {
+  width: 100%;
+  padding: 8px;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 5px;
+}
+
+.status-text {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.status-value {
+  display: inline-block;
+  padding: 5px 10px;
+  border: 2px solid;
+  border-radius: 4px;
+  background-color: #f0f0f0;
 }
 </style>
