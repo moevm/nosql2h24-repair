@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from dao.user import find_user_by_id
-from schemas.project import Project, ProjectCreate, Procurement, Stage, Risk, ProcurementResponse, RiskResponse, \
+from schemas.projectresponse import ProjectResponse, ProjectCreate, Procurement, Stage, Risk, ProcurementResponse, RiskResponse, \
     StageResponse
 from schemas.user import UserDao, ContactCreate, Contact, ContactResponse
 from utils.token import get_current_user
@@ -13,13 +13,13 @@ from dao.project import get_project_by_id, create_project, get_project_by_name, 
 router = APIRouter()
 
 
-@router.get("/one/{project_id}", response_model=dict[str, Project | None])
+@router.get("/one/{project_id}", response_model=dict[str, ProjectResponse | None])
 async def get_project(project_id: str, user: UserDao = Depends(get_current_user)):
     project = await get_project_by_id(project_id)
     return {"project": project}
 
 
-@router.post("/create", response_model=dict[str, Project | None])
+@router.post("/create", response_model=dict[str, ProjectResponse | None])
 async def create(project_data: ProjectCreate, user: UserDao = Depends(get_current_user)):
     project = await get_project_by_name(project_data.name)
     if project:
@@ -31,12 +31,12 @@ async def create(project_data: ProjectCreate, user: UserDao = Depends(get_curren
     return {"new_project": new_project}
 
 
-@router.get("/all", response_model=list[Project])
+@router.get("/all", response_model=list[ProjectResponse])
 async def get_all(user: UserDao = Depends(get_current_user)):
     return await get_projects_by_user(user.id)
 
 
-@router.post("/{project_id}/add_contact", response_model=dict[str, Project | None])
+@router.post("/{project_id}/add_contact", response_model=dict[str, ProjectResponse | None])
 async def add_contact(project_id: str, contact_data: ContactCreate, user: UserDao = Depends(get_current_user)):
     user_to_add = await find_user_by_id(contact_data.user_id)
     if not user_to_add:
@@ -59,7 +59,7 @@ async def get_contacts(project_id: str, user: UserDao = Depends(get_current_user
     return {"contacts": contacts}
 
 
-@router.post("/{project_id}/add_procurement", response_model=dict[str, Project | None])
+@router.post("/{project_id}/add_procurement", response_model=dict[str, ProjectResponse | None])
 async def add_procurement(project_id: str, procurement_data: Procurement, user: UserDao = Depends(get_current_user)):
     procurement_data.created_by = Contact(
         username=f'{user.lastname} {user.name} {user.middlename}',
@@ -96,7 +96,7 @@ async def get_procurement(project_id: str, procurement_id: str, user: UserDao = 
     return {"procurement": procurement}
 
 
-@router.post("/{project_id}/add_stage", response_model=dict[str, Project | None])
+@router.post("/{project_id}/add_stage", response_model=dict[str, ProjectResponse | None])
 async def add_stage(project_id: str, stage_data: Stage, user: UserDao = Depends(get_current_user)):
     project = await add_stage_to_project(project_id, stage_data)
     if project is None:
@@ -129,7 +129,7 @@ async def get_stage(project_id: str, stage_id: str, user: UserDao = Depends(get_
     return {"stage": stage}
 
 
-@router.post("/{project_id}/add_risk", response_model=dict[str, Project | None])
+@router.post("/{project_id}/add_risk", response_model=dict[str, ProjectResponse | None])
 async def add_stage(project_id: str, risk_data: Risk, user: UserDao = Depends(get_current_user)):
     project = await add_risk_to_project(project_id, risk_data)
     if project is None:

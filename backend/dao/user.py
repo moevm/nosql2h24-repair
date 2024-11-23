@@ -1,8 +1,7 @@
 from bson import ObjectId
-from datetime import datetime, timezone
 from database import db
 from schemas.user import UserCreateSchema, UserDao, UserBaseSchema
-from schemas.utils import object_id_to_str
+from schemas.utils import object_id_to_str, get_date_now
 
 
 async def find_user_by_email(email) -> UserDao | None:
@@ -33,15 +32,10 @@ async def find_all_users() -> list[UserBaseSchema]:
     return users_list
 
 
-async def find_users_by_project(project_id: str) -> list[UserBaseSchema]:
-    users_collection = db.get_collection('user')
-    
-
-
 async def create_user(user: UserCreateSchema):
     users_collection = db.get_collection('user')
     user_dict = user.model_dump()
-    user_dict['created_at'] = datetime.now(timezone.utc)
-    user_dict['updated_at'] = datetime.now(timezone.utc)
+    user_dict['created_at'] = get_date_now()
+    user_dict['updated_at'] = get_date_now()
     result = await users_collection.insert_one(user_dict)
     return str(result.inserted_id)

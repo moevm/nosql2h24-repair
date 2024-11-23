@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timezone
 
 
 def generate_id():
@@ -9,3 +10,7 @@ def object_id_to_str(data) -> dict[str, str]:
     data['id'] = str(data['_id'])
     del data['_id']
     return data
+
+
+def get_date_now() -> datetime:
+    return datetime.now(timezone.utc)

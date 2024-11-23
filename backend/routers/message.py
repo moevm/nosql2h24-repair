@@ -6,7 +6,7 @@ from fastapi.params import Depends
 from dao.messager import create_chat, get_chats_by_user_id, get_chat_by_id, get_chat_by_double_id, add_message_to_chat, \
     create_message, get_chat_messages
 from dao.user import find_user_by_id
-from schemas.messager import CreateChatResponse, FirstMessage, ChatResponse, CreateMessage, Message, MessageResponse
+from schemas.messager import FirstMessage, ChatResponse, CreateMessage, Message, MessageResponse
 from schemas.user import UserDao
 from utils.token import get_current_user
 

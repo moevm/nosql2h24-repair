@@ -45,8 +45,7 @@ async def get_tasks_by_stage_id(project_id: str, stage_id: str) -> list[TaskResp
             f"stages.{stage_id}.tasks": {"$exists": True}
         }
     )
-    
-    stage_tasks = []
+
     if not project or "stages" not in project or stage_id not in project["stages"]:
         return []
 

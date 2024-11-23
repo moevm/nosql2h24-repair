@@ -1,10 +1,10 @@
-from bson import ObjectId
 from fastapi import Request, HTTPException, status, Depends
 from jose import jwt, JWTError
 from datetime import datetime, timezone
 
 from config import settings
 from dao.user import find_user_by_id
+from schemas.utils import get_date_now
 
 
 def get_token(request: Request):
@@ -22,7 +22,7 @@ async def get_current_user(token: str = Depends(get_token)):
 
     expire: str = payload.get('exp')
     expire_time = datetime.fromtimestamp(int(expire), tz=timezone.utc)
-    if (not expire) or (expire_time < datetime.now(timezone.utc)):
+    if (not expire) or (expire_time < get_date_now()):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Токен истек')
 
     user_id = payload.get('sub')

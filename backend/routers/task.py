@@ -1,10 +1,7 @@
-import asyncio
-
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from dao.project import get_contacts_by_project_id
 from dao.task import add_task, get_all_tasks_by_user, get_task_by_id, add_worker_to_task, get_tasks_by_stage_id
-from dao.user import find_user_by_id
 from schemas.task import Task, TaskResponse
 from schemas.user import UserDao, Role, Worker
 from utils.token import get_current_user

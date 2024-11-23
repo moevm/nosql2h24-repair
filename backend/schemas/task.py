@@ -1,11 +1,11 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from enum import Enum
 from typing import Dict, Optional
 
 from pydantic import BaseModel, Field
 
 from schemas.user import Worker
-from schemas.utils import generate_id
+from schemas.utils import generate_id, get_date_now
 
 
 class TaskStatus(str, Enum):
@@ -22,8 +22,8 @@ class Task(BaseModel):
     start_date: Optional[datetime] = Field(None)
     end_date: Optional[datetime] = Field(None)
     workers: Dict[str, Worker] = {}
-    created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
+    created_at: Optional[datetime] = Field(get_date_now())
+    updated_at: Optional[datetime] = Field(get_date_now())
 
     def add_worker(self, worker: Worker):
         self.workers[generate_id()] = worker
