@@ -17,8 +17,7 @@ import TasksListPage from '../components/task/TasksListPage.vue';
 import TaskPage from '../components/task/TaskPage.vue';
 import AddStagePage from '../components/stage/AddStagePage.vue';
 import UserSearchPage from '../components/message/UserSearchPage.vue';
-import AddTaskPage from '../components/task/TaskAddPage.vue';
-import AddContactPage from "@/src/components/message/AddContactPage.vue";
+import StatisticsPage from '../components/statics/StatisticsPage.vue';
 
 const routes = [
   { path: '/', component: LoginPage }, // Начальная страница - страница логина
@@ -26,23 +25,22 @@ const routes = [
   { path: '/register', component: RegisterPage },
   { path: '/main', component: MainPage },
   { path: '/new-project', component: NewProjectPage},
-  { path: '/project', component: ProjectPage},
-  { path: '/stages', component: StagesPage},
-  { path: '/risks', component: RisksPage},
-  { path: '/procurements', component: ProcurementsPage},
+  { path: '/project/:id', component: ProjectPage},
+  { path: '/project/stages', component: StagesPage},
+  { path: '/project/risks', component: RisksPage},
+  { path: '/project/procurements', component: ProcurementsPage},
   { path: '/messages', component: MessagesPage},
-  { path: '/chat', component: ChatPage},
-  { path: '/add_risk', component: RiskFormComponent },
-  { path: '/risk-details/', component: RiskDetails},
+  { path: '/chat/:userId', component: ChatPage},
+  { path: '/add-risk', component: RiskFormComponent },
+  { path: '/risk-details/:taskId', component: RiskDetails},
   { path: '/material/:id', component: MaterialDetail},
-  { path: '/add_procurement', component: MaterialEditAdd},
-  { path: '/add_task', component: AddTaskPage},
-  { path: '/add_contact', component: AddContactPage},
-  // { path: '/add-material', component: MaterialEditAdd},
-  { path: '/tasks', component: TasksListPage, props: true},
-  { path: '/tasks/viewRedactorTask', component: TaskPage, props: true},
+  { path: '/material/edit/:id', component: MaterialEditAdd},
+  { path: '/add-material', component: MaterialEditAdd},
+  { path: '/tasks/:stageId', component: TasksListPage, props: true},
+  { path: '/tasks/:stageId/:taskId', component: TaskPage, props: true},
   { path: '/add-stage', name: 'add-stage', component: AddStagePage },
   { path: '/user-search', component: UserSearchPage },
+  { path: '/statistics', component: StatisticsPage },
 ];
 
 const router = createRouter({
