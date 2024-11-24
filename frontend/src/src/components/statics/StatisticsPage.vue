@@ -1,0 +1,277 @@
+<template>
+    <div class="statistics-page">
+      <HeaderComponent />
+      <SidebarComponent />
+      <div class="content">
+        <h1>Статистика</h1>
+        <div class="main-content">
+          <div class="filters-and-actions">
+            <div class="filters">
+              <div class="filter-item">
+                <label for="statType">Тип статистики</label>
+                <select v-model="selectedStatType" id="statType">
+                  <option value="" disabled>Не выбрано</option>
+                  <option value="risks">Риски</option>
+                  <option value="purchases">Закупки</option>
+                </select>
+              </div>
+  
+              <div class="filter-item">
+                <label>Проекты</label>
+                <div class="dropdown">
+                  <button class="dropdown-button" @click="toggleDropdown">
+                    {{ getSelectedProjectsLabel }}
+                  </button>
+                  <div v-if="isDropdownOpen" class="dropdown-menu">
+                    <div v-for="project in projects" :key="project.id" class="dropdown-item">
+                      <input
+                        type="checkbox"
+                        :id="'project-' + project.id"
+                        :value="project.id"
+                        v-model="selectedProjects"
+                      />
+                      <label :for="'project-' + project.id">{{ project.name }}</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+  
+              <div class="filter-item">
+                <label>Период времени</label>
+                <div class="date-filters">
+                  <label for="startDate">С</label>
+                  <input type="date" id="startDate" v-model="startDate" />
+                  <label for="endDate">До</label>
+                  <input type="date" id="endDate" v-model="endDate" />
+                </div>
+              </div>
+            </div>
+            <button class="apply-button" @click="applyFilters">Применить</button>
+            <div class="database-actions">
+              <button class="action-button" @click="importData">Импортировать</button>
+              <button class="action-button" @click="exportData">Экспортировать</button>
+            </div>
+          </div>
+  
+          <div class="graph" v-if="chartData.length > 0">
+            <BarChart :data="chartData" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>  
+  
+  <script>
+import HeaderComponent from "../bars/HeaderComponent.vue";
+import SidebarComponent from "../bars/SidebarComponent.vue";
+import BarChart from "./BarChart.vue";
+
+export default {
+  components: {
+    HeaderComponent,
+    SidebarComponent,
+    BarChart,
+  },
+  data() {
+    return {
+      selectedStatType: "",
+      selectedProjects: [],
+      startDate: "",
+      endDate: "",
+      isDropdownOpen: false,
+      chartData: [], // Пустой массив для скрытия графика
+      projects: [
+        { id: 1, name: "Проект 1" },
+        { id: 2, name: "Проект 2" },
+        { id: 3, name: "Проект 3" },
+      ],
+    };
+  },
+  computed: {
+    getSelectedProjectsLabel() {
+      if (this.selectedProjects.length === 0) return "Выберите проекты";
+      return `Выбрано (${this.selectedProjects.length})`;
+    },
+  },
+  methods: {
+    toggleDropdown() {
+      this.isDropdownOpen = !this.isDropdownOpen;
+    },
+    applyFilters() {
+      // Проверяем, выбраны ли фильтры, и обновляем график
+      if (this.selectedStatType && this.selectedProjects.length > 0 && this.startDate && this.endDate) {
+        this.chartData = this.getFilteredData();
+      } else {
+        alert("Пожалуйста, выберите все фильтры");
+      }
+    },
+    getFilteredData() {
+      // Заглушка для демонстрации данных
+      return [
+        { label: "Проект 1", value: 5 },
+        { label: "Проект 2", value: 10 },
+        { label: "Проект 3", value: 7 },
+      ];
+    },
+    importData() {
+      alert("Импорт данных");
+    },
+    exportData() {
+      alert("Экспорт данных");
+    },
+  },
+};
+</script>
+
+
+<style scoped>
+.statistics-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  margin-top: 60px;
+  margin-left: 150px;
+  padding: 20px;
+}
+
+.main-content {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.filters-and-actions {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.filter-item label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-button, .filter-item select{
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.filter-item input {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  width: 30%;
+  text-align: left;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 5px;
+  z-index: 10;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+}
+
+.dropdown-item input {
+  margin-right: 10px;
+}
+
+.apply-button {
+  background-color: #5a4a7f;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.apply-button:hover {
+  background-color: #47366a;
+}
+
+.database-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.action-button {
+  background-color: #5a4a7f;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.action-button:hover {
+  background-color: #47366a;
+}
+
+.graph {
+  flex: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.date-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-filters label {
+  margin-right: 5px;
+  font-weight: bold;
+}
+
+.date-filters input {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+</style>
