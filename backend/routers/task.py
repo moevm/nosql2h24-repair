@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from dao.project import get_contacts_by_project_id
-from dao.task import add_task, get_all_tasks_by_user, get_task_by_id, add_worker_to_task, get_tasks_by_stage_id
-from schemas.task import Task, TaskResponse
+from dao.task import add_task, get_all_tasks_by_user, get_task_by_id, add_worker_to_task, get_tasks_by_stage_id, \
+    update_task_by_id
+from schemas.task import Task, TaskResponse, TaskUpdate
 from schemas.user import UserDao, Role, Worker
 from utils.role import get_foreman_role
 from utils.token import get_current_user
@@ -24,6 +25,18 @@ async def create_task(project_id: str, stage_id: str, task_data: Task, foreman: 
 @router.get('/get_task/{project_id}/{stage_id}/{task_id}', response_model=TaskResponse)
 async def get_task(project_id: str, stage_id: str, task_id: str, user: UserDao = Depends(get_current_user)):
     task = await get_task_by_id(project_id, stage_id, task_id)
+    if task is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Задача не найдена'
+        )
+    return task
+
+
+@router.put('/update_task/{project_id}/{stage_id}/{task_id}', response_model=TaskResponse)
+async def update_task(project_id: str, stage_id: str, task_id: str, task_data: TaskUpdate,
+                   user: UserDao = Depends(get_foreman_role)):
+    task = await update_task_by_id(project_id, stage_id, task_id, task_data)
     if task is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

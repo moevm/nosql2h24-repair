@@ -182,6 +182,7 @@ async def update_procurement_by_id(project_id: str, procurement_id: str,
                 f"procurements.{procurement_id}.units": update_data["units"],
                 f"procurements.{procurement_id}.delivery_date": update_data["delivery_date"],
                 f"procurements.{procurement_id}.created_by": update_data["created_by"],
+                f"procurements.{procurement_id}.updated_at": update_data["updated_at"],
             }
         }
     )
@@ -249,6 +250,7 @@ async def update_stage_by_id(project_id: str, stage_id: str, stage_update: Stage
                 f"stages.{stage_id}.name": update_data["name"],
                 f"stages.{stage_id}.start_date": update_data["start_date"],
                 f"stages.{stage_id}.end_date": update_data["end_date"],
+                f"stages.{stage_id}.updated_at": update_data["updated_at"],
             }
         }
     )

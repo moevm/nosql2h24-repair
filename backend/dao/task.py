@@ -1,9 +1,9 @@
 from bson import ObjectId
 
 from database import db
-from schemas.task import Task, TaskResponse
+from schemas.task import Task, TaskResponse, TaskUpdate
 from schemas.user import Worker
-from schemas.utils import generate_id
+from schemas.utils import generate_id, get_date_now
 
 
 async def add_task(project_id: str, stage_id, task_create: Task) -> TaskResponse | None:
@@ -36,6 +36,35 @@ async def get_task_by_id(project_id: str, stage_id: str, task_id: str) -> TaskRe
         task = project["stages"][stage_id]["tasks"][task_id]
         return TaskResponse(id=task_id, **task)
     return None
+
+
+async def update_task_by_id(project_id: str, stage_id: str, task_id: str, task_update: TaskUpdate) -> TaskResponse | None:
+    project_collection = db.get_collection('project')
+
+    update_data = task_update.model_dump()
+    update_data["updated_at"] = get_date_now()
+
+    result = await project_collection.update_one(
+        {
+            "_id": ObjectId(project_id),
+            f"stages.{stage_id}.tasks.{task_id}": {"$exists": True}
+        },
+        {
+            "$set": {
+                f"stages.{stage_id}.tasks.{task_id}.description": update_data["description"],
+                f"stages.{stage_id}.tasks.{task_id}.status": update_data["status"],
+                f"stages.{stage_id}.tasks.{task_id}.start_date": update_data["start_date"],
+                f"stages.{stage_id}.tasks.{task_id}.end_date": update_data["end_date"],
+                f"stages.{stage_id}.tasks.{task_id}.updated_at": update_data["updated_at"],
+            }
+        }
+    )
+
+    if result.modified_count == 0:
+        return None
+
+    return await get_task_by_id(project_id, stage_id, task_id)
+
 
 async def get_tasks_by_stage_id(project_id: str, stage_id: str) -> list[TaskResponse] | list[None]:
     project_collection = db.get_collection('project')

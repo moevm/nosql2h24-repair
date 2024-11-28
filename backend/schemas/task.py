@@ -33,4 +33,11 @@ class Task(BaseModel):
 
 class TaskResponse(Task):
     id: str
+    
+
+class TaskUpdate(BaseModel):
+    description: str
+    status: TaskStatus = TaskStatus.none_status
+    start_date: Optional[datetime] = Field(None)
+    end_date: Optional[datetime] = Field(None)
 
