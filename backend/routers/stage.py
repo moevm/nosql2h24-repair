@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from dao.project import add_stage_to_project, get_stages_by_project_id, get_stage_by_id
-from schemas.project import ProjectResponse, Stage, StageResponse
+from dao.project import add_stage_to_project, get_stages_by_project_id, get_stage_by_id, update_stage_by_id
+from schemas.project import ProjectResponse, Stage, StageResponse, StageUpdate
 from schemas.user import UserDao
 from utils.role import get_foreman_role
 from utils.token import get_current_user
@@ -40,3 +40,16 @@ async def get_stage(project_id: str, stage_id: str, user: UserDao = Depends(get_
             detail='Этап не найден'
         )
     return {"stage": stage}
+
+
+@router.put("/{project_id}/update_stage/{stage_id}", response_model=dict[str, StageResponse | None])
+async def update_stage(project_id: str, stage_id: str, stage_data: StageUpdate,
+                       user: UserDao = Depends(get_foreman_role)):
+    stage = await update_stage_by_id(project_id, stage_id, stage_data)
+    if stage is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Этап не найден'
+        )
+
+    return {"updated_stage": stage}

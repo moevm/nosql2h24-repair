@@ -28,6 +28,12 @@ class StageResponse(Stage):
     id: str
 
 
+class StageUpdate(BaseModel):
+    name: str
+    start_date: datetime
+    end_date: datetime
+
+
 class Risk(BaseModel):
     name: str
     description: str

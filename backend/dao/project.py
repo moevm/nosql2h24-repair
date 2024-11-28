@@ -2,7 +2,7 @@ from bson import ObjectId
 from database import db
 from schemas.project import ProjectCreate, ProjectResponse, Procurement, Stage, Risk, ProcurementResponse, \
     RiskResponse, \
-    StageResponse, ProjectUpdate, RiskUpdate, ProcurementUpdate
+    StageResponse, ProjectUpdate, RiskUpdate, ProcurementUpdate, StageUpdate
 from schemas.user import UserDao, Contact, ContactResponse
 from schemas.utils import object_id_to_str, generate_id, get_date_now
 
@@ -231,6 +231,32 @@ async def get_stage_by_id(project_id: str, stage_id: str) -> StageResponse | Non
         stage = project["stages"][stage_id]
         return StageResponse(id=stage_id, **stage)
     return None
+
+
+async def update_stage_by_id(project_id: str, stage_id: str, stage_update: StageUpdate) -> StageResponse | None:
+    project_collection = db.get_collection('project')
+
+    update_data = stage_update.model_dump()
+    update_data["updated_at"] = get_date_now()
+
+    result = await project_collection.update_one(
+        {
+            "_id": ObjectId(project_id),
+            f"stages.{stage_id}": {"$exists": True}
+        },
+        {
+            "$set": {
+                f"stages.{stage_id}.name": update_data["name"],
+                f"stages.{stage_id}.start_date": update_data["start_date"],
+                f"stages.{stage_id}.end_date": update_data["end_date"],
+            }
+        }
+    )
+
+    if result.modified_count == 0:
+        return None
+
+    return await get_stage_by_id(project_id, stage_id)
 
 
 async def add_risk_to_project(project_id: str, risk_create: Risk):
