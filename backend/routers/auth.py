@@ -1,8 +1,7 @@
-from typing import List
 from fastapi import APIRouter, HTTPException, status, Response, Depends
 
 from config import settings
-from dao.user import find_all_users, find_user_by_email, create_user, find_user_by_id
+from dao.user import find_user_by_email, create_user, find_user_by_id
 from schemas.user import UserCreateSchema, UserLoginSchema, UserDao, UserBaseSchema
 from utils.password import verify_password, create_access_token, get_password_hash
 from utils.role import get_admin_role
@@ -30,7 +29,9 @@ async def login_user(response: Response, user_data: UserLoginSchema) -> dict:
         value=access_token,
         secure=False,
         httponly=True,
-        samesite='lax')
+        samesite='lax',
+        expires=settings.ACCESS_TOKEN_EXPIRES_IN * 60
+    )
     return {'access_token': access_token, 'refresh_token': None}
 
 
