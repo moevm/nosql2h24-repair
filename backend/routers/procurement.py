@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from dao.project import add_procurement_to_project, get_procurements_by_project_id, get_procurement_by_id
-from schemas.projectresponse import ProjectResponse, Procurement, ProcurementResponse
+from dao.project import add_procurement_to_project, get_procurements_by_project_id, get_procurement_by_id, \
+    update_procurement_by_id
+from schemas.project import ProjectResponse, Procurement, ProcurementResponse, ProcurementUpdate
 from schemas.user import Contact, UserDao
 from utils.role import get_foreman_role
 from utils.token import get_current_user
@@ -44,3 +45,21 @@ async def get_procurement(project_id: str, procurement_id: str, user: UserDao = 
             detail='Закупка не найдена'
         )
     return {"procurement": procurement}
+
+
+@router.put("/{project_id}/update_procurement/{procurement_id}", response_model=dict[str, ProcurementResponse | None])
+async def update_procurement(project_id: str, procurement_id: str, procurement_data: ProcurementUpdate,
+                             user: UserDao = Depends(get_foreman_role)):
+    procurement_data.created_by = Contact(
+        username=f'{user.lastname} {user.name} {user.middlename}',
+        role=user.role
+    )
+
+    procurement = await update_procurement_by_id(project_id, procurement_id, procurement_data)
+    if procurement is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Закупка не найдена'
+        )
+
+    return {"updated_procurement": procurement}

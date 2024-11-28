@@ -1,10 +1,10 @@
 from bson import ObjectId
 from database import db
-from schemas.projectresponse import ProjectCreate, ProjectResponse, Procurement, Stage, Risk, ProcurementResponse, \
+from schemas.project import ProjectCreate, ProjectResponse, Procurement, Stage, Risk, ProcurementResponse, \
     RiskResponse, \
-    StageResponse
+    StageResponse, ProjectUpdate, RiskUpdate, ProcurementUpdate
 from schemas.user import UserDao, Contact, ContactResponse
-from schemas.utils import object_id_to_str, generate_id
+from schemas.utils import object_id_to_str, generate_id, get_date_now
 
 
 async def create_project(project_crate: ProjectCreate, user: UserDao) -> ProjectResponse:
@@ -16,6 +16,22 @@ async def create_project(project_crate: ProjectCreate, user: UserDao) -> Project
     project_crate.add_contact(user.id, contact)
     result = await project_collection.insert_one(project_crate.model_dump())
     return await get_project_by_id(result.inserted_id)
+
+
+async def update_project_by_id(project_id: str, project_update: ProjectUpdate) -> ProjectResponse | None:
+    project_collection = db.get_collection('project')
+    update_data = project_update.model_dump()
+    update_data["updated_at"] = get_date_now()
+
+    result = await project_collection.update_one(
+        {"_id": ObjectId(project_id)},
+        {"$set": update_data}
+    )
+
+    if result.modified_count == 0:
+        return None
+
+    return await get_project_by_id(project_id)
 
 
 async def get_project_by_id(project_id: str) -> ProjectResponse | None:
@@ -145,6 +161,37 @@ async def get_procurement_by_id(project_id: str, procurement_id: str) -> Procure
     return None
 
 
+async def update_procurement_by_id(project_id: str, procurement_id: str,
+                                   procurement_update: ProcurementUpdate) -> ProcurementResponse | None:
+    project_collection = db.get_collection('project')
+
+    update_data = procurement_update.model_dump()
+    update_data["updated_at"] = get_date_now()
+
+    result = await project_collection.update_one(
+        {
+            "_id": ObjectId(project_id),
+            f"procurements.{procurement_id}": {"$exists": True}
+        },
+        {
+            "$set": {
+                f"procurements.{procurement_id}.item_name": update_data["item_name"],
+                f"procurements.{procurement_id}.quantity": update_data["quantity"],
+                f"procurements.{procurement_id}.price": update_data["price"],
+                f"procurements.{procurement_id}.inStock": update_data["inStock"],
+                f"procurements.{procurement_id}.units": update_data["units"],
+                f"procurements.{procurement_id}.delivery_date": update_data["delivery_date"],
+                f"procurements.{procurement_id}.created_by": update_data["created_by"],
+            }
+        }
+    )
+
+    if result.modified_count == 0:
+        return None
+
+    return await get_procurement_by_id(project_id, procurement_id)
+
+
 async def add_stage_to_project(project_id: str, stage_create: Stage):
     project_collection = db.get_collection('project')
     result = await project_collection.update_one(
@@ -222,6 +269,32 @@ async def get_risk_by_id(project_id: str, risk_id: str) -> RiskResponse | None:
     )
 
     if project:
-        stage = project["risks"][risk_id]
-        return RiskResponse(id=risk_id, **stage)
+        risk = project["risks"][risk_id]
+        return RiskResponse(id=risk_id, **risk)
     return None
+
+
+async def update_risk_by_id(project_id: str, risk_id: str, risk_update: RiskUpdate) -> RiskResponse | None:
+    project_collection = db.get_collection('project')
+
+    update_data = risk_update.model_dump()
+    update_data["updated_at"] = get_date_now()
+
+    result = await project_collection.update_one(
+        {
+            "_id": ObjectId(project_id),
+            f"risks.{risk_id}": {"$exists": True}
+        },
+        {
+            "$set": {
+                f"risks.{risk_id}.name": update_data["name"],
+                f"risks.{risk_id}.description": update_data["description"],
+                f"risks.{risk_id}.updated_at": update_data["updated_at"]
+            }
+        }
+    )
+
+    if result.modified_count == 0:
+        return None
+
+    return await get_risk_by_id(project_id, risk_id)

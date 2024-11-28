@@ -42,6 +42,11 @@ class RiskResponse(Risk):
     id: str
 
 
+class RiskUpdate(BaseModel):
+    name: str
+    description: str
+
+
 class Procurement(BaseModel):
     item_name: str
     quantity: int
@@ -62,6 +67,16 @@ class ProcurementResponse(Procurement):
     def calculate_cost(self):
         self.cost = self.quantity * self.price
         return self
+
+
+class ProcurementUpdate(BaseModel):
+    item_name: str
+    quantity: int
+    price: float
+    inStock: Optional[bool] = Field(False)
+    units: Optional[str] = Field(None)
+    delivery_date: Optional[datetime] = Field(None)
+    created_by: Optional[Contact] = Field(None)
 
 
 class ProjectStatus(str, Enum):
@@ -103,3 +118,10 @@ class ProjectCreate(BaseModel):
 
 class ProjectResponse(ProjectCreate):
     id: str
+
+
+class ProjectUpdate(BaseModel):
+    description: Optional[str] = Field(None)
+    status: ProjectStatus
+    start_date: Optional[datetime] = Field(None)
+    end_date: Optional[datetime] = Field(None)

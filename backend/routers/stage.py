@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from dao.project import add_stage_to_project, get_stages_by_project_id, get_stage_by_id
-from schemas.projectresponse import ProjectResponse, Stage, StageResponse
+from schemas.project import ProjectResponse, Stage, StageResponse
 from schemas.user import UserDao
 from utils.role import get_foreman_role
 from utils.token import get_current_user

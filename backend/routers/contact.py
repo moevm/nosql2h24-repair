@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from dao.project import add_contact_to_project, get_contacts_by_project_id
 from dao.user import find_user_by_id
-from schemas.projectresponse import ProjectResponse
+from schemas.project import ProjectResponse
 from schemas.user import UserDao, ContactCreate, ContactResponse
 from utils.role import get_foreman_role
 from utils.token import get_current_user
