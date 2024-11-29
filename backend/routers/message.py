@@ -1,7 +1,9 @@
-from typing import List
+import asyncio
+from typing import List, Dict
 
 from fastapi import APIRouter, HTTPException, status
 from fastapi.params import Depends
+from starlette.websockets import WebSocket, WebSocketDisconnect
 
 from dao.messager import create_chat, get_chats_by_user_id, get_chat_by_id, get_chat_by_double_id, add_message_to_chat, \
     create_message, get_chat_messages
@@ -11,6 +13,8 @@ from schemas.user import UserDao
 from utils.token import get_current_user
 
 router = APIRouter()
+
+active_connections: Dict[str, WebSocket] = {}
 
 
 @router.post("/create_chat", response_model=ChatResponse)
@@ -89,5 +93,26 @@ async def new_message(message_data: CreateMessage, user: UserDao = Depends(get_c
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Ошибка при добавлении сообщения"
         )
+    
+    await notify_user(user.id, message_data.model_dump())
+    await notify_user(message_data.receiver, message_data.model_dump())
 
     return message
+
+
+async def notify_user(user_id: str, message: dict):
+    if user_id in active_connections:
+        websocket = active_connections[user_id]
+        await websocket.send_json(message)
+
+
+@router.websocket("/chat/{user_id}")
+async def websocket_endpoint(websocket: WebSocket, user_id: str):
+    await websocket.accept()
+    active_connections[user_id] = websocket
+
+    try:
+        while True:
+            await asyncio.sleep(1)
+    except WebSocketDisconnect:
+        active_connections.pop(user_id)
