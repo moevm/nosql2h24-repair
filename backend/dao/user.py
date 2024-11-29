@@ -3,7 +3,7 @@ import re
 from bson import ObjectId
 
 from database import db
-from schemas.user import UserCreateSchema, UserDao, UserBaseSchema, Contact, ContactResponse
+from schemas.user import UserCreateSchema, UserDao, UserBaseSchema, Contact, ContactResponse, Role
 from schemas.utils import object_id_to_str, get_date_now
 
 
@@ -25,16 +25,19 @@ async def find_user_by_id(user_id: str) -> UserDao | None:
     return UserDao(**user)
 
 
-async def find_users(name: str = "", lastname: str = "", middlename: str = "") -> list[UserBaseSchema | None]:
+async def find_users(name: str = "", lastname: str = "", middlename: str = "", role: Role = None) -> list[
+    UserBaseSchema | None]:
     users = db.get_collection('user')
 
     query = {}
     if name:
-        query["name"] = {"$regex": f"^{name}", "$options": "i"}  # Начинается с 'name', регистронезависимо
+        query["name"] = {"$regex": f"^{name}", "$options": "i"}
     if lastname:
-        query["lastname"] = {"$regex": f"^{lastname}", "$options": "i"}  # Начинается с 'lastname', регистронезависимо
+        query["lastname"] = {"$regex": f"^{lastname}", "$options": "i"}
     if middlename:
-        query["middlename"] = {"$regex": f"^{middlename}", "$options": "i"}  # Начинается с 'middlename'
+        query["middlename"] = {"$regex": f"^{middlename}", "$options": "i"}
+    if role:
+        query["role"] = str(role.value)
 
     cursor = users.find(query)
     user_list = []
@@ -45,8 +48,9 @@ async def find_users(name: str = "", lastname: str = "", middlename: str = "") -
     return user_list
 
 
-async def find_users_from_project(project_id: str, name: str = "", lastname: str = "", middlename: str = "") -> list[
-                                                                                                                    ContactResponse | None] | None:
+async def find_users_from_project(project_id: str, name: str = "", lastname: str = "", middlename: str = "",
+                                  role: Role = None) -> list[
+                                                            ContactResponse | None] | None:
     project_collection = db.get_collection('project')
 
     search_params = []
@@ -64,16 +68,31 @@ async def find_users_from_project(project_id: str, name: str = "", lastname: str
         return None
 
     contacts = project.get("contacts", {})
+    matched_contacts = []
 
+    # случай, когда нет фильтров ФИО
     if not search_params:
+        # но есть фильтр роли
+        if role:
+            for contact_id, contact in contacts.items():
+                contact_role = contact.get("role", None)
+                if contact_role == role.value:
+                    matched_contacts.append(ContactResponse(id=contact_id, **contact))
+            return matched_contacts
+        
+        # без фильтров - все контакты проекта
         return [ContactResponse(id=contact_id, **contact) for contact_id, contact in contacts.items()]
 
+    # случай, когда есть фильтры ФИО
     search_query = ".*".join(search_params)
-
-    matched_contacts = []
+    
     for contact_id, contact in contacts.items():
         username = contact.get("username", "")
-        if re.search(search_query, username, re.IGNORECASE):  # Сравнение с username
+        contact_role = contact.get("role", None)
+        if re.search(search_query, username, re.IGNORECASE):
+            # есть фильтр роли
+            if role and contact_role != role.value:
+                continue
             matched_contacts.append(ContactResponse(id=contact_id, **contact))
 
     return matched_contacts

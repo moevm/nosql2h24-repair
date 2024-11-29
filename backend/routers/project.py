@@ -49,9 +49,9 @@ async def get_all(user: UserDao = Depends(get_current_user)):
 
 @router.get("/get_users/{project_id}", response_model=list[ContactResponse | None])
 async def get_users(project_id: str, name: str = "", lastname: str = "", middlename: str = "",
-                    user: UserDao = Depends(get_foreman_role)):
-    users = await find_users_from_project(project_id, name, lastname, middlename)
-    
+                    role: Role = None, user: UserDao = Depends(get_foreman_role)):
+    users = await find_users_from_project(project_id, name, lastname, middlename, role)
+
     if users is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
