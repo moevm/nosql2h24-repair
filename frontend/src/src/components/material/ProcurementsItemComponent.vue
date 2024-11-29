@@ -47,12 +47,15 @@
     <div class="button-group">
       <!-- Переход на страницу редактирования материала при нажатии на кнопку "Редактировать" -->
       <button @click="editMaterial" class="details-button">Редактировать</button>
-      <button @click="$emit('delete', material.materialId)" class="delete-button">Удалить</button>
+      <button @click="deleteMaterial" class="delete-button">Удалить</button>
     </div>
   </div>
 </template>
 
 <script>
+import { useCookies } from '@/src/js/useCookies';
+import axios from 'axios';
+const { setMaterialId,getProjectId } = useCookies();
 export default {
   props: {
     material: Object,
@@ -60,8 +63,27 @@ export default {
   methods: {
     // Метод для перехода на страницу редактирования материала
     editMaterial() {
-      this.$router.push(`/add_procurement?id=${this.material.id}`);
+      setMaterialId(this.material.materialId);
+      this.$router.push('/material');
     },
+    async deleteMaterial() {
+      if (confirm(`Удалить материал "${this.material.name}"?`)) {
+        try {
+          await axios.delete(`/api/projects/${getProjectId()}/delete_procurement/${this.material.materialId}`, {
+            headers: {
+              'Accept': 'application/json',
+            },
+            withCredentials: true,
+          });
+          this.$emit('delete', this.material.materialId);
+        } catch (error) {
+          // Обработка ошибки, если нужно
+          console.error(error);
+        }
+
+
+      }
+    }
   },
 };
 </script>

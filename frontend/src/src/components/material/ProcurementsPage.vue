@@ -21,7 +21,7 @@
         <div class="materials-list">
           <ProcurementsItemComponent
             v-for="material in filteredMaterials"
-            :key="material.id"
+            :key="material.materialId"
             :material="material"
             @viewDetails="viewDetails"
             @delete="deleteMaterial"
@@ -69,7 +69,7 @@ export default {
       // this.$router.push({ path: `/material-details/${materialId}` });
     },
     deleteMaterial(materialId) {
-      this.materials = this.materials.filter(material => material.id !== materialId);
+      this.procurements = this.procurements.filter(material => material.materialId !== materialId);
     },
     async fetchStageData() {
       try {

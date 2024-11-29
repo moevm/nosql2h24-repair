@@ -11,7 +11,7 @@ import MessagesPage from '../components/message/MessagesPage.vue';
 import ChatPage from '../components/message/ChatPage.vue';
 import RiskFormComponent from '../components/risk/RiskFormComponent.vue';
 import RiskDetails from '../components/risk/RiskDetails.vue';
-import MaterialDetail from '../components/material/MaterialDetail.vue';
+// import MaterialDetail from '../components/material/MaterialDetail.vue';
 import MaterialEditAdd from '../components/material/MaterialEditAdd.vue';
 import TasksListPage from '../components/task/TasksListPage.vue';
 import TaskPage from '../components/task/TaskPage.vue';
@@ -35,11 +35,10 @@ const routes = [
   { path: '/chat', component: ChatPage},
   { path: '/add_risk', component: RiskFormComponent },
   { path: '/risk-details/', component: RiskDetails},
-  { path: '/material', component: MaterialDetail},
+  { path: '/material', component: MaterialEditAdd},
   { path: '/add_procurement', component: MaterialEditAdd},
   { path: '/add_task', component: AddTaskPage},
   { path: '/add_contact', component: AddContactPage},
-  // { path: '/add-material', component: MaterialEditAdd},
   { path: '/tasks', component: TasksListPage, props: true},
   { path: '/tasks/viewRedactorTask', component: TaskPage, props: true},
   { path: '/add-stage', name: 'add-stage', component: AddStagePage },

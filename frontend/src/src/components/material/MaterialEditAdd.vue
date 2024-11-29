@@ -29,7 +29,7 @@
               <input type="checkbox" v-model="material.inStock" id="stock" />
             </div>
 
-            <button type="submit" class="save-button" @click="addProcurement">Сохранить изменения</button>
+            <button type="submit" class="save-button" @click="addProcurement">{{ isEditMode ? 'Сохранить изменения' : 'Сохранить' }}</button>
           </form>
         </div>
       </div>
@@ -41,7 +41,7 @@
   import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
   import axios from 'axios';
   import { useCookies } from '@/src/js/useCookies';
-  const { getProjectId } = useCookies();
+  const { getProjectId,getMaterialId } = useCookies();
 
   export default {
     components: {
@@ -61,6 +61,21 @@
       };
     },
     methods: {
+      async checkPath(){
+        if(this.$route.path !== '/add_procurement'){
+          try {
+            const response = await axios.get(`/api/projects/${getProjectId()}/get_procurement/${getMaterialId()}`);
+            this.material.name = response.data.procurement.item_name;
+            this.material.quantity = response.data.procurement.quantity;
+            this.material.unit = response.data.procurement.units;
+            this.material.pricePerUnit = response.data.procurement.price;
+            this.material.inStock = response.data.procurement.inStock;
+          } catch (error) {
+            console.error('Ошибка при загрузке Закупки:', error);
+          }
+          this.isEditMode = true;
+        }
+      },
       async addProcurement() {
         this.showErrors = true;
 
@@ -72,24 +87,45 @@
             inStock: this.material.inStock,
             units: this.material.unit,
           };
-          console.log(dataToSend);
-          try {
-            const res = await axios.post(`/api/projects/${getProjectId()}/add_procurement`, dataToSend, {
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-              },
-              withCredentials: true,
-            });
-            console.log(res);
-            alert('Закупка успешно создана!');
-            this.$router.push(`/procurements`);
-          } catch (error) {
-            console.error("Ошибка сети:", error.message);
-            if (error.response && error.response.data.detail) {
-              this.errorMessage = error.response.data.detail;
+          if(this.isEditMode){
+            try {
+              await axios.put(`/api/projects/${getProjectId()}/update_procurement/${getMaterialId()}`, dataToSend, {
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                },
+                withCredentials: true,
+              });
+              // console.log(res);
+              alert('Закупка успешно изменена!');
+              this.$router.push(`/procurements`);
+            } catch (error) {
+              console.error("Ошибка сети:", error.message);
+              if (error.response && error.response.data.detail) {
+                this.errorMessage = error.response.data.detail;
+              }
             }
           }
+          else {
+            try {
+              await axios.post(`/api/projects/${getProjectId()}/add_procurement`, dataToSend, {
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                },
+                withCredentials: true,
+              });
+              // console.log(res);
+              alert('Закупка успешно создана!');
+              this.$router.push(`/procurements`);
+            } catch (error) {
+              console.error("Ошибка сети:", error.message);
+              if (error.response && error.response.data.detail) {
+                this.errorMessage = error.response.data.detail;
+              }
+            }
+          }
+
         } else {
           this.errorMessage='Пожалуйста, заполните все поля.';
         }
@@ -112,6 +148,9 @@
         // }
         // this.$router.push({ path: '/project/procurements' }); // Переход на главную страницу после сохранения
     //   },
+    },
+    beforeMount() {
+      this.checkPath();
     },
   };
   </script>
