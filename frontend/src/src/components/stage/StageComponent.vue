@@ -86,8 +86,6 @@ export default {
     async saveEdit() {
       const dataToSend = {
         name:this.editStageData.name,
-        // start_date: "2024-11-29T11:45:36.366Z",
-        // end_date:  "2024-11-29T11:45:36.366Z"
         start_date: this.formatToDateTime(this.editStageData.startDate),
         end_date:  this.formatToDateTime(this.editStageData.endDate),
       };

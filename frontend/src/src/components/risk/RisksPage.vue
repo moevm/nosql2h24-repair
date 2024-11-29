@@ -23,6 +23,7 @@
           :projectId="projectId"
           :projectName="projectName"
           :title="risk.riskName"
+          :id="risk.riskId"
           :description="risk.description"
           @delete="deleteTask(risk.riskId)"
           @details="viewDetails(risk.riskId)"
@@ -72,7 +73,8 @@ export default {
       this.risks.push(newRisk);
     },
     deleteTask(id) {
-      this.risks = this.risks.filter(risk => risk.id !== id);
+      this.risks = this.risks.filter(risk => risk.riskId !== id);
+
     },
     viewDetails(id) {
       setRiskId(id);

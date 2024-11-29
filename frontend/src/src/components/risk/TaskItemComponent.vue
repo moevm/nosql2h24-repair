@@ -3,16 +3,39 @@
       <h3>{{ title }}</h3>
       <p>{{ description }}</p>
       <button @click="$emit('details')">Подробнее</button>
-      <button @click="$emit('delete')">Удалить</button>
+      <button @click="deleteStage">>Удалить</button>
     </div>
   </template>
   
   <script>
+  import axios from 'axios';
+  import { useCookies } from '@/src/js/useCookies';
+  const { getProjectId } = useCookies();
   export default {
     props: {
+      id: String,
       title: String,
       description: String,
     },
+    methods: {
+      async deleteStage() {
+        if (confirm(`Удалить риск "${this.title}"?`)) {
+          try {
+            await axios.delete(`/api/projects/${getProjectId()}/delete_risk/${this.id}`, {
+              headers: {
+                'Accept': 'application/json',
+              },
+              withCredentials: true,
+            });
+          } catch (error) {
+            // Обработка ошибки, если нужно
+            console.error(error);
+          }
+
+          this.$emit("delete", this.id);
+        }
+      }
+    }
   };
   </script>
   
