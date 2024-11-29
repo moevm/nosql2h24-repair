@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from dao.user import find_users_from_project
 from schemas.project import ProjectResponse, ProjectCreate, ProjectUpdate
-from schemas.user import UserDao, Role
-from utils.role import get_customer_role
+from schemas.user import UserDao, Role, UserBaseSchema, ContactResponse
+from utils.role import get_customer_role, get_foreman_role
 from utils.token import get_current_user
 from dao.project import get_project_by_id, create_project, get_project_by_name, get_projects_by_user, get_all_projects, \
     update_project_by_id
@@ -44,3 +45,17 @@ async def get_all(user: UserDao = Depends(get_current_user)):
     if user.role == Role.admin:
         return await get_all_projects()
     return await get_projects_by_user(user.id)
+
+
+@router.get("/get_users/{project_id}", response_model=list[ContactResponse | None])
+async def get_users(project_id: str, name: str = "", lastname: str = "", middlename: str = "",
+                    user: UserDao = Depends(get_foreman_role)):
+    users = await find_users_from_project(project_id, name, lastname, middlename)
+    
+    if users is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Проекта не существует'
+        )
+
+    return users
