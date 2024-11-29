@@ -1,7 +1,8 @@
+from anyio.abc import value
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from dao.user import find_user_by_email, create_user, find_all_users, find_user_by_id, find_users
-from schemas.user import UserDao, UserCreateSchema, UserBaseSchema
+from schemas.user import UserDao, UserCreateSchema, UserBaseSchema, Role
 from utils.password import get_password_hash
 from utils.role import get_admin_role, get_foreman_role
 from utils.token import get_current_user
@@ -30,8 +31,8 @@ async def get_users() -> dict[str, list[UserBaseSchema]]:
 
 
 @router.get("/find/", response_model=list[UserBaseSchema | None])
-async def find_users_by_filters(name: str = "", lastname: str = "", middlename: str = "", user: UserDao = Depends(get_foreman_role)) -> list[UserBaseSchema | None]:
-    users = await find_users(name, lastname, middlename)
+async def find_users_by_filters(name: str = "", lastname: str = "", middlename: str = "", role: Role = None, user: UserDao = Depends(get_foreman_role)) -> list[UserBaseSchema | None]:
+    users = await find_users(name, lastname, middlename, role)
     return users
 
 
