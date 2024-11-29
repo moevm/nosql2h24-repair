@@ -2,6 +2,7 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from './src/router';
 import axios from 'axios';
+import store from './src/store';
 
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = 'http://localhost:8000/';  // the FastAPI backend
@@ -14,4 +15,5 @@ axios.defaults.headers = {
 
 const app = createApp(App); // Создание экземпляра приложения
 app.use(router); // Использование маршрутизатора
+app.use(store);
 app.mount('#app'); // Монтирование приложения в DOM

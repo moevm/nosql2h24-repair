@@ -42,6 +42,7 @@ export default {
         const res = await axios.post('/api/auth/logout');
         console.log(res);
         clearCookies();
+        this.$store.commit('removeUsers');  // Изменяем состояние
         this.$router.push('/login');
         // Дополнительный код для обработки успешной регистрации
       } catch (error) {

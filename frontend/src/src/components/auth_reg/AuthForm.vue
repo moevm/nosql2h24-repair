@@ -177,6 +177,8 @@ export default {
           console.log(res);
           setUserName(res.data.lastname + ' ' + res.data.name + ' ' + res.data.middlename);
           setUserId(res.data.id)
+          const newUserData = { name: res.data.lastname + ' ' + res.data.name + ' ' + res.data.middlename, role: res.data.role };
+          this.$store.commit('addSingleUser', newUserData);  // Изменяем состояние
           this.$router.push("/main");
         })
             .catch(err => {
