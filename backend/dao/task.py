@@ -38,7 +38,8 @@ async def get_task_by_id(project_id: str, stage_id: str, task_id: str) -> TaskRe
     return None
 
 
-async def update_task_by_id(project_id: str, stage_id: str, task_id: str, task_update: TaskUpdate) -> TaskResponse | None:
+async def update_task_by_id(project_id: str, stage_id: str, task_id: str,
+                            task_update: TaskUpdate) -> TaskResponse | None:
     project_collection = db.get_collection('project')
 
     update_data = task_update.model_dump()
@@ -131,3 +132,24 @@ async def add_worker_to_task(project_id: str, stage_id: str, task_id: str, worke
         return None
 
     return await get_task_by_id(project_id, stage_id, task_id)
+
+
+async def delete_worker_from_task(project_id: str, stage_id: str, task_id: str, worker_id: str) -> str | None:
+    project_collection = db.get_collection('project')
+
+    delete_result = await project_collection.update_one(
+        {
+            "_id": ObjectId(project_id),
+            f"stages.{stage_id}.tasks.{task_id}": {"$exists": True}
+        },
+        {
+            "$unset": {
+                f"stages.{stage_id}.tasks.{task_id}.workers.{worker_id}": ""
+            }
+        }
+    )
+
+    if delete_result.modified_count == 0:
+        return None
+
+    return task_id

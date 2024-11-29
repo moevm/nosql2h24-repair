@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from dao.project import get_contacts_by_project_id
 from dao.task import add_task, get_all_tasks_by_user, get_task_by_id, add_worker_to_task, get_tasks_by_stage_id, \
-    update_task_by_id
+    update_task_by_id, delete_worker_from_task
 from schemas.task import Task, TaskResponse, TaskUpdate
 from schemas.user import UserDao, Worker
 from utils.role import get_foreman_role
@@ -35,7 +35,7 @@ async def get_task(project_id: str, stage_id: str, task_id: str, user: UserDao =
 
 @router.put('/update_task/{project_id}/{stage_id}/{task_id}', response_model=TaskResponse)
 async def update_task(project_id: str, stage_id: str, task_id: str, task_data: TaskUpdate,
-                   user: UserDao = Depends(get_foreman_role)):
+                      user: UserDao = Depends(get_foreman_role)):
     task = await update_task_by_id(project_id, stage_id, task_id, task_data)
     if task is None:
         raise HTTPException(
@@ -79,3 +79,17 @@ async def add_worker(project_id: str, stage_id: str, task_id: str, worker_id: st
         status_code=status.HTTP_404_NOT_FOUND,
         detail='Работник отсутствует в контактах проекта'
     )
+
+
+@router.delete('/{project_id}/{stage_id}/{task_id}/{worker_id}', response_model=dict[str, str])
+async def delete_worker(project_id: str, stage_id: str, task_id: str, worker_id: str,
+                        foreman: UserDao = Depends(get_foreman_role)):
+    delete_id = await delete_worker_from_task(project_id, stage_id, task_id, worker_id)
+
+    if delete_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Работник не привязан к задаче'
+        )
+
+    return {"delete_id": delete_id}
