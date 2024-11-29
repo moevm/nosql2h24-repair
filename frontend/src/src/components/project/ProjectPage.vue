@@ -77,16 +77,46 @@ export default {
     console.log(this.nameProject)
   },
   methods: {
+    formatToDateTime(date) {
+      return `${date}T00:00:00`; // Преобразует в формат `YYYY-MM-DDT00:00:00`
+    },
     editProject() {
       this.isEditing = true;
       this.editedDescription = this.description;
       this.editedStatus = this.status;
     },
-    saveChanges() {
-      this.description = this.editedDescription;
-      this.status = this.editedStatus;
-      this.isEditing = false;
-    },
+   async saveChanges() {
+    this.description = this.editedDescription;
+    this.status = this.editedStatus;
+    this.isEditing = false;
+    console.log(this.description);
+     const dataToSend = {
+       description:this.description,
+       status:this.status,
+       start_date: "2024-11-29T11:45:36.366Z",
+       end_date:  "2024-11-29T11:45:36.366Z"
+     };
+     console.log(dataToSend)
+     try {
+       const res = await axios.put(`/api/projects/update/${getProjectId()}`, dataToSend, {
+         headers: {
+           'Content-Type': 'application/json',
+           'Accept': 'application/json',
+         },
+         withCredentials: true,
+       });
+       console.log(res);
+     } catch (error) {
+       console.error("Ошибка сети:", error.message);
+       if (error.response) {
+         console.error("Данные ответа:", error.response.data);
+         // Вывод ошибки с сервера
+         if (error.response.data.detail) {
+           this.errorMessage = error.response.data.detail; // Сохраняем ошибку с сервера
+         }
+       }
+     }
+  },
     cancelEdit() {
       this.isEditing = false;
     },
