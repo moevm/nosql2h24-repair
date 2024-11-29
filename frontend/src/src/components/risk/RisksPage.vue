@@ -105,7 +105,6 @@ export default {
 .main-container {
   display: flex;
   flex-direction: column;
-  font-family: Arial, sans-serif;
 }
 
 .content {
