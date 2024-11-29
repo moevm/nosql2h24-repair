@@ -71,7 +71,7 @@ export default {
       startDate: "",
       endDate: "",
       status: "",
-      taskDescription: ``
+      taskDescription: ``,
     };
   },
   methods: {
@@ -97,8 +97,41 @@ export default {
       const year = date.getFullYear();
       return `${year}-${month}-${day}`;
     },
-    toggleEdit() {
+    formatToDateTime(date) {
+      return `${date}T00:00:00`; // Преобразует в формат `YYYY-MM-DDT00:00:00`
+    },
+    async toggleEdit() {
       if (this.isEditing) {
+        const dataToSend = {
+          name:this.taskName,
+          description:this.taskDescription,
+          status: this.status,
+          start_date: this.formatToDateTime(this.startDate),
+          end_date:  this.formatToDateTime(this.endDate),
+        };
+        console.log(dataToSend)
+        try {
+          const res = await axios.put(`/api/tasks/update_task/${getProjectId()}/${getStageId()}/${getTaskId()}`, dataToSend, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            withCredentials: true,
+          });
+          console.log(res);
+          this.isEditing = false;
+          this.$emit('update-stage', { ...this.stage, ...this.editStageData });
+        } catch (error) {
+          console.error("Ошибка сети:", error.message);
+          if (error.response) {
+            console.error("Данные ответа:", error.response.data);
+            // Вывод ошибки с сервера
+            if (error.response.data.detail) {
+              this.errorMessage = error.response.data.detail; // Сохраняем ошибку с сервера
+            }
+          }
+        }
+
         console.log("Сохранено:", this.startDate, this.endDate, this.status, this.taskDescription);
       }
       this.isEditing = !this.isEditing;

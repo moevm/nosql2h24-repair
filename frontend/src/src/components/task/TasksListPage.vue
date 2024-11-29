@@ -20,6 +20,7 @@
           <tr 
             v-for="task in tasks" 
             :key="task.taskId"
+            :taskName="task.taskName"
             :class="{ selected: selectedTaskId === task.taskId }"
             @click="selectTask(task.taskId)"
           >
@@ -56,6 +57,7 @@ export default {
   },
   data() {
     return {
+      taskName: '',
       stageName: getStageName(),
       tasks: [
       ],
@@ -66,9 +68,23 @@ export default {
     addTask() {
       this.$router.push(`/add_task`); // переход на страницу новой задачи
     },
-    deleteTask(taskId) {
-      this.tasks = this.tasks.filter(task => task.id !== taskId);
-      this.selectedTaskId = null;  // сбрасываем выбор после удаления
+    async deleteTask(taskId) {
+      if (confirm(`Удалить задачу "${this.taskName}"?`)) {
+        try {
+          await axios.delete(`/api/tasks/${getProjectId()}/${getStageId()}/${this.stage.stageId}`, {
+            headers: {
+              'Accept': 'application/json',
+            },
+            withCredentials: true,
+          });
+          this.tasks = this.tasks.filter(task => task.id !== taskId);
+          this.selectedTaskId = null;  // сбрасываем выбор после удаления
+        } catch (error) {
+          // Обработка ошибки, если нужно
+          console.error(error);
+        }
+      }
+
     },
     viewTask() {
       setTaskId(this.selectedTaskId);

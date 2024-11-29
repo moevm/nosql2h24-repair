@@ -4,8 +4,8 @@
   <div class="task-page">
     <div class="task-header">
       <div>
-        <h1>Ремонт кафедры МОЭВМ</h1>
-        <p>СПбГЭТУ "ЛЭТИ"</p>
+        <h1>{{projectName}}</h1>
+        <p>{{stageName}}</p>
         <div class="task-title">
           <input
               v-model="taskName"
@@ -62,7 +62,7 @@ import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
 import ContactsComponent from '../project/ContactsComponent.vue';
 import axios from 'axios';
 import { useCookies } from '@/src/js/useCookies';
-const { getProjectId, getStageId } = useCookies();
+const { getProjectId, getStageId, getStageName, getProjectName } = useCookies();
 
 export default {
   components: {
@@ -72,6 +72,8 @@ export default {
   },
   data() {
     return {
+      projectName: getProjectName(),
+      stageName: getStageName(),
       taskName: '',
       startDate: '',
       endDate: '',
