@@ -7,33 +7,43 @@
         <div class="project-description">
           <h2> {{ nameProject }}</h2>
 
-          <!-- Описание проекта -->
-          <div v-if="isEditing">
-              <textarea class="edit-description" v-model="editedDescription"></textarea>
+          <!-- Статус, начало и конец одной строчкой над описанием -->
+          <div class="project-info">
+            <div class="status-info">
               <label for="status" class="status-label">Статус:</label>
-              <select v-model="editedStatus" class="status-select">
+              <span v-if="!isEditing" class="status-value">{{ status }}</span>
+              <select v-if="isEditing" v-model="editedStatus" class="status-select">
                 <option value="В процессе">В процессе</option>
                 <option value="Готово">Готово</option>
                 <option value="Новый">Новый</option>
                 <option value="Опоздание">Опоздание</option>
                 <option value="Нет статуса">Нет статуса</option>
               </select>
-              <div class="edit-buttons">
-                <button @click="saveChanges" class="save-button">Сохранить</button>
-                <button @click="cancelEdit" class="cancel-button">Отмена</button>
-              </div>
+            </div>
+            <div class="date-info">
+              <label for="dateStart" class="date-label">Начало:</label>
+              <span v-if="!isEditing" class="date-value">{{ dateStart }}</span>
+              <input v-if="isEditing" type="date" v-model="editedDateStart" class="date-input" />
+            </div>
+            <div class="date-info">
+              <label for="dateEnd" class="date-label">Конец:</label>
+              <span v-if="!isEditing" class="date-value">{{ dateEnd }}</span>
+              <input v-if="isEditing" type="date" v-model="editedDateEnd" class="date-input" />
+            </div>
+          </div>
+
+          <!-- Описание проекта -->
+          <div v-if="isEditing">
+            <textarea class="edit-description" v-model="editedDescription"></textarea>
+            <div class="edit-buttons">
+              <button @click="saveChanges" class="save-button">Сохранить</button>
+              <button @click="cancelEdit" class="cancel-button">Отмена</button>
+            </div>
           </div>
           <div v-else>
             <p>{{ description }}</p>
-            <p class="status-text">Статус: <span class="status-value">{{ status }}</span></p>
             <button @click="editProject" class="edit-button">Редактировать</button>
           </div>
-
-        </div>
-
-        <div class="date-selectors">
-          <DateSelectorComponent label="Начало" :date="dateStart" />
-          <DateSelectorComponent label="Конец" :date="dateEnd" />
         </div>
 
         <ContactsComponent :contacts="contacts" />
@@ -46,7 +56,6 @@
 import axios from 'axios';
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
-import DateSelectorComponent from '../project/DateSelectorComponent.vue';
 import ContactsComponent from '../project/ContactsComponent.vue';
 
 import { useCookies } from '@/src/js/useCookies';
@@ -56,7 +65,6 @@ export default {
   components: {
     HeaderComponent,
     ProjectSidebarComponent,
-    DateSelectorComponent,
     ContactsComponent,
   },
   data() {
@@ -69,7 +77,9 @@ export default {
       isEditing: false,
       editedDescription: '',
       status: '',
-      editedStatus: ''
+      editedStatus: '',
+      editedDateStart: '',
+      editedDateEnd: ''
     };
   },
   created() {
@@ -84,19 +94,23 @@ export default {
       this.isEditing = true;
       this.editedDescription = this.description;
       this.editedStatus = this.status;
+      this.editedDateStart = this.dateStart;
+      this.editedDateEnd = this.dateEnd;
     },
    async saveChanges() {
     this.description = this.editedDescription;
     this.status = this.editedStatus;
+    this.dateStart = this.editedDateStart;
+    this.dateEnd = this.editedDateEnd;
     this.isEditing = false;
     console.log(this.description);
-    const dataToSend = {
+     const dataToSend = {
        description:this.description,
        status:this.status,
-       start_date: "2024-11-29T11:45:36.366Z",
-       end_date:  "2024-11-29T11:45:36.366Z"
-    };
-    console.log(dataToSend)
+       start_date: this.formatToDateTime(this.dateStart),
+       end_date: this.formatToDateTime(this.dateEnd)
+     };
+     console.log(dataToSend)
      try {
        const res = await axios.put(`/api/projects/update/${getProjectId()}`, dataToSend, {
          headers: {
@@ -141,7 +155,7 @@ export default {
       const day = String(date.getDate()).padStart(2, '0');
       const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 по 11, поэтому +1
       const year = date.getFullYear();
-      return `${day}.${month}.${year}`;
+      return `${year}-${month}-${day}`; // Формат YYYY-MM-DD для input type="date"
     },
   },
 };
@@ -166,6 +180,41 @@ export default {
   overflow-y: auto;
   padding-right: 10px;
   width: 900px;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.status-info, .date-info {
+  display: flex;
+  align-items: center;
+}
+
+.status-label, .date-label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.status-value, .date-value {
+  display: inline-block;
+  padding: 5px 10px;
+  border: 2px solid;
+  border-radius: 4px;
+  background-color: #f0f0f0;
+}
+
+.status-select, .date-input {
+  width: 150px;
+  padding: 8px;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 .edit-description {
@@ -204,12 +253,6 @@ export default {
   margin-left: 10px;
 }
 
-.date-selectors {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
 .contacts {
   flex: 1;
 }
@@ -218,33 +261,5 @@ export default {
   display: flex;
   align-items: center;
   margin-top: 10px;
-}
-
-.status-label {
-  display: block;
-  margin-top: 10px;
-  font-weight: bold;
-}
-
-.status-select {
-  width: 100%;
-  padding: 8px;
-  background-color: #f0f0f0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-top: 5px;
-}
-
-.status-text {
-  margin-top: 10px;
-  font-weight: bold;
-}
-
-.status-value {
-  display: inline-block;
-  padding: 5px 10px;
-  border: 2px solid;
-  border-radius: 4px;
-  background-color: #f0f0f0;
 }
 </style>
