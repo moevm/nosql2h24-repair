@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from dao.user import find_user_by_email, create_user, find_all_users, find_user_by_id
+from dao.user import find_user_by_email, create_user, find_all_users, find_user_by_id, find_users
 from schemas.user import UserDao, UserCreateSchema, UserBaseSchema
 from utils.password import get_password_hash
-from utils.role import get_admin_role
+from utils.role import get_admin_role, get_foreman_role
 from utils.token import get_current_user
 
 router = APIRouter()
@@ -27,6 +27,12 @@ async def register_user(user_data: UserCreateSchema, admin: UserDao = Depends(ge
 async def get_users() -> dict[str, list[UserBaseSchema]]:
     users = await find_all_users()
     return {"users": users}
+
+
+@router.get("/find/", response_model=list[UserBaseSchema | None])
+async def find_users_by_filters(name: str = "", lastname: str = "", middlename: str = "", user: UserDao = Depends(get_foreman_role)) -> list[UserBaseSchema | None]:
+    users = await find_users(name, lastname, middlename)
+    return users
 
 
 @router.get("/get_user/{user_id}", response_model=UserDao)
