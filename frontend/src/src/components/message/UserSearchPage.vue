@@ -58,7 +58,7 @@ export default {
       this.users = [];
       try {
         // console.log(this.lastname);
-        const response = await axios.get(`/api/auth/get_user/${this.lastname}`);
+        const response = await axios.get(`/api/user/find/?${this.lastname}?${this.name}?${this.middelname}?${this.selectedRole}`);
         // console.log(response.data);
         this.users.push(response.data);
         // this.users = Object.values(response.data).map(user => ({
