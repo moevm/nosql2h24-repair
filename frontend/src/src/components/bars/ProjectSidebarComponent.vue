@@ -1,15 +1,15 @@
 <template>
   <aside class="sidebar">
     <button v-if="!isMainPage" @click="goToMain" class="to-main-button">На основную</button>
-    <div class="menu-item" @click="goToPhases">
+    <div :class="['menu-item', { 'active': isPhasesPage }]" @click="goToPhases">
       <img src="@/assets/icons/phases.png" alt="Phases Icon" class="icon">
       <p>Этапы</p>
     </div>
-    <div class="menu-item" @click="goToProcurements">
+    <div :class="['menu-item', { 'active': isProcurementsPage }]" @click="goToProcurements">
       <img src="@/assets/icons/procurements.png" alt="Procurements Icon" class="icon">
       <p>Закупки</p>
     </div>
-    <div class="menu-item" @click="goToRisks">
+    <div :class="['menu-item', { 'active': isRisksPage }]" @click="goToRisks">
       <img src="@/assets/icons/risks.png" alt="Risks Icon" class="icon">
       <p>Риски</p>
     </div>
@@ -33,6 +33,15 @@ export default {
     isMainPage() {
       return this.$route.path === '/main';
     },
+    isPhasesPage() {
+      return this.$route.path === '/stages';
+    },
+    isProcurementsPage() {
+      return this.$route.path === '/procurements';
+    },
+    isRisksPage() {
+      return this.$route.path === '/risks';
+    }
   },
   methods: {
     goToPhases() {
@@ -124,5 +133,22 @@ export default {
 
 .logout-item {
   margin-top: auto; /* Перемещает элемент вниз */
+}
+
+.active {
+  position: relative;
+}
+
+.active::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90px;
+  height: 90px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  z-index: -1;
 }
 </style>
