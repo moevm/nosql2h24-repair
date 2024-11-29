@@ -11,6 +11,7 @@
           <div>{{ contact.userName }}</div>
           <span>{{ contact.role }}</span>
         </div>
+        <button @click="deleteContact(index)" class="delete-button">Удалить</button>
       </li>
     </ul>
   </div>
@@ -31,6 +32,9 @@ export default {
       router.push(`/add_contact`);
       console.log('Добавить контакт');
     },
+    deleteContact(index) {
+      this.$emit('delete-contact', index);
+    }
   },
 };
 </script>
@@ -80,5 +84,15 @@ export default {
 .contact-info {
   display: flex;
   flex-direction: column;
+}
+
+.delete-button {
+  background-color: #625b71;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-left: 10px;
 }
 </style>

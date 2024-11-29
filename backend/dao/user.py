@@ -1,7 +1,9 @@
+import re
+
 from bson import ObjectId
 
 from database import db
-from schemas.user import UserCreateSchema, UserDao, UserBaseSchema
+from schemas.user import UserCreateSchema, UserDao, UserBaseSchema, Contact, ContactResponse
 from schemas.utils import object_id_to_str, get_date_now
 
 
@@ -41,6 +43,40 @@ async def find_users(name: str = "", lastname: str = "", middlename: str = "") -
         user = object_id_to_str(user)
         user_list.append(UserBaseSchema(**user))
     return user_list
+
+
+async def find_users_from_project(project_id: str, name: str = "", lastname: str = "", middlename: str = "") -> list[
+                                                                                                                    ContactResponse | None] | None:
+    project_collection = db.get_collection('project')
+
+    search_params = []
+
+    if lastname:
+        search_params.append(lastname)
+    if name:
+        search_params.append(name)
+    if middlename:
+        search_params.append(middlename)
+
+    project = await project_collection.find_one({"_id": ObjectId(project_id)})
+
+    if project is None:
+        return None
+
+    contacts = project.get("contacts", {})
+
+    if not search_params:
+        return [ContactResponse(id=contact_id, **contact) for contact_id, contact in contacts.items()]
+
+    search_query = ".*".join(search_params)
+
+    matched_contacts = []
+    for contact_id, contact in contacts.items():
+        username = contact.get("username", "")
+        if re.search(search_query, username, re.IGNORECASE):  # Сравнение с username
+            matched_contacts.append(ContactResponse(id=contact_id, **contact))
+
+    return matched_contacts
 
 
 async def find_all_users() -> list[UserBaseSchema | None]:

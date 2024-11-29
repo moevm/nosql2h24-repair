@@ -4,8 +4,8 @@
     <div class="stage-content">
       <div v-if="isEditing">
         <input v-model="editStageData.name" placeholder="Название этапа" />
-        <input v-model="editStageData.startDate" placeholder="Дата начала" />
-        <input v-model="editStageData.endDate" placeholder="Дата окончания" />
+        <input type="date" v-model="editStageData.startDate" placeholder="Дата начала" />
+        <input type="date" v-model="editStageData.endDate" placeholder="Дата окончания" />
         <button @click="saveEdit">Сохранить</button>
         <button @click="cancelEdit">Отмена</button>
       </div>
