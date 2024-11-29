@@ -150,7 +150,7 @@ export default {
 }
 
 .add-stage-button {
-  background-color: #4CAF50;
+  background-color: #625b71;
   color: white;
   padding: 12px;
   border: none;
@@ -160,6 +160,6 @@ export default {
 }
 
 .add-stage-button:hover {
-  background-color: #45a049;
+  background-color: #4e4168;
 }
 </style>

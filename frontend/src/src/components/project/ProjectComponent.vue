@@ -112,7 +112,7 @@ export default {
 
 .project-button {
   padding: 10px 15px;
-  background-color: #007bff;
+  background-color: #625b71;
   color: white;
   border: none;
   border-radius: 5px;
@@ -121,6 +121,6 @@ export default {
 }
 
 .project-button:hover {
-  background-color: #0056b3; /* Цвет кнопки при наведении */
+  background-color: #4d3d6e; /* Цвет кнопки при наведении */
 }
 </style>

@@ -151,7 +151,7 @@ export default {
 .task-actions button {
   padding: 5px 10px;
   margin-right: 10px;
-  background-color: #007bff;
+  background-color: #625b71;
   color: white;
   border: none;
   border-radius: 4px;
@@ -159,6 +159,6 @@ export default {
 }
 
 .task-actions button:hover {
-  background-color: #0056b3;
+  background-color: #4d4069;
 }
 </style>

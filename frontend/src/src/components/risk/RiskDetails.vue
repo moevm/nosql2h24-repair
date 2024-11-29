@@ -107,7 +107,7 @@ export default {
 
 .button {
   padding: 8px 16px;
-  background-color: #007bff;
+  background-color: #625b71;
   color: white;
   border: none;
   cursor: pointer;
@@ -115,7 +115,7 @@ export default {
 
 .cancel-button {
   padding: 8px 16px;
-  background-color: #dc3545;
+  background-color: #625b71;
   color: white;
   border: none;
   cursor: pointer;

@@ -50,7 +50,7 @@ export default {
 }
 
 .add-button {
-  background-color: #007bff;
+  background-color: #625b71;
   color: white;
   border: none;
   padding: 5px 10px;

@@ -122,7 +122,7 @@ export default {
   border-radius: 4px;
 }
 .add-stage-form button {
-  background-color: #4CAF50;
+  background-color: #625b71;
   color: white;
   padding: 8px;
   border: none;
@@ -130,7 +130,7 @@ export default {
   cursor: pointer;
 }
 .add-stage-form button:hover {
-  background-color: #45a049;
+  background-color: #554a6d;
 }
 .input-error {
   border-color: red;

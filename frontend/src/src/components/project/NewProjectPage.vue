@@ -112,7 +112,7 @@ textarea {
 
 button {
   padding: 10px 20px;
-  background-color: #007bff;
+  background-color: #625b71;
   color: white;
   border: none;
   border-radius: 5px;
@@ -121,7 +121,7 @@ button {
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: #554c69;
 }
 
 .error {

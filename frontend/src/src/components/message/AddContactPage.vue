@@ -137,7 +137,7 @@ export default {
 }
 
 .input-field:focus {
-  border-color: #007BFF;
+  border-color: #625b71;
   outline: none;
 }
 
@@ -150,7 +150,7 @@ export default {
 }
 
 .select-field:focus {
-  border-color: #007BFF;
+  border-color: #625b71;
   outline: none;
 }
 
@@ -174,7 +174,7 @@ export default {
 }
 
 .user-item button {
-  background-color: #007BFF;
+  background-color: #625b71;
   color: #fff;
   border: none;
   padding: 6px 12px;
@@ -184,11 +184,11 @@ export default {
 }
 
 .user-item button:hover {
-  background-color: #0056b3;
+  background-color: #625b71;
 }
 
 .search-filters button {
-  background-color: #007BFF;
+  background-color: #625b71;
   color: #fff;
   padding: 8px 15px;
   font-size: 16px;
@@ -199,7 +199,7 @@ export default {
 }
 
 .search-filters button:hover {
-  background-color: #0056b3;
+  background-color: #625b71;
   transform: scale(1.05);
 }
 

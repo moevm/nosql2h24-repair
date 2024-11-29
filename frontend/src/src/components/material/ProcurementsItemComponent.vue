@@ -130,12 +130,12 @@ export default {
 }
 
 .details-button {
-  background-color: #007bff;
+  background-color: #625b71;
   color: white;
 }
 
 .delete-button {
-  background-color: #dc3545;
+  background-color: #625b71;
   color: white;
 }
 </style>

@@ -137,7 +137,7 @@ export default {
 .add-button {
   margin-top: 10px;
   padding: 10px;
-  background-color: #007bff;
+  background-color: #625b71;
   color: white;
   border: none;
   cursor: pointer;

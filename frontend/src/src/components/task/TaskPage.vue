@@ -139,7 +139,7 @@ export default {
 
 .task-title button {
   padding: 8px 12px;
-  background-color: #007bff;
+  background-color: #625b71;
   color: white;
   border: none;
   border-radius: 4px;
@@ -147,7 +147,7 @@ export default {
 }
 
 .task-title button:hover {
-  background-color: #0056b3;
+  background-color: #4f416d;
 }
 
 .task-content {

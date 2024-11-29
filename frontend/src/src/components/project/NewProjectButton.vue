@@ -19,7 +19,7 @@
   .create-project-button {
     width: 500px; /* Ширина, соответствующая компоненту проекта */
     height: 350px; /* Высота, соответствующая компоненту проекта */
-    background-color: #007bff; /* Фоновый цвет кнопки */
+    background-color: #625b71; /* Фоновый цвет кнопки */
     color: white; /* Цвет текста */
     border: 1px solid #ccc;
     border-radius: 8px;
@@ -36,7 +36,7 @@
   }
   
   .create-project-button:hover {
-    background-color: #0056b3; /* Цвет кнопки при наведении */
+    background-color: #615b6d; /* Цвет кнопки при наведении */
   }
   </style>
   

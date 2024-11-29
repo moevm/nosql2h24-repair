@@ -160,14 +160,14 @@ export default {
 }
 
 .save-button {
-  background-color: #4CAF50;
+  background-color: #625b71;
   color: white;
   border: none;
   border-radius: 4px;
 }
 
 .cancel-button {
-  background-color: #f44336;
+  background-color: #625b71;
   color: white;
   border: none;
   border-radius: 4px;

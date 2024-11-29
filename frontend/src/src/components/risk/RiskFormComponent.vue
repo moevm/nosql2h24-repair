@@ -84,7 +84,7 @@
   
   button {
     padding: 5px 15px;
-    background-color: #007bff;
+    background-color: #625b71;
     color: white;
     border: none;
     cursor: pointer;
