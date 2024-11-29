@@ -47,7 +47,7 @@
     <div class="button-group">
       <!-- Переход на страницу о материале при нажатии на кнопку "Подробнее" -->
       <button @click="viewDetails" class="details-button">Подробнее</button>
-      <button @click="$emit('delete', material.id)" class="delete-button">Удалить</button>
+      <button @click="$emit('delete', material.materialId)" class="delete-button">Удалить</button>
     </div>
   </div>
 </template>
@@ -60,7 +60,7 @@ export default {
   methods: {
     // Метод для перехода на страницу о материале
     viewDetails() {
-      // this.$router.push(`/material/${this.material.id}`);
+      this.$router.push(`/material/${this.material.id}`);
     },
   },
 };
