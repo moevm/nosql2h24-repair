@@ -45,8 +45,8 @@
 
     <!-- Кнопки внизу карточки -->
     <div class="button-group">
-      <!-- Переход на страницу о материале при нажатии на кнопку "Подробнее" -->
-      <button @click="viewDetails" class="details-button">Подробнее</button>
+      <!-- Переход на страницу редактирования материала при нажатии на кнопку "Редактировать" -->
+      <button @click="editMaterial" class="details-button">Редактировать</button>
       <button @click="$emit('delete', material.materialId)" class="delete-button">Удалить</button>
     </div>
   </div>
@@ -58,9 +58,9 @@ export default {
     material: Object,
   },
   methods: {
-    // Метод для перехода на страницу о материале
-    viewDetails() {
-      this.$router.push(`/material/${this.material.id}`);
+    // Метод для перехода на страницу редактирования материала
+    editMaterial() {
+      this.$router.push(`/add_procurement?id=${this.material.id}`);
     },
   },
 };
