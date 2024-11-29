@@ -90,13 +90,13 @@ export default {
     this.status = this.editedStatus;
     this.isEditing = false;
     console.log(this.description);
-     const dataToSend = {
+    const dataToSend = {
        description:this.description,
        status:this.status,
        start_date: "2024-11-29T11:45:36.366Z",
        end_date:  "2024-11-29T11:45:36.366Z"
-     };
-     console.log(dataToSend)
+    };
+    console.log(dataToSend)
      try {
        const res = await axios.put(`/api/projects/update/${getProjectId()}`, dataToSend, {
          headers: {

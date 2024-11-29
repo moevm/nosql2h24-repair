@@ -46,8 +46,10 @@
 </template>
 
 <script>
+import axios from 'axios';
 import { useCookies } from '@/src/js/useCookies';
-const { setStageId,setStageName } = useCookies();
+const { setStageId,setStageName, getProjectId } = useCookies();
+
 
 export default {
   props: {
@@ -75,20 +77,64 @@ export default {
     },
   },
   methods: {
+    formatToDateTime(date) {
+      return `${date}T00:00:00`; // Преобразует в формат `YYYY-MM-DDT00:00:00`
+    },
     editStage() {
       this.isEditing = true;
     },
-    saveEdit() {
-      this.isEditing = false;
-      this.$emit('update-stage', { ...this.stage, ...this.editStageData });
+    async saveEdit() {
+      const dataToSend = {
+        name:this.editStageData.name,
+        start_date: "2024-11-29T11:45:36.366Z",
+        end_date:  "2024-11-29T11:45:36.366Z"
+        // start_date: this.formatToDateTime(this.editStageData.startDate),
+        // end_date:  this.formatToDateTime(this.editStageData.endDate),
+      };
+      console.log(dataToSend)
+      try {
+        const res = await axios.put(`/api/projects/${getProjectId()}/update_stage/${this.stage.stageId}`, dataToSend, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          withCredentials: true,
+        });
+        console.log(res);
+        this.isEditing = false;
+        this.$emit('update-stage', { ...this.stage, ...this.editStageData });
+      } catch (error) {
+        console.error("Ошибка сети:", error.message);
+        if (error.response) {
+          console.error("Данные ответа:", error.response.data);
+          // Вывод ошибки с сервера
+          if (error.response.data.detail) {
+            this.errorMessage = error.response.data.detail; // Сохраняем ошибку с сервера
+          }
+        }
+      }
+
+
     },
     cancelEdit() {
       this.isEditing = false;
       this.editStageData = { ...this.stage };
     },
-    deleteStage() {
+    async deleteStage() {
       if (confirm(`Удалить этап "${this.stage.name}"?`)) {
-        this.$emit("delete", this.stage.id);
+        try {
+          await axios.delete(`/api/projects/${getProjectId()}/delete_stage/${this.stage.stageId}`, {
+            headers: {
+              'Accept': 'application/json',
+            },
+            withCredentials: true,
+          });
+        } catch (error) {
+          // Обработка ошибки, если нужно
+          console.error(error);
+        }
+
+        this.$emit("delete", this.stage.stageId);
       }
     },
     async goToTasks() {

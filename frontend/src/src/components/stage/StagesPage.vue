@@ -63,13 +63,13 @@ export default {
   },
   methods: {
     updateStage(updatedStage) {
-      const index = this.stages.findIndex(stage => stage.id === updatedStage.id);
+      const index = this.stages.findIndex(stage => stage.stageId === updatedStage.stageId);
       if (index !== -1) {
         this.stages.splice(index, 1, updatedStage);
       }
     },
     deleteStage(stageId) {
-      this.stages = this.stages.filter(stage => stage.id !== stageId);
+      this.stages = this.stages.filter(stage => stage.stageId !== stageId);
     },
     goToTasks() {
       // this.$router.push(`/tasks-list/${stageId}`);
