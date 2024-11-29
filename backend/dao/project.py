@@ -130,6 +130,25 @@ async def add_procurement_to_project(project_id: str, procurement_create: Procur
     return await get_project_by_id(project_id)
 
 
+async def delete_procurement(project_id: str, procurement_id: str) -> str | None:
+    project_collection = db.get_collection('project')
+
+    result = await project_collection.update_one(
+        {
+            "_id": ObjectId(project_id),
+            f"procurements.{procurement_id}": {"$exists": True}
+        },
+        {
+            "$unset": {f"procurements.{procurement_id}": ""}
+        }
+    )
+
+    if result.modified_count == 0:
+        return None
+
+    return procurement_id
+
+
 async def get_procurements_by_project_id(project_id: str) -> list[ProcurementResponse] | list[None] | None:
     project_collection = db.get_collection('project')
     project = await project_collection.find_one({"_id": ObjectId(project_id)}, {"procurements": 1})
@@ -204,6 +223,25 @@ async def add_stage_to_project(project_id: str, stage_create: Stage):
     return await get_project_by_id(project_id)
 
 
+async def delete_stage(project_id: str, stage_id: str) -> str | None:
+    project_collection = db.get_collection('project')
+
+    result = await project_collection.update_one(
+        {
+            "_id": ObjectId(project_id),
+            f"stages.{stage_id}": {"$exists": True}
+        },
+        {
+            "$unset": {f"stages.{stage_id}": ""}
+        }
+    )
+
+    if result.modified_count == 0:
+        return None
+
+    return stage_id
+
+
 async def get_stages_by_project_id(project_id: str) -> list[StageResponse] | list[None] | None:
     project_collection = db.get_collection('project')
     project = await project_collection.find_one({"_id": ObjectId(project_id)}, {"stages": 1})
@@ -270,6 +308,25 @@ async def add_risk_to_project(project_id: str, risk_create: Risk):
         }
     )
     return await get_project_by_id(project_id)
+
+
+async def delete_risk(project_id: str, risk_id: str) -> str | None:
+    project_collection = db.get_collection('project')
+
+    result = await project_collection.update_one(
+        {
+            "_id": ObjectId(project_id),
+            f"risks.{risk_id}": {"$exists": True}
+        },
+        {
+            "$unset": {f"risks.{risk_id}": ""}
+        }
+    )
+
+    if result.modified_count == 0:
+        return None
+
+    return risk_id
 
 
 async def get_risks_by_project_id(project_id: str) -> list[RiskResponse] | list[None] | None:

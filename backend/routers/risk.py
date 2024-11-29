@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 
-from dao.project import add_risk_to_project, get_risks_by_project_id, get_risk_by_id, update_risk_by_id
+from dao.project import add_risk_to_project, get_risks_by_project_id, get_risk_by_id, update_risk_by_id, delete_risk
 from schemas.project import ProjectResponse, Risk, RiskResponse, RiskUpdate
 from schemas.user import UserDao
 from utils.role import get_foreman_role
@@ -52,3 +52,15 @@ async def update_risk(project_id: str, risk_id: str, risk_data: RiskUpdate, user
         )
 
     return {"updated_risk": risk}
+
+
+@router.delete("/{project_id}/delete_risk/{risk_id}", response_model=dict[str, str])
+async def remove_risk(project_id: str, risk_id: str, user: UserDao = Depends(get_foreman_role)):
+    deleted_id = await delete_risk(project_id, risk_id)
+    if deleted_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Риск не найден'
+        )
+
+    return {"deleted_risk": deleted_id}

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from dao.project import add_procurement_to_project, get_procurements_by_project_id, get_procurement_by_id, \
-    update_procurement_by_id
+    update_procurement_by_id, delete_procurement
 from schemas.project import ProjectResponse, Procurement, ProcurementResponse, ProcurementUpdate
 from schemas.user import Contact, UserDao
 from utils.role import get_foreman_role
@@ -63,3 +63,15 @@ async def update_procurement(project_id: str, procurement_id: str, procurement_d
         )
 
     return {"updated_procurement": procurement}
+
+
+@router.delete("/{project_id}/delete_procurement/{procurement_id}", response_model=dict[str, str])
+async def remove_procurement(project_id: str, procurement_id: str, user: UserDao = Depends(get_foreman_role)):
+    deleted_id = await delete_procurement(project_id, procurement_id)
+    if deleted_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Закупка не найдена'
+        )
+
+    return {"deleted_id": deleted_id}
