@@ -1,7 +1,7 @@
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorCollection
 
-from schemas.utils import get_date_now
+from schemas.utils import get_date_now, object_id_to_str
 
 
 class BaseDao:
@@ -18,12 +18,14 @@ class BaseDao:
     @classmethod
     async def _get_by_id(cls, id: str) -> dict:
         if cls.collection is not None:
-            return await cls.collection.find_one({"_id": ObjectId(id)})
+            data = await cls.collection.find_one({"_id": ObjectId(id)})
+            return object_id_to_str(data)
 
     @classmethod
     async def _get_by_field(cls, field: str, data: str) -> dict:
         if cls.collection is not None:
-            return await cls.collection.find_one({field: data})
+            data = await cls.collection.find_one({field: data})
+            return object_id_to_str(data)
 
     @classmethod
     async def _update(cls, id: str, data: dict) -> str | None:

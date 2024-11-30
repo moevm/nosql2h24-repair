@@ -16,7 +16,6 @@ class UserDao(BaseDao):
         user = await cls._get_by_field('email', email)
         if not user:
             return None
-        user = object_id_to_str(user)
         return User(**user)
 
     @classmethod
@@ -24,7 +23,6 @@ class UserDao(BaseDao):
         user = await cls._get_by_id(user_id)
         if not user:
             return None
-        user = object_id_to_str(user)
         return User(**user)
 
     @classmethod
