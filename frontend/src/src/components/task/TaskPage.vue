@@ -111,15 +111,13 @@ export default {
         };
         console.log(dataToSend)
         try {
-          const res = await axios.put(`/api/tasks/update_task/${getProjectId()}/${getStageId()}/${getTaskId()}`, dataToSend, {
+          await axios.put(`/api/tasks/update_task/${getProjectId()}/${getStageId()}/${getTaskId()}`, dataToSend, {
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
             },
             withCredentials: true,
           });
-          console.log(res);
-          this.isEditing = false;
           this.$emit('update-stage', { ...this.stage, ...this.editStageData });
         } catch (error) {
           if(error.response.status === 401){
