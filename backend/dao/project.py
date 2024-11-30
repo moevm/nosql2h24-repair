@@ -85,6 +85,8 @@ async def add_contact_to_project(project_id: str, user: UserDao) -> ProjectRespo
                 f"contacts.{user.id}": {
                     "username": f"{user.lastname} {user.name} {user.middlename}",
                     "role": user.role,
+                    "updated_at": get_date_now(),
+                    "created_at": user.created_at
                 }
             }
         },
