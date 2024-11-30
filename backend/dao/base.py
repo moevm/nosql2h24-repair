@@ -42,13 +42,13 @@ class BaseDao:
                 return None
             return id
         
-    # @classmethod
-    # async def _update_with_query(cls, query: list[dict[str, Any]]) -> str | None:
-    #     if cls.collection is not None:
-    #         result = await cls.collection.update_one(query)
-    #         if result.modified_count == 0:
-    #             return None
-    #         return str(query["_id"])
+    @classmethod
+    async def _update_with_query(cls, query: dict[str, Any], data: dict[str, Any]) -> str | None:
+        if cls.collection is not None:
+            result = await cls.collection.update_one(query, data)
+            if result.modified_count == 0:
+                return None
+            return str(query["_id"])
 
     # @classmethod        
     # async def _find_with_filters(cls, query: dict) -> dict:

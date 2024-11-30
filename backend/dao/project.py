@@ -66,7 +66,7 @@ class ProjectDao(BaseDao):
 
     @classmethod
     async def add_contact_to_project(cls, project_id: str, user: User) -> ProjectResponse | None:
-        result = await cls.collection.update_one(
+        updated_id = await cls._update_with_query(
             {"_id": ObjectId(project_id)},
             {
                 "$set": {
@@ -77,9 +77,9 @@ class ProjectDao(BaseDao):
                         "created_at": user.created_at
                     }
                 }
-            },
+            }
         )
-        return await cls.get_project_by_id(project_id)
+        return await cls.get_project_by_id(updated_id)
 
     @classmethod
     async def get_contacts_by_project_id(cls, project_id: str) -> list[ContactResponse] | list[None] | None:
@@ -119,7 +119,7 @@ class ProjectDao(BaseDao):
 
     @classmethod
     async def delete_procurement(cls, project_id: str, procurement_id: str) -> str | None:
-        result = await cls.collection.update_one(
+        return await cls._update_with_query(
             {
                 "_id": ObjectId(project_id),
                 f"procurements.{procurement_id}": {"$exists": True}
@@ -128,11 +128,6 @@ class ProjectDao(BaseDao):
                 "$unset": {f"procurements.{procurement_id}": ""}
             }
         )
-
-        if result.modified_count == 0:
-            return None
-
-        return procurement_id
 
     @classmethod
     async def get_procurements_by_project_id(cls, project_id: str) -> list[ProcurementResponse] | list[None] | None:
@@ -169,9 +164,8 @@ class ProjectDao(BaseDao):
                                        procurement_update: ProcurementUpdate) -> ProcurementResponse | None:
 
         update_data = procurement_update.model_dump()
-        update_data["updated_at"] = get_date_now()
 
-        result = await cls.collection.update_one(
+        updated_id = await cls._update_with_query(
             {
                 "_id": ObjectId(project_id),
                 f"procurements.{procurement_id}": {"$exists": True}
@@ -185,31 +179,26 @@ class ProjectDao(BaseDao):
                     f"procurements.{procurement_id}.units": update_data["units"],
                     f"procurements.{procurement_id}.delivery_date": update_data["delivery_date"],
                     f"procurements.{procurement_id}.created_by": update_data["created_by"],
-                    f"procurements.{procurement_id}.updated_at": update_data["updated_at"],
+                    f"procurements.{procurement_id}.updated_at": get_date_now(),
                 }
             }
         )
 
-        if result.modified_count == 0:
-            return None
-
-        return await cls.get_procurement_by_id(project_id, procurement_id)
+        return await cls.get_procurement_by_id(updated_id, procurement_id)
 
     @classmethod
     async def add_stage_to_project(cls, project_id: str, stage_create: Stage):
-        project_collection = db.get_collection('project')
-        result = await project_collection.update_one(
+        updated_id = await cls._update_with_query(
             {'_id': ObjectId(project_id)},
             {
                 "$set": {f"stages.{generate_id()}": stage_create.model_dump()}
             }
         )
-        return await cls.get_project_by_id(project_id)
+        return await cls.get_project_by_id(updated_id)
 
     @classmethod
     async def delete_stage(cls, project_id: str, stage_id: str) -> str | None:
-
-        result = await cls.collection.update_one(
+        updated_id = await cls._update_with_query(
             {
                 "_id": ObjectId(project_id),
                 f"stages.{stage_id}": {"$exists": True}
@@ -218,9 +207,6 @@ class ProjectDao(BaseDao):
                 "$unset": {f"stages.{stage_id}": ""}
             }
         )
-
-        if result.modified_count == 0:
-            return None
 
         return stage_id
 
@@ -253,11 +239,11 @@ class ProjectDao(BaseDao):
         return None
 
     @classmethod
-    async def update_stage_by_id(cls, project_id: str, stage_id: str, stage_update: StageUpdate) -> StageResponse | None:
+    async def update_stage_by_id(cls, project_id: str, stage_id: str,
+                                 stage_update: StageUpdate) -> StageResponse | None:
         update_data = stage_update.model_dump()
         update_data["updated_at"] = get_date_now()
-
-        result = await cls.collection.update_one(
+        updated_id = await cls._update_with_query(
             {
                 "_id": ObjectId(project_id),
                 f"stages.{stage_id}": {"$exists": True}
@@ -271,11 +257,7 @@ class ProjectDao(BaseDao):
                 }
             }
         )
-
-        if result.modified_count == 0:
-            return None
-
-        return await cls.get_stage_by_id(project_id, stage_id)
+        return await cls.get_stage_by_id(updated_id, stage_id)
 
     @classmethod
     async def add_risk_to_project(cls, project_id: str, risk_create: Risk):
