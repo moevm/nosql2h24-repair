@@ -3,7 +3,7 @@ from jose import jwt, JWTError
 from datetime import datetime, timezone
 
 from config import settings
-from dao.user import find_user_by_id
+from dao.user import UserDao
 from schemas.utils import get_date_now
 
 
@@ -29,7 +29,7 @@ async def get_current_user(token: str = Depends(get_token)):
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Не найден ID пользователя')
 
-    user = await find_user_by_id(str(user_id))
+    user = await UserDao.find_user_by_id(str(user_id))
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='User not found')
 

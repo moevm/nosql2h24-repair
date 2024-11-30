@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status, Response, Depends
 
 from config import settings
-from dao.user import find_user_by_email, create_user, find_user_by_id
-from schemas.user import UserCreateSchema, UserLoginSchema, UserDao, UserBaseSchema
+from dao.user import UserDao
+from schemas.user import UserCreateSchema, UserLoginSchema, User, UserResponse
 from utils.password import verify_password, create_access_token, get_password_hash
 from utils.role import get_admin_role
 from utils.token import get_current_user
@@ -12,7 +12,7 @@ router = APIRouter()
 
 @router.post("/login")
 async def login_user(response: Response, user_data: UserLoginSchema) -> dict:
-    user = await find_user_by_email(user_data.email)
+    user = await UserDao.find_user_by_email(user_data.email)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -36,7 +36,7 @@ async def login_user(response: Response, user_data: UserLoginSchema) -> dict:
 
 
 @router.get("/me/")
-async def get_me(user_data: UserDao = Depends(get_current_user)):
+async def get_me(user_data: User = Depends(get_current_user)):
     return user_data
 
 

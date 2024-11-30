@@ -3,11 +3,11 @@ from database import db
 from schemas.project import ProjectCreate, ProjectResponse, Procurement, Stage, Risk, ProcurementResponse, \
     RiskResponse, \
     StageResponse, ProjectUpdate, RiskUpdate, ProcurementUpdate, StageUpdate
-from schemas.user import UserDao, Contact, ContactResponse
+from schemas.user import User, Contact, ContactResponse
 from schemas.utils import object_id_to_str, generate_id, get_date_now
 
 
-async def create_project(project_crate: ProjectCreate, user: UserDao) -> ProjectResponse:
+async def create_project(project_crate: ProjectCreate, user: User) -> ProjectResponse:
     project_collection = db.get_collection('project')
     contact = Contact(
         username=f'{user.lastname} {user.name} {user.middlename}',
@@ -76,7 +76,7 @@ async def get_projects_by_user(user_id: str) -> list[ProjectResponse] | list[Non
     return result
 
 
-async def add_contact_to_project(project_id: str, user: UserDao) -> ProjectResponse | None:
+async def add_contact_to_project(project_id: str, user: User) -> ProjectResponse | None:
     project_collection = db.get_collection('project')
     result = await project_collection.update_one(
         {"_id": ObjectId(project_id)},

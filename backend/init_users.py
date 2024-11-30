@@ -1,4 +1,4 @@
-from dao.user import create_user, find_user_by_email
+from dao.user import UserDao
 from schemas.user import UserCreateSchema, Role
 from utils.password import get_password_hash
 
@@ -40,18 +40,18 @@ async def create_users():
         role=Role.customer
     )
 
-    exist_admin = await find_user_by_email(admin_init.email)
+    exist_admin = await UserDao.find_user_by_email(admin_init.email)
     if exist_admin is None:
-        await create_user(admin_init)
+        await UserDao.create_user(admin_init)
         
-    exist_foreman = await find_user_by_email(foreman_init.email)
+    exist_foreman = await UserDao.find_user_by_email(foreman_init.email)
     if exist_foreman is None:
-        await create_user(foreman_init)
+        await UserDao.create_user(foreman_init)
         
-    exist_worker = await find_user_by_email(worker_init.email)
+    exist_worker = await UserDao.find_user_by_email(worker_init.email)
     if exist_worker is None:
-        await create_user(worker_init)
+        await UserDao.create_user(worker_init)
         
-    exist_customer = await find_user_by_email(customer_init.email)
+    exist_customer = await UserDao.find_user_by_email(customer_init.email)
     if exist_customer is None:
-        await create_user(customer_init)
+        await UserDao.create_user(customer_init)

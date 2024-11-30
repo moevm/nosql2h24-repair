@@ -3,11 +3,11 @@ from bson import ObjectId
 from database import db
 from schemas.messager import Participant, LastMessage, Chat, Message, ChatResponse, CreateMessage, \
     StatusMsg, MessageResponse
-from schemas.user import UserDao
+from schemas.user import User
 from schemas.utils import get_date_now
 
 
-async def create_chat(user_sender: UserDao, user_receiver: UserDao, content: str) -> ChatResponse | None:
+async def create_chat(user_sender: User, user_receiver: User, content: str) -> ChatResponse | None:
     chat_collection = db.get_collection('chat')
     message_collection = db.get_collection('message')
 

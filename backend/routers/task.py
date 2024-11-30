@@ -4,7 +4,7 @@ from dao.project import get_contacts_by_project_id
 from dao.task import add_task, get_all_tasks_by_user, get_task_by_id, add_worker_to_task, get_tasks_by_stage_id, \
     update_task_by_id, delete_worker_from_task
 from schemas.task import Task, TaskResponse, TaskUpdate
-from schemas.user import UserDao, Worker
+from schemas.user import User, Worker
 from utils.role import get_foreman_role
 from utils.token import get_current_user
 
@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.post('/create/{project_id}/{stage_id}', response_model=TaskResponse)
-async def create_task(project_id: str, stage_id: str, task_data: Task, foreman: UserDao = Depends(get_foreman_role)):
+async def create_task(project_id: str, stage_id: str, task_data: Task, foreman: User = Depends(get_foreman_role)):
     new_task = await add_task(project_id, stage_id, task_data)
     if new_task is None:
         raise HTTPException(
@@ -23,7 +23,7 @@ async def create_task(project_id: str, stage_id: str, task_data: Task, foreman: 
 
 
 @router.get('/get_task/{project_id}/{stage_id}/{task_id}', response_model=TaskResponse)
-async def get_task(project_id: str, stage_id: str, task_id: str, user: UserDao = Depends(get_current_user)):
+async def get_task(project_id: str, stage_id: str, task_id: str, user: User = Depends(get_current_user)):
     task = await get_task_by_id(project_id, stage_id, task_id)
     if task is None:
         raise HTTPException(
@@ -35,7 +35,7 @@ async def get_task(project_id: str, stage_id: str, task_id: str, user: UserDao =
 
 @router.put('/update_task/{project_id}/{stage_id}/{task_id}', response_model=TaskResponse)
 async def update_task(project_id: str, stage_id: str, task_id: str, task_data: TaskUpdate,
-                      user: UserDao = Depends(get_foreman_role)):
+                      user: User = Depends(get_foreman_role)):
     task = await update_task_by_id(project_id, stage_id, task_id, task_data)
     if task is None:
         raise HTTPException(
@@ -52,14 +52,14 @@ async def get_stage_tasks(project_id: str, stage_id: str):
 
 
 @router.get('/get_all', response_model=list[TaskResponse] | list[None])
-async def get_all_tasks(user: UserDao = Depends(get_current_user)):
+async def get_all_tasks(user: User = Depends(get_current_user)):
     tasks = await get_all_tasks_by_user(user.id)
     return tasks
 
 
 @router.put('/{project_id}/{stage_id}/{task_id}/{worker_id}', response_model=TaskResponse)
 async def add_worker(project_id: str, stage_id: str, task_id: str, worker_id: str,
-                     foreman: UserDao = Depends(get_foreman_role)):
+                     foreman: User = Depends(get_foreman_role)):
     contacts = await get_contacts_by_project_id(project_id)
     for contact in contacts:
         if contact.id == worker_id:
@@ -83,7 +83,7 @@ async def add_worker(project_id: str, stage_id: str, task_id: str, worker_id: st
 
 @router.delete('/{project_id}/{stage_id}/{task_id}/{worker_id}', response_model=dict[str, str])
 async def delete_worker(project_id: str, stage_id: str, task_id: str, worker_id: str,
-                        foreman: UserDao = Depends(get_foreman_role)):
+                        foreman: User = Depends(get_foreman_role)):
     delete_id = await delete_worker_from_task(project_id, stage_id, task_id, worker_id)
 
     if delete_id is None:
