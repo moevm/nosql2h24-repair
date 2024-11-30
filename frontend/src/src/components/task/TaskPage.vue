@@ -42,7 +42,7 @@
       </div>
 
       <div class="task-contacts">
-        <ContactsComponent />
+        <ContactsComponent :contacts="contacts" />
       </div>
     </div>
   </div>
@@ -64,6 +64,7 @@ export default {
   },
   data() {
     return {
+      contacts: [],
       projectName: getProjectName(),
       stageName: getStageName(),
       taskName: "",
@@ -85,6 +86,7 @@ export default {
         this.status= response.data.status;
         this.taskDescription = response.data.description;
         this.taskId= response.data.id;
+        this.contacts = response.data.workers;
         console.log(this.startDate);
       } catch (error) {
         console.error('Ошибка при загрузке Задачи:', error);

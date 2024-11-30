@@ -29,8 +29,13 @@ export default {
   },
   methods: {
     addContact() {
-      router.push(`/add_contact`);
-      console.log('Добавить контакт');
+      if(this.$route.path === '/project') {
+        router.push(`/add_contact`);
+        console.log('Добавить контакт');
+      }
+      if(this.$route.path === '/tasks/viewRedactorTask') {
+        router.push(`/add_worker`);
+      }
     },
     deleteContact(index) {
       this.$emit('delete-contact', index);

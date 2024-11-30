@@ -11,7 +11,7 @@ import MessagesPage from '../components/message/MessagesPage.vue';
 import ChatPage from '../components/message/ChatPage.vue';
 import RiskFormComponent from '../components/risk/RiskFormComponent.vue';
 import RiskDetails from '../components/risk/RiskDetails.vue';
-// import MaterialDetail from '../components/material/MaterialDetail.vue';
+import AddWorkerPage from "@/src/components/message/AddWorkerPage.vue";
 import MaterialEditAdd from '../components/material/MaterialEditAdd.vue';
 import TasksListPage from '../components/task/TasksListPage.vue';
 import TaskPage from '../components/task/TaskPage.vue';
@@ -44,6 +44,7 @@ const routes = [
   { path: '/add-stage', name: 'add-stage', component: AddStagePage },
   { path: '/user-search', component: UserSearchPage },
   { path: '/statistics', component: StatisticsPage },
+  {path: '/add_worker', component: AddWorkerPage},
 ];
 
 const router = createRouter({
