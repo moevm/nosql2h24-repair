@@ -1,387 +1,357 @@
 from bson import ObjectId
+
+from dao.base import BaseDao
 from database import db
 from schemas.project import ProjectCreate, ProjectResponse, Procurement, Stage, Risk, ProcurementResponse, \
     RiskResponse, \
     StageResponse, ProjectUpdate, RiskUpdate, ProcurementUpdate, StageUpdate
-from schemas.user import UserDao, Contact, ContactResponse
+from schemas.user import User, Contact, ContactResponse
 from schemas.utils import object_id_to_str, generate_id, get_date_now
 
 
-async def create_project(project_crate: ProjectCreate, user: UserDao) -> ProjectResponse:
-    project_collection = db.get_collection('project')
-    contact = Contact(
-        username=f'{user.lastname} {user.name} {user.middlename}',
-        role=user.role
-    )
-    project_crate.add_contact(user.id, contact)
-    result = await project_collection.insert_one(project_crate.model_dump())
-    return await get_project_by_id(result.inserted_id)
+class ProjectDao(BaseDao):
+    collection = db.get_collection('project')
 
+    @classmethod
+    async def create_project(cls, project_create: ProjectCreate, user: User) -> ProjectResponse:
+        contact = Contact(
+            username=f'{user.lastname} {user.name} {user.middlename}',
+            role=user.role
+        )
+        project_create.add_contact(user.id, contact)
+        created_id = await cls._create(project_create.model_dump())
+        return await cls.get_project_by_id(created_id)
 
-async def update_project_by_id(project_id: str, project_update: ProjectUpdate) -> ProjectResponse | None:
-    project_collection = db.get_collection('project')
-    update_data = project_update.model_dump()
-    update_data["updated_at"] = get_date_now()
+    @classmethod
+    async def get_project_by_id(cls, project_id: str) -> ProjectResponse | None:
+        project = await cls._get_one_by_id(project_id)
+        if project is None:
+            return None
+        return ProjectResponse(**project)
 
-    result = await project_collection.update_one(
-        {"_id": ObjectId(project_id)},
-        {"$set": update_data}
-    )
+    @classmethod
+    async def update_project_by_id(cls, project_id: str, project_update: ProjectUpdate) -> ProjectResponse | None:
+        update_data = project_update.model_dump()
+        updated_id = await cls._update(project_id, update_data)
+        return await cls.get_project_by_id(updated_id)
 
-    if result.modified_count == 0:
+    @classmethod
+    async def get_project_by_name(cls, project_name: str) -> ProjectResponse | None:
+        project = await cls._get_one_by_field('name', project_name)
+        if project is None:
+            return None
+        return ProjectResponse(**project)
+
+    @classmethod
+    async def get_all_projects(cls) -> list[ProjectResponse] | list[None]:
+        cursor = cls.collection.find()
+        projects_list = await cursor.to_list()
+        result = []
+        for project in projects_list:
+            project = object_id_to_str(project)
+            result.append(ProjectResponse(**project))
+        return result
+
+    @classmethod
+    async def get_projects_by_user(cls, user_id: str) -> list[ProjectResponse] | list[None]:
+        cursor = cls.collection.find(
+            {f"contacts.{user_id}": {"$exists": True}}
+        )
+        projects_list = await cursor.to_list()
+        result = []
+        for project in projects_list:
+            project = object_id_to_str(project)
+            result.append(ProjectResponse(**project))
+        return result
+
+    @classmethod
+    async def add_contact_to_project(cls, project_id: str, user: User) -> ProjectResponse | None:
+        result = await cls.collection.update_one(
+            {"_id": ObjectId(project_id)},
+            {
+                "$set": {
+                    f"contacts.{user.id}": {
+                        "username": f"{user.lastname} {user.name} {user.middlename}",
+                        "role": user.role,
+                        "updated_at": get_date_now(),
+                        "created_at": user.created_at
+                    }
+                }
+            },
+        )
+        return await cls.get_project_by_id(project_id)
+
+    @classmethod
+    async def get_contacts_by_project_id(cls, project_id: str) -> list[ContactResponse] | list[None] | None:
+        project = await cls.collection.find_one({"_id": ObjectId(project_id)}, {"contacts": 1})
+        if project and "contacts" in project:
+            contacts = [ContactResponse(id=contact_id, **contact_data) for contact_id, contact_data in
+                        project["contacts"].items()]
+            return contacts
+        elif project is None:
+            return None
+        return []
+
+    @classmethod
+    async def get_contact_by_id(cls, project_id: str, contact_id: str) -> ContactResponse | None:
+        project = await cls._get_one_by_id(project_id)
+        if not project:
+            return None
+
+        contact = project.get("contacts", {}).get(contact_id)
+        if not contact or contact.get("user_id") != ObjectId(contact_id):
+            return None
+        return ContactResponse(**contact)
+
+    @classmethod
+    async def add_procurement_to_project(cls, project_id: str,
+                                         procurement_create: Procurement) -> ProjectResponse | None:
+        procurement = procurement_create.model_dump()
+        procurement['quantity'] = str(procurement['quantity'])
+        procurement['price'] = str(procurement['price'])
+        result = await cls.collection.update_one(
+            {"_id": ObjectId(project_id)},
+            {
+                "$set": {f"procurements.{generate_id()}": procurement}
+            }
+        )
+        return await cls.get_project_by_id(project_id)
+
+    @classmethod
+    async def delete_procurement(cls, project_id: str, procurement_id: str) -> str | None:
+        result = await cls.collection.update_one(
+            {
+                "_id": ObjectId(project_id),
+                f"procurements.{procurement_id}": {"$exists": True}
+            },
+            {
+                "$unset": {f"procurements.{procurement_id}": ""}
+            }
+        )
+
+        if result.modified_count == 0:
+            return None
+
+        return procurement_id
+
+    @classmethod
+    async def get_procurements_by_project_id(cls, project_id: str) -> list[ProcurementResponse] | list[None] | None:
+        project = await cls.collection.find_one({"_id": ObjectId(project_id)}, {"procurements": 1})
+        if project and "procurements" in project:
+            procurements = [ProcurementResponse(id=procurement_id, **procurement_data) for
+                            procurement_id, procurement_data
+                            in
+                            project["procurements"].items()]
+            return procurements
+        elif project is None:
+            return None
+        return []
+
+    @classmethod
+    async def get_procurement_by_id(cls, project_id: str, procurement_id: str) -> ProcurementResponse | None:
+        project = await cls.collection.find_one(
+            {
+                "_id": ObjectId(project_id),
+                f"procurements.{procurement_id}": {"$exists": True}
+            },
+            {
+                f"procurements.{procurement_id}": 1
+            }
+        )
+
+        if project:
+            procurement = project["procurements"][procurement_id]
+            return ProcurementResponse(id=procurement_id, **procurement)
         return None
 
-    return await get_project_by_id(project_id)
+    @classmethod
+    async def update_procurement_by_id(cls, project_id: str, procurement_id: str,
+                                       procurement_update: ProcurementUpdate) -> ProcurementResponse | None:
 
+        update_data = procurement_update.model_dump()
+        update_data["updated_at"] = get_date_now()
 
-async def get_project_by_id(project_id: str) -> ProjectResponse | None:
-    project_collection = db.get_collection('project')
-    project = await project_collection.find_one({'_id': ObjectId(project_id)})
-    if project is None:
-        return None
-    project = object_id_to_str(project)
-    return ProjectResponse(**project)
-
-
-async def get_project_by_name(project_name: str) -> ProjectResponse | None:
-    project_collection = db.get_collection('project')
-    project = await project_collection.find_one({'name': project_name})
-    if project is None:
-        return None
-    project = object_id_to_str(project)
-    return ProjectResponse(**project)
-
-
-async def get_all_projects() -> list[ProjectResponse] | list[None]:
-    project_collection = db.get_collection('project')
-    cursor = project_collection.find()
-    projects_list = await cursor.to_list()
-    result = []
-    for project in projects_list:
-        project = object_id_to_str(project)
-        result.append(ProjectResponse(**project))
-    return result
-
-
-async def get_projects_by_user(user_id: str) -> list[ProjectResponse] | list[None]:
-    project_collection = db.get_collection('project')
-    cursor = project_collection.find(
-        {f"contacts.{user_id}": {"$exists": True}}
-    )
-    projects_list = await cursor.to_list()
-    result = []
-    for project in projects_list:
-        project = object_id_to_str(project)
-        result.append(ProjectResponse(**project))
-    return result
-
-
-async def add_contact_to_project(project_id: str, user: UserDao) -> ProjectResponse | None:
-    project_collection = db.get_collection('project')
-    result = await project_collection.update_one(
-        {"_id": ObjectId(project_id)},
-        {
-            "$set": {
-                f"contacts.{user.id}": {
-                    "username": f"{user.lastname} {user.name} {user.middlename}",
-                    "role": user.role,
-                    "updated_at": get_date_now(),
-                    "created_at": user.created_at
+        result = await cls.collection.update_one(
+            {
+                "_id": ObjectId(project_id),
+                f"procurements.{procurement_id}": {"$exists": True}
+            },
+            {
+                "$set": {
+                    f"procurements.{procurement_id}.item_name": update_data["item_name"],
+                    f"procurements.{procurement_id}.quantity": update_data["quantity"],
+                    f"procurements.{procurement_id}.price": update_data["price"],
+                    f"procurements.{procurement_id}.inStock": update_data["inStock"],
+                    f"procurements.{procurement_id}.units": update_data["units"],
+                    f"procurements.{procurement_id}.delivery_date": update_data["delivery_date"],
+                    f"procurements.{procurement_id}.created_by": update_data["created_by"],
+                    f"procurements.{procurement_id}.updated_at": update_data["updated_at"],
                 }
             }
-        },
-    )
-    return await get_project_by_id(project_id)
+        )
 
+        if result.modified_count == 0:
+            return None
 
-async def get_contacts_by_project_id(project_id: str) -> list[ContactResponse] | list[None] | None:
-    project_collection = db.get_collection('project')
-    project = await project_collection.find_one({"_id": ObjectId(project_id)}, {"contacts": 1})
-    if project and "contacts" in project:
-        contacts = [ContactResponse(id=contact_id, **contact_data) for contact_id, contact_data in
-                    project["contacts"].items()]
-        return contacts
-    elif project is None:
-        return None
-    return []
+        return await cls.get_procurement_by_id(project_id, procurement_id)
 
-
-async def get_contact_by_id(project_id: str, contact_id: str) -> ContactResponse | None:
-    project_collection = db.get_collection('project')
-    project = await project_collection.find_one({"_id": ObjectId(project_id)})
-    if not project:
-        return None
-
-    contact = project.get("contacts", {}).get(contact_id)
-    if not contact or contact.get("user_id") != ObjectId(contact_id):
-        return None
-    return ContactResponse(**contact)
-
-
-async def add_procurement_to_project(project_id: str, procurement_create: Procurement) -> ProjectResponse | None:
-    project_collection = db.get_collection('project')
-    procurement = procurement_create.model_dump()
-    procurement['quantity'] = str(procurement['quantity'])
-    procurement['price'] = str(procurement['price'])
-    result = await project_collection.update_one(
-        {"_id": ObjectId(project_id)},
-        {
-            "$set": {f"procurements.{generate_id()}": procurement}
-        }
-    )
-    return await get_project_by_id(project_id)
-
-
-async def delete_procurement(project_id: str, procurement_id: str) -> str | None:
-    project_collection = db.get_collection('project')
-
-    result = await project_collection.update_one(
-        {
-            "_id": ObjectId(project_id),
-            f"procurements.{procurement_id}": {"$exists": True}
-        },
-        {
-            "$unset": {f"procurements.{procurement_id}": ""}
-        }
-    )
-
-    if result.modified_count == 0:
-        return None
-
-    return procurement_id
-
-
-async def get_procurements_by_project_id(project_id: str) -> list[ProcurementResponse] | list[None] | None:
-    project_collection = db.get_collection('project')
-    project = await project_collection.find_one({"_id": ObjectId(project_id)}, {"procurements": 1})
-    if project and "procurements" in project:
-        procurements = [ProcurementResponse(id=procurement_id, **procurement_data) for procurement_id, procurement_data
-                        in
-                        project["procurements"].items()]
-        return procurements
-    elif project is None:
-        return None
-    return []
-
-
-async def get_procurement_by_id(project_id: str, procurement_id: str) -> ProcurementResponse | None:
-    project_collection = db.get_collection('project')
-    project = await project_collection.find_one(
-        {
-            "_id": ObjectId(project_id),
-            f"procurements.{procurement_id}": {"$exists": True}
-        },
-        {
-            f"procurements.{procurement_id}": 1
-        }
-    )
-
-    if project:
-        procurement = project["procurements"][procurement_id]
-        return ProcurementResponse(id=procurement_id, **procurement)
-    return None
-
-
-async def update_procurement_by_id(project_id: str, procurement_id: str,
-                                   procurement_update: ProcurementUpdate) -> ProcurementResponse | None:
-    project_collection = db.get_collection('project')
-
-    update_data = procurement_update.model_dump()
-    update_data["updated_at"] = get_date_now()
-
-    result = await project_collection.update_one(
-        {
-            "_id": ObjectId(project_id),
-            f"procurements.{procurement_id}": {"$exists": True}
-        },
-        {
-            "$set": {
-                f"procurements.{procurement_id}.item_name": update_data["item_name"],
-                f"procurements.{procurement_id}.quantity": update_data["quantity"],
-                f"procurements.{procurement_id}.price": update_data["price"],
-                f"procurements.{procurement_id}.inStock": update_data["inStock"],
-                f"procurements.{procurement_id}.units": update_data["units"],
-                f"procurements.{procurement_id}.delivery_date": update_data["delivery_date"],
-                f"procurements.{procurement_id}.created_by": update_data["created_by"],
-                f"procurements.{procurement_id}.updated_at": update_data["updated_at"],
+    @classmethod
+    async def add_stage_to_project(cls, project_id: str, stage_create: Stage):
+        project_collection = db.get_collection('project')
+        result = await project_collection.update_one(
+            {'_id': ObjectId(project_id)},
+            {
+                "$set": {f"stages.{generate_id()}": stage_create.model_dump()}
             }
-        }
-    )
+        )
+        return await cls.get_project_by_id(project_id)
 
-    if result.modified_count == 0:
-        return None
+    @classmethod
+    async def delete_stage(cls, project_id: str, stage_id: str) -> str | None:
 
-    return await get_procurement_by_id(project_id, procurement_id)
-
-
-async def add_stage_to_project(project_id: str, stage_create: Stage):
-    project_collection = db.get_collection('project')
-    result = await project_collection.update_one(
-        {'_id': ObjectId(project_id)},
-        {
-            "$set": {f"stages.{generate_id()}": stage_create.model_dump()}
-        }
-    )
-    return await get_project_by_id(project_id)
-
-
-async def delete_stage(project_id: str, stage_id: str) -> str | None:
-    project_collection = db.get_collection('project')
-
-    result = await project_collection.update_one(
-        {
-            "_id": ObjectId(project_id),
-            f"stages.{stage_id}": {"$exists": True}
-        },
-        {
-            "$unset": {f"stages.{stage_id}": ""}
-        }
-    )
-
-    if result.modified_count == 0:
-        return None
-
-    return stage_id
-
-
-async def get_stages_by_project_id(project_id: str) -> list[StageResponse] | list[None] | None:
-    project_collection = db.get_collection('project')
-    project = await project_collection.find_one({"_id": ObjectId(project_id)}, {"stages": 1})
-    if project and "stages" in project:
-        stages = [StageResponse(id=stage_id, **stage_data) for stage_id, stage_data in
-                  project["stages"].items()]
-        return stages
-    elif project is None:
-        return None
-    return []
-
-
-async def get_stage_by_id(project_id: str, stage_id: str) -> StageResponse | None:
-    project_collection = db.get_collection('project')
-    project = await project_collection.find_one(
-        {
-            "_id": ObjectId(project_id),
-            f"stages.{stage_id}": {"$exists": True}
-        },
-        {
-            f"stages.{stage_id}": 1
-        }
-    )
-
-    if project:
-        stage = project["stages"][stage_id]
-        return StageResponse(id=stage_id, **stage)
-    return None
-
-
-async def update_stage_by_id(project_id: str, stage_id: str, stage_update: StageUpdate) -> StageResponse | None:
-    project_collection = db.get_collection('project')
-
-    update_data = stage_update.model_dump()
-    update_data["updated_at"] = get_date_now()
-
-    result = await project_collection.update_one(
-        {
-            "_id": ObjectId(project_id),
-            f"stages.{stage_id}": {"$exists": True}
-        },
-        {
-            "$set": {
-                f"stages.{stage_id}.name": update_data["name"],
-                f"stages.{stage_id}.start_date": update_data["start_date"],
-                f"stages.{stage_id}.end_date": update_data["end_date"],
-                f"stages.{stage_id}.updated_at": update_data["updated_at"],
+        result = await cls.collection.update_one(
+            {
+                "_id": ObjectId(project_id),
+                f"stages.{stage_id}": {"$exists": True}
+            },
+            {
+                "$unset": {f"stages.{stage_id}": ""}
             }
-        }
-    )
+        )
 
-    if result.modified_count == 0:
-        return None
+        if result.modified_count == 0:
+            return None
 
-    return await get_stage_by_id(project_id, stage_id)
+        return stage_id
 
+    @classmethod
+    async def get_stages_by_project_id(cls, project_id: str) -> list[StageResponse] | list[None] | None:
+        project = await cls.collection.find_one({"_id": ObjectId(project_id)}, {"stages": 1})
+        if project and "stages" in project:
+            stages = [StageResponse(id=stage_id, **stage_data) for stage_id, stage_data in
+                      project["stages"].items()]
+            return stages
+        elif project is None:
+            return None
+        return []
 
-async def add_risk_to_project(project_id: str, risk_create: Risk):
-    project_collection = db.get_collection('project')
-    result = await project_collection.update_one(
-        {"_id": ObjectId(project_id)},
-        {
-            "$set": {f"risks.{generate_id()}": risk_create.model_dump()}
-        }
-    )
-    return await get_project_by_id(project_id)
-
-
-async def delete_risk(project_id: str, risk_id: str) -> str | None:
-    project_collection = db.get_collection('project')
-
-    result = await project_collection.update_one(
-        {
-            "_id": ObjectId(project_id),
-            f"risks.{risk_id}": {"$exists": True}
-        },
-        {
-            "$unset": {f"risks.{risk_id}": ""}
-        }
-    )
-
-    if result.modified_count == 0:
-        return None
-
-    return risk_id
-
-
-async def get_risks_by_project_id(project_id: str) -> list[RiskResponse] | list[None] | None:
-    project_collection = db.get_collection('project')
-    project = await project_collection.find_one({"_id": ObjectId(project_id)}, {"risks": 1})
-    if project and "risks" in project:
-        risks = [RiskResponse(id=risk_id, **risk_data) for risk_id, risk_data in
-                 project["risks"].items()]
-        return risks
-    elif project is None:
-        return None
-    return []
-
-
-async def get_risk_by_id(project_id: str, risk_id: str) -> RiskResponse | None:
-    project_collection = db.get_collection('project')
-    project = await project_collection.find_one(
-        {
-            "_id": ObjectId(project_id),
-            f"risks.{risk_id}": {"$exists": True}
-        },
-        {
-            f"risks.{risk_id}": 1
-        }
-    )
-
-    if project:
-        risk = project["risks"][risk_id]
-        return RiskResponse(id=risk_id, **risk)
-    return None
-
-
-async def update_risk_by_id(project_id: str, risk_id: str, risk_update: RiskUpdate) -> RiskResponse | None:
-    project_collection = db.get_collection('project')
-
-    update_data = risk_update.model_dump()
-    update_data["updated_at"] = get_date_now()
-
-    result = await project_collection.update_one(
-        {
-            "_id": ObjectId(project_id),
-            f"risks.{risk_id}": {"$exists": True}
-        },
-        {
-            "$set": {
-                f"risks.{risk_id}.name": update_data["name"],
-                f"risks.{risk_id}.description": update_data["description"],
-                f"risks.{risk_id}.updated_at": update_data["updated_at"]
+    @classmethod
+    async def get_stage_by_id(cls, project_id: str, stage_id: str) -> StageResponse | None:
+        project = await cls.collection.find_one(
+            {
+                "_id": ObjectId(project_id),
+                f"stages.{stage_id}": {"$exists": True}
+            },
+            {
+                f"stages.{stage_id}": 1
             }
-        }
-    )
+        )
 
-    if result.modified_count == 0:
+        if project:
+            stage = project["stages"][stage_id]
+            return StageResponse(id=stage_id, **stage)
         return None
 
-    return await get_risk_by_id(project_id, risk_id)
+    @classmethod
+    async def update_stage_by_id(cls, project_id: str, stage_id: str, stage_update: StageUpdate) -> StageResponse | None:
+        update_data = stage_update.model_dump()
+        update_data["updated_at"] = get_date_now()
+
+        result = await cls.collection.update_one(
+            {
+                "_id": ObjectId(project_id),
+                f"stages.{stage_id}": {"$exists": True}
+            },
+            {
+                "$set": {
+                    f"stages.{stage_id}.name": update_data["name"],
+                    f"stages.{stage_id}.start_date": update_data["start_date"],
+                    f"stages.{stage_id}.end_date": update_data["end_date"],
+                    f"stages.{stage_id}.updated_at": update_data["updated_at"],
+                }
+            }
+        )
+
+        if result.modified_count == 0:
+            return None
+
+        return await cls.get_stage_by_id(project_id, stage_id)
+
+    @classmethod
+    async def add_risk_to_project(cls, project_id: str, risk_create: Risk):
+        result = await cls.collection.update_one(
+            {"_id": ObjectId(project_id)},
+            {
+                "$set": {f"risks.{generate_id()}": risk_create.model_dump()}
+            }
+        )
+        return await cls.get_project_by_id(project_id)
+
+    @classmethod
+    async def delete_risk(cls, project_id: str, risk_id: str) -> str | None:
+        result = await cls.collection.update_one(
+            {
+                "_id": ObjectId(project_id),
+                f"risks.{risk_id}": {"$exists": True}
+            },
+            {
+                "$unset": {f"risks.{risk_id}": ""}
+            }
+        )
+
+        if result.modified_count == 0:
+            return None
+
+        return risk_id
+
+    @classmethod
+    async def get_risks_by_project_id(cls, project_id: str) -> list[RiskResponse] | list[None] | None:
+        project = await cls.collection.find_one({"_id": ObjectId(project_id)}, {"risks": 1})
+        if project and "risks" in project:
+            risks = [RiskResponse(id=risk_id, **risk_data) for risk_id, risk_data in
+                     project["risks"].items()]
+            return risks
+        elif project is None:
+            return None
+        return []
+
+    @classmethod
+    async def get_risk_by_id(cls, project_id: str, risk_id: str) -> RiskResponse | None:
+        project = await cls.collection.find_one(
+            {
+                "_id": ObjectId(project_id),
+                f"risks.{risk_id}": {"$exists": True}
+            },
+            {
+                f"risks.{risk_id}": 1
+            }
+        )
+
+        if project:
+            risk = project["risks"][risk_id]
+            return RiskResponse(id=risk_id, **risk)
+        return None
+
+    @classmethod
+    async def update_risk_by_id(cls, project_id: str, risk_id: str, risk_update: RiskUpdate) -> RiskResponse | None:
+        update_data = risk_update.model_dump()
+        update_data["updated_at"] = get_date_now()
+
+        result = await cls.collection.update_one(
+            {
+                "_id": ObjectId(project_id),
+                f"risks.{risk_id}": {"$exists": True}
+            },
+            {
+                "$set": {
+                    f"risks.{risk_id}.name": update_data["name"],
+                    f"risks.{risk_id}.description": update_data["description"],
+                    f"risks.{risk_id}.updated_at": update_data["updated_at"]
+                }
+            }
+        )
+
+        if result.modified_count == 0:
+            return None
+
+        return await cls.get_risk_by_id(project_id, risk_id)

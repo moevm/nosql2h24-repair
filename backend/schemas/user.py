@@ -25,7 +25,7 @@ class UserCreateSchema(BaseModel):
         from_attributes = True
 
 
-class UserBaseSchema(UserCreateSchema):
+class UserResponse(UserCreateSchema):
     id: str
     created_at: Optional[datetime] = Field(get_date_now())
     updated_at: Optional[datetime] = Field(get_date_now())
@@ -36,7 +36,7 @@ class UserLoginSchema(BaseModel):
     password: str = Field(min_length=8)
 
 
-class UserDao(UserBaseSchema):
+class User(UserResponse):
     password: str = Field(min_length=8)
 
 
