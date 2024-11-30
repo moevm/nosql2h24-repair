@@ -32,6 +32,17 @@ async def get_task(project_id: str, stage_id: str, task_id: str, user: User = De
     return task
 
 
+@router.delete('/delete/{project_id}/{stage_id}/{task_id}')
+async def remove_task(project_id: str, stage_id: str, task_id: str, user: User = Depends(get_foreman_role)):
+    deleted_id = await TaskDAO.remove_task(project_id, stage_id, task_id)
+    if deleted_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Задача не найдена'
+        )
+    return deleted_id
+
+
 @router.put('/update_task/{project_id}/{stage_id}/{task_id}', response_model=TaskResponse)
 async def update_task(project_id: str, stage_id: str, task_id: str, task_data: TaskUpdate,
                       user: User = Depends(get_foreman_role)):

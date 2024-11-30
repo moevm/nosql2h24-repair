@@ -24,6 +24,19 @@ class TaskDAO(BaseDao):
         return None
 
     @classmethod
+    async def remove_task(cls, project_id: str, stage_id: str, task_id: str) -> str | None:
+        deleted_id = await cls._update_with_query(
+            {
+                "_id": ObjectId(project_id),
+                f"stages.{stage_id}.tasks.{task_id}": {"$exists": True}
+            },
+            {
+                "$unset": {f"stages.{stage_id}.tasks.{task_id}": ""}
+            }
+        )
+        return deleted_id
+
+    @classmethod
     async def get_task_by_id(cls, project_id: str, stage_id: str, task_id: str) -> TaskResponse | None:
         project = await cls.collection.find_one(
             {
