@@ -261,17 +261,17 @@ class ProjectDao(BaseDao):
 
     @classmethod
     async def add_risk_to_project(cls, project_id: str, risk_create: Risk):
-        result = await cls.collection.update_one(
+        updated_id = await cls._update_with_query(
             {"_id": ObjectId(project_id)},
             {
                 "$set": {f"risks.{generate_id()}": risk_create.model_dump()}
             }
         )
-        return await cls.get_project_by_id(project_id)
+        return await cls.get_project_by_id(updated_id)
 
     @classmethod
     async def delete_risk(cls, project_id: str, risk_id: str) -> str | None:
-        result = await cls.collection.update_one(
+        updated_id = await cls._update_with_query(
             {
                 "_id": ObjectId(project_id),
                 f"risks.{risk_id}": {"$exists": True}
@@ -280,10 +280,6 @@ class ProjectDao(BaseDao):
                 "$unset": {f"risks.{risk_id}": ""}
             }
         )
-
-        if result.modified_count == 0:
-            return None
-
         return risk_id
 
     @classmethod
