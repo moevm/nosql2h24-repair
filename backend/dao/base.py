@@ -1,3 +1,5 @@
+from typing import Mapping, Any, Sequence
+
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorCollection
 
@@ -16,13 +18,13 @@ class BaseDao:
             return str(result.inserted_id)
 
     @classmethod
-    async def _get_by_id(cls, id: str) -> dict:
+    async def _get_one_by_id(cls, id: str) -> dict:
         if cls.collection is not None:
             data = await cls.collection.find_one({"_id": ObjectId(id)})
             return object_id_to_str(data)
 
     @classmethod
-    async def _get_by_field(cls, field: str, data: str) -> dict:
+    async def _get_one_by_field(cls, field: str, data: str) -> dict:
         if cls.collection is not None:
             data = await cls.collection.find_one({field: data})
             return object_id_to_str(data)
@@ -39,6 +41,14 @@ class BaseDao:
             if result.modified_count == 0:
                 return None
             return id
+        
+    # @classmethod
+    # async def _update_with_query(cls, query: list[dict[str, Any]]) -> str | None:
+    #     if cls.collection is not None:
+    #         result = await cls.collection.update_one(query)
+    #         if result.modified_count == 0:
+    #             return None
+    #         return str(query["_id"])
 
     # @classmethod        
     # async def _find_with_filters(cls, query: dict) -> dict:

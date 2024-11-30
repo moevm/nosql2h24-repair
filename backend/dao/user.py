@@ -13,14 +13,14 @@ class UserDao(BaseDao):
 
     @classmethod
     async def find_user_by_email(cls, email) -> User | None:
-        user = await cls._get_by_field('email', email)
+        user = await cls._get_one_by_field('email', email)
         if not user:
             return None
         return User(**user)
 
     @classmethod
     async def find_user_by_id(cls, user_id: str) -> User | None:
-        user = await cls._get_by_id(user_id)
+        user = await cls._get_one_by_id(user_id)
         if not user:
             return None
         return User(**user)

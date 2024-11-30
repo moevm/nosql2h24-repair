@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from dao.project import add_contact_to_project, get_contacts_by_project_id
+from dao.project import ProjectDao
 from dao.user import UserDao
 from schemas.project import ProjectResponse
 from schemas.user import User, ContactCreate, ContactResponse
@@ -18,13 +18,13 @@ async def add_contact(project_id: str, contact_data: ContactCreate, foreman: Use
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='Пользователя не существует'
         )
-    project = await add_contact_to_project(project_id, user_to_add)
+    project = await ProjectDao.add_contact_to_project(project_id, user_to_add)
     return {"updated_project": project}
 
 
 @router.get("/{project_id}/get_contacts", response_model=dict[str, list[ContactResponse] | list[None]])
 async def get_contacts(project_id: str, user: User = Depends(get_current_user)):
-    contacts = await get_contacts_by_project_id(project_id)
+    contacts = await ProjectDao.get_contacts_by_project_id(project_id)
     if contacts is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from dao.project import add_procurement_to_project, get_procurements_by_project_id, get_procurement_by_id, \
-    update_procurement_by_id, delete_procurement
+from dao.project import ProjectDao
 from schemas.project import ProjectResponse, Procurement, ProcurementResponse, ProcurementUpdate
 from schemas.user import Contact, User
 from utils.role import get_foreman_role
@@ -16,7 +15,7 @@ async def add_procurement(project_id: str, procurement_data: Procurement, forema
         username=f'{foreman.lastname} {foreman.name} {foreman.middlename}',
         role=foreman.role
     )
-    project = await add_procurement_to_project(project_id, procurement_data)
+    project = await ProjectDao.add_procurement_to_project(project_id, procurement_data)
     if project is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -27,7 +26,7 @@ async def add_procurement(project_id: str, procurement_data: Procurement, forema
 
 @router.get("/{project_id}/get_procurements", response_model=dict[str, list[ProcurementResponse] | list[None]])
 async def get_procurements(project_id: str, user: User = Depends(get_current_user)):
-    procurements = await get_procurements_by_project_id(project_id)
+    procurements = await ProjectDao.get_procurements_by_project_id(project_id)
     if procurements is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -38,7 +37,7 @@ async def get_procurements(project_id: str, user: User = Depends(get_current_use
 
 @router.get("/{project_id}/get_procurement/{procurement_id}", response_model=dict[str, ProcurementResponse])
 async def get_procurement(project_id: str, procurement_id: str, user: User = Depends(get_current_user)):
-    procurement = await get_procurement_by_id(project_id, procurement_id)
+    procurement = await ProjectDao.get_procurement_by_id(project_id, procurement_id)
     if procurement is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -55,7 +54,7 @@ async def update_procurement(project_id: str, procurement_id: str, procurement_d
         role=user.role
     )
 
-    procurement = await update_procurement_by_id(project_id, procurement_id, procurement_data)
+    procurement = await ProjectDao.update_procurement_by_id(project_id, procurement_id, procurement_data)
     if procurement is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -67,7 +66,7 @@ async def update_procurement(project_id: str, procurement_id: str, procurement_d
 
 @router.delete("/{project_id}/delete_procurement/{procurement_id}", response_model=dict[str, str])
 async def remove_procurement(project_id: str, procurement_id: str, user: User = Depends(get_foreman_role)):
-    deleted_id = await delete_procurement(project_id, procurement_id)
+    deleted_id = await ProjectDao.delete_procurement(project_id, procurement_id)
     if deleted_id is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
