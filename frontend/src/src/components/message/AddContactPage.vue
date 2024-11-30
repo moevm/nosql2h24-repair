@@ -61,18 +61,35 @@ export default {
     async searchUsers() {
       this.users = [];
       try {
-        console.log(this.lastname);
-        const response = await axios.get(`/api/user/find/?${this.lastname}?${this.name}?${this.middelname}?${this.selectedRole}`);
-        // console.log(response.data);
-        this.users.push(response.data);
-        // this.users = Object.values(response.data).map(user => ({
-        //   name: user.name,
-        //   lastname: user.lastname,
-        //   middlename: user.middlename,
-        //   id: user.id,
-        //   role: user.role,
-        // }));
-        console.log(this.users);
+        const params = new URLSearchParams({
+        });
+
+        if (this.selectedRole) {
+          params.append('role', this.selectedRole);
+        }
+        if(this.name){
+          params.append('name', this.name);
+        }
+        if (this.middelname) {
+          params.append('middlename', this.middelname);
+        }
+        if(this.lastname){
+          params.append('lastname', this.lastname);
+        }
+        // console.log(params.toString());
+        // console.log(this.lastname);
+        // console.log(`/api/user/find/?${params.toString()}`);
+        const response = await axios.get(`/api/user/find/?${params.toString()}`);
+        // console.log("это дата",response.data);
+        // this.users.push(response.data);
+        this.users = Object.values(response.data).map(user => ({
+          name: user.name,
+          lastname: user.lastname,
+          middlename: user.middlename,
+          id: user.id,
+          role: user.role,
+        }));
+        // console.log(this.users);
       } catch (error) {
         console.error('Ошибка при загрузке контактов:', error);
         if (error.response && error.response.data.detail) {
