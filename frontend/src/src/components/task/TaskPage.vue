@@ -42,7 +42,9 @@
       </div>
 
       <div class="task-contacts">
-        <ContactsComponent :contacts="contacts" />
+        <ContactsComponent :contacts="contacts"
+                           @delete="deleteWorker"
+        />
       </div>
     </div>
   </div>
@@ -76,6 +78,9 @@ export default {
     };
   },
   methods: {
+    deleteWorker(id){
+      this.contacts = this.contacts.filter(contact => contact.id !== id);
+    },
     async fetchTaskData() {
       try {
         const response = await axios.get(`/api/tasks/get_task/${getProjectId()}/${getStageId()}/${getTaskId()}`);
@@ -86,8 +91,12 @@ export default {
         this.status= response.data.status;
         this.taskDescription = response.data.description;
         this.taskId= response.data.id;
-        this.contacts = response.data.workers;
-        console.log(this.startDate);
+        this.contacts = Object.entries(response.data.workers).map(([id, contact]) => ({
+          id, // ID пользователя (ключ объекта)
+          userName: contact.name,
+          role: contact.role,
+        }));
+        console.log(this.contacts);
       } catch (error) {
         console.error('Ошибка при загрузке Задачи:', error);
       }

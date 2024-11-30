@@ -46,7 +46,7 @@
           </div>
         </div>
 
-        <ContactsComponent :contacts="contacts" />
+        <ContactsComponent :contacts="contacts"/>
       </div>
     </main>
   </div>
@@ -142,11 +142,12 @@ export default {
         this.dateStart = this.formatDate(response.data.project.created_at);
         this.dateEnd = this.formatDate(response.data.project.end_date);
         this.status = response.data.project.status || 'Нет статуса';
-        this.contacts = Object.values(response.data.project.contacts).map(contact => ({
+        this.contacts = Object.entries(response.data.project.contacts).map(([id, contact]) => ({
+          id, // ID пользователя (ключ объекта)
           userName: contact.username,
           role: contact.role,
         }));
-        console.log(response.data);
+        console.log(this.contacts);
       } catch (error) {
         if(error.response.status === 401){
           this.$store.commit('removeUsers');  // Изменяем состояние
