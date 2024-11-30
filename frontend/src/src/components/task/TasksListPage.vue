@@ -47,7 +47,7 @@
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
 import axios from 'axios';
-import { useCookies } from '@/src/js/useCookies';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getProjectId, getStageId, getStageName,setTaskId } = useCookies();
 
 export default {
@@ -80,6 +80,11 @@ export default {
           this.tasks = this.tasks.filter(task => task.id !== taskId);
           this.selectedTaskId = null;  // сбрасываем выбор после удаления
         } catch (error) {
+          if(error.response.status === 401){
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
           // Обработка ошибки, если нужно
           console.error(error);
         }

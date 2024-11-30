@@ -53,7 +53,7 @@ import HeaderComponent from '../bars/HeaderComponent.vue';
 import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
 import ContactsComponent from '../project/ContactsComponent.vue';
 import axios from 'axios';
-import { useCookies } from '@/src/js/useCookies';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getProjectId,getProjectName,getStageId,getStageName,getTaskId } = useCookies();
 
 export default {
@@ -122,6 +122,11 @@ export default {
           this.isEditing = false;
           this.$emit('update-stage', { ...this.stage, ...this.editStageData });
         } catch (error) {
+          if(error.response.status === 401){
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
           console.error("Ошибка сети:", error.message);
           if (error.response) {
             console.error("Данные ответа:", error.response.data);

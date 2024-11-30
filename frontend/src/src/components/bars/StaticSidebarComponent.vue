@@ -46,6 +46,11 @@ export default {
         this.$router.push('/login');
         // Дополнительный код для обработки успешной регистрации
       } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
         console.error("Ошибка сети:", error.message);
         if (error.response) {
           console.error("Данные ответа:", error.response.data);

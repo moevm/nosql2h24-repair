@@ -18,6 +18,7 @@
 import axios from 'axios';
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import StaticSidebarComponent from '../bars/StaticSidebarComponent.vue';
+import {clearAllCookies} from "@/src/js/useCookies";
 
 export default {
   components: {
@@ -63,6 +64,11 @@ export default {
         this.$router.push('/main');
         console.log(res);
       } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
         console.error("Ошибка сети:", error.message);
         if (error.response) {
           console.error("Данные ответа:", error.response.data);

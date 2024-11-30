@@ -39,7 +39,7 @@ import HeaderComponent from '../bars/HeaderComponent.vue';
 import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
 import TaskItemComponent from '../risk/TaskItemComponent.vue';
 
-import { useCookies } from '@/src/js/useCookies';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getProjectId, getProjectName,setRiskId } = useCookies();
 
 export default {
@@ -92,6 +92,11 @@ export default {
         }));
         console.log(this.risks);
       } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
         console.error('Ошибка при загрузке проектов:', error);
       }
     },

@@ -58,7 +58,7 @@ import HeaderComponent from '../bars/HeaderComponent.vue';
 import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
 import ContactsComponent from '../project/ContactsComponent.vue';
 
-import { useCookies } from '@/src/js/useCookies';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getProjectId } = useCookies();
 
 export default {
@@ -147,7 +147,12 @@ export default {
           role: contact.role,
         }));
       } catch (error) {
-        console.error('Ошибка при загрузке проекта:', error);
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        console.error(error.response.status);
       }
     },
     formatDate(dateString) {
