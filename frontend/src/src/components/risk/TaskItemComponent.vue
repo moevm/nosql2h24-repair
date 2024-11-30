@@ -9,7 +9,7 @@
   
   <script>
   import axios from 'axios';
-  import { useCookies } from '@/src/js/useCookies';
+  import {clearAllCookies, useCookies} from '@/src/js/useCookies';
   const { getProjectId } = useCookies();
   export default {
     props: {
@@ -28,6 +28,11 @@
               withCredentials: true,
             });
           } catch (error) {
+            if(error.response.status === 401){
+              this.$store.commit('removeUsers');  // Изменяем состояние
+              clearAllCookies();
+              this.$router.push("/login");
+            }
             // Обработка ошибки, если нужно
             console.error(error);
           }

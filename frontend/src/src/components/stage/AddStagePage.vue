@@ -39,7 +39,7 @@
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
 import axios from 'axios';
-import { useCookies } from '@/src/js/useCookies';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getProjectId } = useCookies();
 
 export default {
@@ -78,6 +78,11 @@ export default {
           alert('Этап успешно создан!');
           this.$router.push(`/stages`);
         } catch (error) {
+          if(error.response.status === 401){
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
           console.error("Ошибка сети:", error.message);
           if (error.response && error.response.data.detail) {
             this.errorMessage = error.response.data.detail;

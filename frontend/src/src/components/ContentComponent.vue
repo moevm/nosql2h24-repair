@@ -31,6 +31,7 @@
 import axios from 'axios';
 import NewProjectButton from '../components/project/NewProjectButton.vue';
 import Project from '../components/project/ProjectComponent.vue';
+import {clearAllCookies} from "@/src/js/useCookies";
 
 export default {
   components: {
@@ -73,6 +74,11 @@ export default {
           })),
         ];
       } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
         console.error('Ошибка при загрузке проектов:', error);
       }
     },
