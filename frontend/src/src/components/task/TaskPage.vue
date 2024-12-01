@@ -7,8 +7,12 @@
         <h1>{{projectName}}</h1>
         <div class="task-title">
           <h2>Этап: {{stageName}}</h2>
-          <h2>Задача: {{taskName}}</h2>
-          <button @click="toggleEdit">{{ isEditing ? "Сохранить" : "Редактировать" }}</button>
+          <h2>Задача: </h2>
+          <h2 v-if="!isEditing">{{taskName}}</h2>
+          <input v-else type="text" v-model="taskName" class="task-name-input" />
+          <button v-if="!isEditing" @click="startEdit">Редактировать</button>
+          <button v-if="isEditing" @click="saveEdit">Сохранить</button>
+          <button v-if="isEditing" @click="cancelEdit">Отмена</button>
         </div>
       </div>
     </div>
@@ -42,10 +46,12 @@
       </div>
 
       <div class="task-contacts">
-        <ContactsComponent :contacts="contacts"
-                           @delete="deleteWorker"
-        />
+        <ContactsComponent :contacts="contacts" :isEditing="isEditing" @delete="deleteWorker" />
       </div>
+    </div>
+
+    <div class="task-actions">
+      <button @click="goToTasks" class="go-to-tasks-button">Перейти к задачам</button>
     </div>
   </div>
 </template>
@@ -75,6 +81,11 @@ export default {
       endDate: "",
       status: "",
       taskDescription: ``,
+      originalTaskName: "",
+      originalStartDate: "",
+      originalEndDate: "",
+      originalStatus: "",
+      originalTaskDescription: "",
     };
   },
   methods: {
@@ -111,44 +122,61 @@ export default {
     formatToDateTime(date) {
       return `${date}T00:00:00`; // Преобразует в формат `YYYY-MM-DDT00:00:00`
     },
-    async toggleEdit() {
-      if (this.isEditing) {
-        const dataToSend = {
-          name:this.taskName,
-          description:this.taskDescription,
-          status: this.status,
-          start_date: this.formatToDateTime(this.startDate),
-          end_date:  this.formatToDateTime(this.endDate),
-        };
-        console.log(dataToSend)
-        try {
-          await axios.put(`/api/tasks/update_task/${getProjectId()}/${getStageId()}/${getTaskId()}`, dataToSend, {
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            withCredentials: true,
-          });
-          this.$emit('update-stage', { ...this.stage, ...this.editStageData });
-        } catch (error) {
-          if(error.response.status === 401){
-            this.$store.commit('removeUsers');  // Изменяем состояние
-            clearAllCookies();
-            this.$router.push("/login");
-          }
-          console.error("Ошибка сети:", error.message);
-          if (error.response) {
-            console.error("Данные ответа:", error.response.data);
-            // Вывод ошибки с сервера
-            if (error.response.data.detail) {
-              this.errorMessage = error.response.data.detail; // Сохраняем ошибку с сервера
-            }
+    startEdit() {
+      this.originalTaskName = this.taskName;
+      this.originalStartDate = this.startDate;
+      this.originalEndDate = this.endDate;
+      this.originalStatus = this.status;
+      this.originalTaskDescription = this.taskDescription;
+      this.isEditing = true;
+    },
+    async saveEdit() {
+      const dataToSend = {
+        name: this.taskName,
+        description: this.taskDescription,
+        status: this.status,
+        start_date: this.formatToDateTime(this.startDate),
+        end_date: this.formatToDateTime(this.endDate),
+      };
+      console.log(dataToSend)
+      try {
+        await axios.put(`/api/tasks/update_task/${getProjectId()}/${getStageId()}/${getTaskId()}`, dataToSend, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          withCredentials: true,
+        });
+        this.$emit('update-stage', { ...this.stage, ...this.editStageData });
+      } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        console.error("Ошибка сети:", error.message);
+        if (error.response) {
+          console.error("Данные ответа:", error.response.data);
+          // Вывод ошибки с сервера
+          if (error.response.data.detail) {
+            this.errorMessage = error.response.data.detail; // Сохраняем ошибку с сервера
           }
         }
-
-        console.log("Сохранено:", this.startDate, this.endDate, this.status, this.taskDescription);
       }
-      this.isEditing = !this.isEditing;
+
+      console.log("Сохранено:", this.startDate, this.endDate, this.status, this.taskDescription);
+      this.isEditing = false;
+    },
+    cancelEdit() {
+      this.taskName = this.originalTaskName;
+      this.startDate = this.originalStartDate;
+      this.endDate = this.originalEndDate;
+      this.status = this.originalStatus;
+      this.taskDescription = this.originalTaskDescription;
+      this.isEditing = false;
+    },
+    goToTasks() {
+      this.$router.push(`/tasks`);
     }
   },
   beforeMount() {
@@ -184,6 +212,14 @@ export default {
   margin-right: 10px;
 }
 
+.task-title input.task-name-input {
+  font-size: 20px;
+  margin-right: 10px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
 .task-title button {
   padding: 8px 12px;
   background-color: #625b71;
@@ -191,6 +227,7 @@ export default {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  margin-right: 15px;
 }
 
 .task-title button:hover {
@@ -249,5 +286,22 @@ export default {
 
 .task-contacts {
   margin-left: 20px;
+}
+
+.task-actions {
+  margin-top: 20px;
+}
+
+.go-to-tasks-button {
+  padding: 8px 12px;
+  background-color: #625b71;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.go-to-tasks-button:hover {
+  background-color: #4f416d;
 }
 </style>
