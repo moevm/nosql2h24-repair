@@ -21,8 +21,8 @@
             v-for="task in tasks" 
             :key="task.taskId"
             :taskName="task.taskName"
-            :class="{ selected: selectedTaskId === task.taskId }"
-            @click="selectTask(task.taskId)"
+            :class="{ selected: selectedTaskId === task.taskId}"
+            @click="selectTask(task)"
           >
             <td>{{ task.taskName }}</td>
             <td>{{ task.startDate }}</td>
@@ -69,15 +69,15 @@ export default {
       this.$router.push(`/add_task`); // переход на страницу новой задачи
     },
     async deleteTask(taskId) {
-      if (confirm(`Удалить задачу "${this.taskName}"?`)) {
+      if (confirm(`Удалить задачу ${this.taskName}?`)) {
         try {
-          await axios.delete(`/api/tasks/${getProjectId()}/${getStageId()}/${this.stage.stageId}`, {
+          await axios.delete(`/api/tasks/delete/${getProjectId()}/${getStageId()}/${taskId}`, {
             headers: {
               'Accept': 'application/json',
             },
             withCredentials: true,
           });
-          this.tasks = this.tasks.filter(task => task.id !== taskId);
+          this.tasks = this.tasks.filter(task => task.taskId !== taskId);
           this.selectedTaskId = null;  // сбрасываем выбор после удаления
         } catch (error) {
           if(error.response.status === 401){
@@ -95,8 +95,9 @@ export default {
       setTaskId(this.selectedTaskId);
       this.$router.push(`/tasks/viewRedactorTask`);
     },
-    selectTask(taskId) {
-      this.selectedTaskId = taskId;
+    selectTask(task) {
+      this.selectedTaskId = task.taskId;
+      this.taskName = task.taskName;
     },
     async fetchTaskData() {
       try {
