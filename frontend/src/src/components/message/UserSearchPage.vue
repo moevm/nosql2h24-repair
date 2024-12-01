@@ -172,7 +172,7 @@ export default {
   color: #fff;
   border: none;
   padding: 6px 12px;
-  border-radius: 5px;
+  border-radius: 15px;
   cursor: pointer;
   transition: background-color 0.3s;
 }
@@ -187,7 +187,7 @@ export default {
   padding: 8px 15px;
   font-size: 16px;
   border: none;
-  border-radius: 5px;
+  border-radius: 15px;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
 }
