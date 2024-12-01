@@ -112,7 +112,7 @@ export default {
 .content {
   display: flex;
   margin-left: 150px;
-  padding-top: 60px;
+  padding-top: 30px;
 }
 
 .purchases-container {
@@ -147,6 +147,7 @@ export default {
   border: none;
   cursor: pointer;
   margin-left: auto;
+  border-radius: 15px;
 }
 
 .materials-list {
