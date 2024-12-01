@@ -53,14 +53,14 @@ class UserDao(BaseDao):
                                                                 ContactResponse | None] | None:
         project_collection = db.get_collection('project')
 
-        search_params = []
+        search_params = {}
 
         if lastname:
-            search_params.append(lastname)
+            search_params["lastname"] = lastname
         if name:
-            search_params.append(name)
+            search_params["name"] = name
         if middlename:
-            search_params.append(middlename)
+            search_params["middlename"] = middlename
 
         project = await project_collection.find_one({"_id": ObjectId(project_id)})
 
@@ -88,9 +88,28 @@ class UserDao(BaseDao):
 
         for contact_id, contact in contacts.items():
             username = contact.get("username", "")
+            fio = username.split()
             contact_role = contact.get("role", None)
-            if re.search(search_query, username, re.IGNORECASE):
-                # есть фильтр роли
+
+            if "lastname" in search_params and len(fio) > 0:
+                lastname_match = re.search(search_params["lastname"], fio[0], re.IGNORECASE)
+            else:
+                lastname_match = True  # Если lastname не указан, то считаем его найденным
+
+            # Проверяем наличие имени
+            if "name" in search_params and len(fio) > 1:
+                name_match = re.search(search_params["name"], fio[1], re.IGNORECASE)
+            else:
+                name_match = True  # Если name не указан, то считаем его найденным
+
+            # Проверяем наличие отчества
+            if "middlename" in search_params and len(fio) > 2:
+                middlename_match = re.search(search_params["middlename"], fio[2], re.IGNORECASE)
+            else:
+                middlename_match = True  # Если middlename не указан, то считаем его найденным
+
+            # Условие совпадения всех параметров
+            if lastname_match and name_match and middlename_match:
                 if role and contact_role != role.value:
                     continue
                 matched_contacts.append(ContactResponse(id=contact_id, **contact))
