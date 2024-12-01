@@ -93,5 +93,6 @@
     color: white;
     border: none;
     cursor: pointer;
+    border-radius: 10px;
   }
   </style>   
