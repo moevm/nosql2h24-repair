@@ -1,198 +1,193 @@
 <template>
-    <div class="main-container">
-      <HeaderComponent />
-      <ProjectSidebarComponent />
-      
-      <div class="content">
-        <div class="edit-material-container">
-          <h1>{{ isEditMode ? 'Редактирование материала' : 'Добавление нового материала' }}</h1>
-          
-          <form @submit.prevent="saveMaterial">
-            <div class="form-group">
-              <label for="name">Название материала:</label>
-              <input type="text" v-model="material.name" id="name" />
-            </div>
-            <div class="form-group">
-              <label for="quantity">Количество:</label>
-              <input type="number" v-model="material.quantity" id="quantity" />
-            </div>
-            <div class="form-group">
-              <label for="unit">Ед. изм:</label>
-              <input type="text" v-model="material.unit" id="unit" />
-            </div>
-            <div class="form-group">
-              <label for="price">Цена за единицу:</label>
-              <input type="number" v-model="material.pricePerUnit" id="price" />
-            </div>
-            <div class="form-group">
-              <label for="stock">В наличии:</label>
-              <input type="checkbox" v-model="material.inStock" id="stock" />
-            </div>
+  <div class="main-container">
+    <HeaderComponent />
+    <ProjectSidebarComponent />
 
+    <div class="content">
+      <div class="edit-material-container">
+        <h1>{{ isEditMode ? 'Редактирование материала' : 'Добавление нового материала' }}</h1>
+
+        <form @submit.prevent="saveMaterial">
+          <div class="form-group">
+            <label for="name">Название материала:</label>
+            <input type="text" v-model="material.name" id="name" />
+          </div>
+          <div class="form-group">
+            <label for="quantity">Количество:</label>
+            <input type="number" v-model="material.quantity" id="quantity" />
+          </div>
+          <div class="form-group">
+            <label for="unit">Ед. изм:</label>
+            <input type="text" v-model="material.unit" id="unit" />
+          </div>
+          <div class="form-group">
+            <label for="price">Цена за единицу:</label>
+            <input type="number" v-model="material.pricePerUnit" id="price" />
+          </div>
+          <div class="form-group">
+            <label for="stock">В наличии:</label>
+            <input type="checkbox" v-model="material.inStock" id="stock" />
+          </div>
+
+          <div class="button-container">
             <button type="submit" class="save-button" @click="addProcurement">{{ isEditMode ? 'Сохранить изменения' : 'Сохранить' }}</button>
-          </form>
-        </div>
+            <button type="button" class="cancel-button" @click="goToProcurements">Отмена</button>
+          </div>
+        </form>
       </div>
     </div>
-  </template>
-  
-  <script>
-  import HeaderComponent from '../bars/HeaderComponent.vue';
-  import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
-  import axios from 'axios';
-  import {clearAllCookies, useCookies} from '@/src/js/useCookies';
-  const { getProjectId,getMaterialId } = useCookies();
+  </div>
+</template>
 
-  export default {
-    components: {
-      HeaderComponent,
-      ProjectSidebarComponent,
-    },
-    data() {
-      return {
-        material: {
-          name: '',
-          quantity: 0,
-          unit: '',
-          pricePerUnit: 0,
-          inStock: false,
-        },
-        isEditMode: false, // Определяет режим редактирования или добавления
-      };
-    },
-    methods: {
-      async checkPath(){
-        if(this.$route.path !== '/add_procurement'){
-          try {
-            const response = await axios.get(`/api/projects/${getProjectId()}/get_procurement/${getMaterialId()}`);
-            this.material.name = response.data.procurement.item_name;
-            this.material.quantity = response.data.procurement.quantity;
-            this.material.unit = response.data.procurement.units;
-            this.material.pricePerUnit = response.data.procurement.price;
-            this.material.inStock = response.data.procurement.inStock;
-          } catch (error) {
-            if(error.response.status === 401){
+<script>
+import HeaderComponent from '../bars/HeaderComponent.vue';
+import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
+import axios from 'axios';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
+const { getProjectId, getMaterialId } = useCookies();
+
+export default {
+  components: {
+    HeaderComponent,
+    ProjectSidebarComponent,
+  },
+  data() {
+    return {
+      material: {
+        name: '',
+        quantity: 0,
+        unit: '',
+        pricePerUnit: 0,
+        inStock: false,
+      },
+      isEditMode: false, // Определяет режим редактирования или добавления
+    };
+  },
+  methods: {
+    async checkPath() {
+      if (this.$route.path !== '/add_procurement') {
+        try {
+          const response = await axios.get(`/api/projects/${getProjectId()}/get_procurement/${getMaterialId()}`);
+          this.material.name = response.data.procurement.item_name;
+          this.material.quantity = response.data.procurement.quantity;
+          this.material.unit = response.data.procurement.units;
+          this.material.pricePerUnit = response.data.procurement.price;
+          this.material.inStock = response.data.procurement.inStock;
+        } catch (error) {
+          if(error.response.status === 401){
               this.$store.commit('removeUsers');  // Изменяем состояние
               clearAllCookies();
               this.$router.push("/login");
             }
-            console.error('Ошибка при загрузке Закупки:', error);
-          }
-          this.isEditMode = true;
+          console.error('Ошибка при загрузке Закупки:', error);
         }
-      },
-      async addProcurement() {
-        this.showErrors = true;
+        this.isEditMode = true;
+      }
+    },
+    async addProcurement() {
+      this.showErrors = true;
 
-        if (this.material.name) {
-          const dataToSend = {
-            item_name: this.material.name,
-            quantity: this.material.quantity,
-            price: this.material.pricePerUnit,
-            inStock: this.material.inStock,
-            units: this.material.unit,
-          };
-          if(this.isEditMode){
-            try {
-              await axios.put(`/api/projects/${getProjectId()}/update_procurement/${getMaterialId()}`, dataToSend, {
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-                },
-                withCredentials: true,
-              });
-              // console.log(res);
-              alert('Закупка успешно изменена!');
-              this.$router.push(`/procurements`);
-            } catch (error) {
-              if(error.response.status === 401){
+      if (this.material.name) {
+        const dataToSend = {
+          item_name: this.material.name,
+          quantity: this.material.quantity,
+          price: this.material.pricePerUnit,
+          inStock: this.material.inStock,
+          units: this.material.unit,
+        };
+        if (this.isEditMode) {
+          try {
+            await axios.put(`/api/projects/${getProjectId()}/update_procurement/${getMaterialId()}`, dataToSend, {
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+              withCredentials: true,
+            });
+            alert('Закупка успешно изменена!');
+            this.$router.push(`/procurements`);
+          } catch (error) {
+            if(error.response.status === 401){
                 this.$store.commit('removeUsers');  // Изменяем состояние
                 clearAllCookies();
                 this.$router.push("/login");
               }
-              console.error("Ошибка сети:", error.message);
-              if (error.response && error.response.data.detail) {
-                this.errorMessage = error.response.data.detail;
-              }
+            console.error("Ошибка сети:", error.message);
+            if (error.response && error.response.data.detail) {
+              this.errorMessage = error.response.data.detail;
             }
           }
-          else {
-            try {
-              await axios.post(`/api/projects/${getProjectId()}/add_procurement`, dataToSend, {
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-                },
-                withCredentials: true,
-              });
-              // console.log(res);
-              alert('Закупка успешно создана!');
-              this.$router.push(`/procurements`);
-            } catch (error) {
-              if(error.response.status === 401){
-                this.$store.commit('removeUsers');  // Изменяем состояние
-                clearAllCookies();
-                this.$router.push("/login");
-              }
-              console.error("Ошибка сети:", error.message);
-              if (error.response && error.response.data.detail) {
-                this.errorMessage = error.response.data.detail;
-              }
-            }
-          }
-
         } else {
-          this.errorMessage='Пожалуйста, заполните все поля.';
+          try {
+            await axios.post(`/api/projects/${getProjectId()}/add_procurement`, dataToSend, {
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+              withCredentials: true,
+            });
+            alert('Закупка успешно создана!');
+            this.$router.push(`/procurements`);
+          } catch (error) {
+            if(error.response.status === 401){
+                this.$store.commit('removeUsers');  // Изменяем состояние
+                clearAllCookies();
+                this.$router.push("/login");
+              }
+            console.error("Ошибка сети:", error.message);
+            if (error.response && error.response.data.detail) {
+              this.errorMessage = error.response.data.detail;
+            }
+          }
         }
-      },
-      // fetchMaterialById(id) {
-      //   const materials = [
-      //     { id: 1, name: 'краска бежевая', quantity: 20, unit: 'банка 5 л.', pricePerUnit: 5000, totalCost: 100000, inStock: true },
-      //     { id: 2, name: 'богемский кафель', quantity: 1500, unit: 'шт', pricePerUnit: 20000, totalCost: 3000000, inStock: false },
-      //   ];
-      //   return materials.find(material => material.id === parseInt(id)) || {};
-      // },
-      // saveMaterial() {
-      //   if (this.isEditMode) {
-      //     // Сохраняем изменения (например, обновляем материал в базе данных)
-      //     console.log('Material updated:', this.material);
-      //   } else {
+      } else {
+        this.errorMessage = 'Пожалуйста, заполните все поля.';
+      }
+    },
+    goToProcurements() {
+      this.$router.push(`/procurements`);
+    }
+  },
+  beforeMount() {
+    this.checkPath();
+  },
+};
+</script>
 
-        //   // Добавляем новый материал (например, сохраняем в базу данных)
-        //   console.log('New material added:', this.material);
-        // }
-        // this.$router.push({ path: '/project/procurements' }); // Переход на главную страницу после сохранения
-    //   },
-    },
-    beforeMount() {
-      this.checkPath();
-    },
-  };
-  </script>
-  
-  <style scoped>
-  .edit-material-container {
-    margin-left: 150px;
-    padding-top: 60px;
-  }
-  
-  .form-group {
-    margin-bottom: 10px;
-  }
-  
-  label {
-    font-weight: bold;
-  }
-  
-  input {
-    padding: 5px;
-    margin-top: 5px;
-  }
-  
-  .save-button {
-    padding: 10px 15px;
-    background-color: #625b71;
-    color: white;
-    cursor: pointer;
-  }
-  </style>  
+<style scoped>
+.edit-material-container {
+  margin-left: 150px;
+  padding-top: 60px;
+}
+
+.form-group {
+  margin-bottom: 10px;
+}
+
+label {
+  font-weight: bold;
+}
+
+input {
+  padding: 5px;
+  margin-top: 5px;
+}
+
+.button-container {
+  display: flex;
+  gap: 10px;
+}
+
+.save-button, .cancel-button {
+  padding: 10px 15px;
+  background-color: #625b71;
+  color: white;
+  cursor: pointer;
+  border: none;
+  border-radius: 20px; /* Rounded corners */
+}
+
+.save-button:hover, .cancel-button:hover {
+  background-color: #4f416d;
+}
+</style>
