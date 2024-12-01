@@ -3,7 +3,7 @@
       <h3>{{ title }}</h3>
       <p>{{ description }}</p>
       <button @click="$emit('details')">Подробнее</button>
-      <button @click="deleteStage">>Удалить</button>
+      <button @click="deleteStage">Удалить</button>
     </div>
   </template>
   
@@ -59,5 +59,6 @@
     color: white;
     border: none;
     cursor: pointer;
+    border-radius: 10px;
   }
   </style>  
