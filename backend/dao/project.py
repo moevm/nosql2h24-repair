@@ -23,6 +23,10 @@ class ProjectDao(BaseDao):
         return await cls.get_project_by_id(created_id)
 
     @classmethod
+    async def delete_project(cls, project_id: str) -> str:
+        return await cls._delete_by_id(project_id)
+
+    @classmethod
     async def get_project_by_id(cls, project_id: str) -> ProjectResponse | None:
         project = await cls._get_one_by_id(project_id)
         if project is None:
