@@ -1,53 +1,84 @@
 <template>
     <div class="task-card">
-      <h3 class="task-title">Прибить полки</h3>
+      <h3 class="task-title">{{name}}</h3>
+      <div class="task-field">
+        <label>Описание</label>
+        <input type="text" :value=description readonly />
+      </div>
       <div class="task-field">
         <label>Начало</label>
-        <input type="date" v-model="startDate" readonly />
+        <input type="text" :value="startDate"  readonly />
       </div>
       <div class="task-field">
         <label>Конец</label>
-        <input type="date" v-model="endDate" readonly />
+        <input type="text" :value="endDate" readonly />
       </div>
       <div class="task-field">
         <label>Проект</label>
-        <input type="text" v-model="projectName" readonly />
+        <input type="text" :value="projectName" readonly />
       </div>
       <div class="task-field">
         <label>Статус</label>
         <div class="status-dropdown">
-          <button @click="toggleDropdown" :style="{ backgroundColor: currentStatus.color }">
-            {{ currentStatus.text }}
+          <button @click="toggleDropdown" :style="{ backgroundColor: statuses[status]}">
+            {{ status }}
           </button>
           <ul v-if="dropdownOpen" class="dropdown-menu">
             <li
-              v-for="status in statuses"
-              :key="status.text"
-              :style="{ backgroundColor: status.color }"
-              @click="selectStatus(status)"
+                v-for="(color, text) in statuses"
+                :key="text"
+                :style="{ backgroundColor: color }"
+                @click="selectStatus(text)"
             >
-              {{ status.text }}
+              {{ text }}
             </li>
           </ul>
         </div>
       </div>
     </div>
-  </template>  
-  
+  </template>
   <script>
   export default {
+    // components: {TaskCard},
+    props: {
+      description: {
+        type: String,
+        required: true,
+      },
+      endDate: {
+        type: String,
+        required: true,
+      },
+      name:{
+        type: String,
+        required: true,
+      },
+      startDate: {
+        type: String,
+        required: true,
+      },
+      status: {
+        type: String,
+        default: 'В процессе',
+      },
+      // key:{
+      //   type: String,
+      // }
+    },
     data() {
       return {
-        startDate: "2024-12-25",
-        endDate: "2024-12-25",
-        projectName: "Ремонт кафедры МОЗВМ",
+      //   startDate: "2024-12-25",
+      //   endDate: "2024-12-25",
+        projectName: "Нет в бд",
         dropdownOpen: false,
         currentStatus: { text: "В процессе", color: "orange" },
-        statuses: [
-          { text: "-не выбрано-", color: "#e0e0e0" },
-          { text: "Готово", color: "green" },
-          { text: "Опоздание", color: "red" },
-        ],
+        statuses: {
+          "-не выбрано-": "#e0e0e0",
+          "Готово": "green",
+          "Опоздание": "red",
+          "В процессе": "orange"
+        }
+
       };
     },
     methods: {

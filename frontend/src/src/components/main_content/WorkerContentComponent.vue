@@ -30,9 +30,13 @@
   
       <div class="task-list">
         <TaskCard
-          v-for="(task, index) in filteredTasks"
-          :key="index"
-          :task="task"
+            v-for="task in tasks"
+            :key="task.taskId"
+            :description="task.description"
+            :endDate="task.endDate"
+            :startDate="task.startDate"
+            :name="task.name"
+            :status="task.status"
         />
       </div>
     </div>
@@ -61,10 +65,10 @@
           { text: '-не выбрано-', color: '#e0e0e0' }
         ],
         tasks: [
-          { name: 'Прибить полки', startDate: '2024-12-25', endDate: '2024-12-25', project: 'Ремонт кафедры МОЗВМ', status: 'Готово' },
-          { name: 'Прибить полки', startDate: '2024-12-25', endDate: '2024-12-25', project: 'Ремонт кафедры МОЗВМ', status: 'В процессе' },
-          { name: 'Прибить полки', startDate: '2024-12-25', endDate: '2024-12-25', project: 'Ремонт кафедры МОЗВМ', status: 'Опоздание' },
-          { name: 'Прибить полки', startDate: '2024-12-25', endDate: '2024-12-25', project: 'Ремонт кафедры МОЗВМ', status: '-не выбрано-' },
+          // { name: 'Прибить полки', startDate: '2024-12-25', endDate: '2024-12-25', project: 'Ремонт кафедры МОЗВМ', status: 'Готово' },
+          // { name: 'Прибить полки', startDate: '2024-12-25', endDate: '2024-12-25', project: 'Ремонт кафедры МОЗВМ', status: 'В процессе' },
+          // { name: 'Прибить полки', startDate: '2024-12-25', endDate: '2024-12-25', project: 'Ремонт кафедры МОЗВМ', status: 'Опоздание' },
+          // { name: 'Прибить полки', startDate: '2024-12-25', endDate: '2024-12-25', project: 'Ремонт кафедры МОЗВМ', status: '-не выбрано-' },
         ]
       };
     },
@@ -90,17 +94,15 @@
         try {
           const response = await axios.get('/api/tasks/get_all');
           console.log(response.data);
-          // this.items = [
-          //   { type: 'newProjectButton' },
-          //   ...response.data.map(project => ({
-          //     type: 'project',
-          //     name: project.name,
-          //     startDate: this.formatDate(project.start_date),
-          //     endDate: this.formatDate(project.end_date),
-          //     projectPhase: project.status,
-          //     projectId: project.id,
-          //   })),
-          // ];
+          this.tasks = Object.values(response.data).map(task => ({
+            name: task.name,
+            startDate: this.formatDate(task.start_date),
+            endDate: this.formatDate(task.end_date),
+            status: task.status,
+            description: task.description,
+            taskId: task.id
+          }));
+          console.log(this.tasks)
         } catch (error) {
           if(error.response.status === 401){
             this.$store.commit('removeUsers');  // Изменяем состояние
