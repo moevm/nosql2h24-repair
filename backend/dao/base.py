@@ -1,4 +1,4 @@
-from typing import Mapping, Any, Sequence
+from typing import Any
 
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorCollection
@@ -41,7 +41,7 @@ class BaseDao:
             if result.modified_count == 0:
                 return None
             return id
-        
+
     @classmethod
     async def _update_with_query(cls, query: dict[str, Any], data: dict[str, Any]) -> str | None:
         if cls.collection is not None:
@@ -54,3 +54,12 @@ class BaseDao:
     # async def _find_with_filters(cls, query: dict) -> dict:
     #     if cls.collection:
     #
+
+    @classmethod
+    async def _delete_by_id(cls, id: str) -> str | None:
+        if cls.collection is not None:
+            result = await cls.collection.delete_one({"_id": ObjectId(id)})
+
+            if result.deleted_count == 0:
+                return None
+            return id

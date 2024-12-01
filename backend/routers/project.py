@@ -39,6 +39,17 @@ async def create(project_data: ProjectCreate, customer: User = Depends(get_custo
     return {"new_project": new_project}
 
 
+@router.delete("/delete/{project_id}", response_model=dict[str, str])
+async def remove_project(project_id: str, user: User = Depends(get_foreman_role)):
+    deleted_id = await ProjectDao.delete_project(project_id)
+    if deleted_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Проект не найден'
+        )
+    return {"deleted_id": deleted_id}
+
+
 @router.get("/all", response_model=list[ProjectResponse])
 async def get_all(user: User = Depends(get_current_user)):
     if user.role == Role.admin:

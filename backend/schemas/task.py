@@ -4,7 +4,7 @@ from typing import Dict, Optional
 
 from pydantic import BaseModel, Field
 
-from schemas.user import Worker
+from schemas.user import Worker, WorkerResponse, WorkerCreate
 from schemas.utils import generate_id, get_date_now
 
 
@@ -21,14 +21,9 @@ class Task(BaseModel):
     status: TaskStatus = TaskStatus.none_status
     start_date: Optional[datetime] = Field(None)
     end_date: Optional[datetime] = Field(None)
-    workers: Dict[str, Worker] = {}
+    workers: Dict[str, WorkerCreate] = {}
     created_at: Optional[datetime] = Field(get_date_now())
     updated_at: Optional[datetime] = Field(get_date_now())
-
-    def add_worker(self, worker: Worker):
-        self.workers[generate_id()] = worker
-        class Config:
-            from_attributes = True
 
 
 class TaskResponse(Task):
