@@ -154,6 +154,7 @@ export default {
   padding: 5px 10px;
   border: none;
   cursor: pointer;
+  border-radius: 10px;
 }
 
 .details-button {
