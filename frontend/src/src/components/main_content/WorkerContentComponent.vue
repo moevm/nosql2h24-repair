@@ -39,7 +39,9 @@
   </template>
   
   <script>
+  import axios from 'axios';
   import TaskCard from './TaskCard.vue';
+  import {clearAllCookies} from "@/src/js/useCookies";
   
   export default {
     components: {
@@ -83,8 +85,42 @@
     methods: {
       applyFilters() {
         // Здесь можно будет применить дополнительные фильтры, если нужно
-      }
-    }
+      },
+      async fetchTasks() {
+        try {
+          const response = await axios.get('/api/tasks/get_all');
+          console.log(response.data);
+          // this.items = [
+          //   { type: 'newProjectButton' },
+          //   ...response.data.map(project => ({
+          //     type: 'project',
+          //     name: project.name,
+          //     startDate: this.formatDate(project.start_date),
+          //     endDate: this.formatDate(project.end_date),
+          //     projectPhase: project.status,
+          //     projectId: project.id,
+          //   })),
+          // ];
+        } catch (error) {
+          if(error.response.status === 401){
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
+          console.error('Ошибка при загрузке проектов:', error);
+        }
+      },
+      formatDate(dateString) {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 по 11, поэтому +1
+        const year = date.getFullYear();
+        return `${day}.${month}.${year}`;
+      },
+    },
+    beforeMount() {
+      this.fetchTasks();
+    },
   };
   </script>
   

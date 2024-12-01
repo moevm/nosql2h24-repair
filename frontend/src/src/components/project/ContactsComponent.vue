@@ -49,7 +49,7 @@ export default {
     },
     async deleteContact(contact) {
       if(this.$route.path === '/tasks/viewRedactorTask') {
-        if (confirm(`Удалить риск "${contact.userName}"?`)) {
+        if (confirm(`Удалить рабочего "${contact.userName}"?`)) {
           try {
             await axios.delete(`/api/tasks/${getProjectId()}/${getStageId()}/${getTaskId()}/${contact.id}`, {
               headers: {

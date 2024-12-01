@@ -1,10 +1,9 @@
 <template>
   <aside class="sidebar">
-    <button v-if="!isMainPage" @click="goToMain" class="to-main-button">На основную</button>
-<!--    <div v-if="isCustomer" class="menu-item" @click="goToStatistics">-->
-<!--      <img src="@/assets/icons/statics.png" alt="Static Icon" class="static-icon">-->
-<!--      <p>Статистика</p>-->
-<!--    </div>-->
+    <div v-if="isCustomer" class="menu-item" @click="goToStatistics">
+      <img src="@/assets/icons/statics.png" alt="Static Icon" class="static-icon">
+      <p>Статистика</p>
+    </div>
     <div class="menu-item logout-item" @click="logOut">
       <img src="@/assets/icons/logout.png" alt="Logout Icon" class="logout-icon">
     </div>
