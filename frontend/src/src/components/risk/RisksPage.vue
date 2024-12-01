@@ -6,10 +6,7 @@
     <div class="content">
       <div class="task-container">
         <div class="search-bar">
-          <div>
-            <h1>{{projectName}}</h1>
-<!--            <p>СПбГЭТУ "ЛЭТИ"</p>-->
-          </div>
+          <h1>{{projectName}}</h1>
           <input type="text" placeholder="Название риска" v-model="searchQuery" class="search-input" />
         </div>
 
@@ -117,7 +114,7 @@ export default {
 .content {
   display: flex;
   margin-left: 150px;
-  padding-top: 60px;
+  padding-top: 30px;
 }
 
 /* Стили для верхнего компонента */
@@ -153,7 +150,6 @@ sidebar-component {
   justify-content: space-between;
   align-items: center;
   background-color: #fff;
-  padding: 10px 20px;
 }
 
 .add-button {
@@ -163,6 +159,7 @@ sidebar-component {
   color: white;
   border: none;
   cursor: pointer;
+  border-radius: 10px;
 }
 
 .task-item {
