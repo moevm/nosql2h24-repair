@@ -2,7 +2,7 @@
   <div class="contacts">
     <div class="contacts-header">
       <h3>Контакты</h3>
-      <button @click="addContact" class="add-button">Добавить</button>
+      <button v-if="isEditing" @click="addContact" class="add-button">Добавить</button>
     </div>
     <ul>
       <li v-for="contact in contacts" :key="contact.userName">
@@ -11,14 +11,13 @@
           <div>{{ contact.userName }}</div>
           <span>{{ contact.role }}</span>
         </div>
-        <button @click="deleteContact(contact)" class="delete-button">Удалить</button>
+        <button v-if="isEditing" @click="deleteContact(contact)" class="delete-button">Удалить</button>
       </li>
     </ul>
   </div>
 </template>
 
 <script>
-
 import router from "@/src/router";
 import axios from 'axios';
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
@@ -28,6 +27,10 @@ export default {
   props: {
     contacts: {
       type: Array,
+      required: true
+    },
+    isEditing: {
+      type: Boolean,
       required: true
     }
   },
@@ -65,9 +68,7 @@ export default {
             console.error(error);
           }
         }
-
       }
-
     }
   },
 };
@@ -94,6 +95,7 @@ export default {
   padding: 5px 10px;
   cursor: pointer;
   border-radius: 4px;
+  border-radius: 10px;
 }
 
 .contacts ul {
@@ -128,5 +130,6 @@ export default {
   cursor: pointer;
   border-radius: 4px;
   margin-left: 10px;
+  border-radius: 10px;
 }
 </style>
