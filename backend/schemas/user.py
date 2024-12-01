@@ -64,6 +64,6 @@ class WorkerResponse(Worker):
     id: str
     
 class WorkerCreate(BaseModel):
-    id: str
+    user_id: str
     role: Role = Role.worker
     username: str

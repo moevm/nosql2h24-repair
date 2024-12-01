@@ -21,7 +21,7 @@ class Task(BaseModel):
     status: TaskStatus = TaskStatus.none_status
     start_date: Optional[datetime] = Field(None)
     end_date: Optional[datetime] = Field(None)
-    workers: Dict[str, WorkerCreate] = {}
+    workers: Dict[str, Worker] = {}
     created_at: Optional[datetime] = Field(get_date_now())
     updated_at: Optional[datetime] = Field(get_date_now())
 

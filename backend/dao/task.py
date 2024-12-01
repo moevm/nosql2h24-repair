@@ -131,7 +131,6 @@ class TaskDAO(BaseDao):
             {
                 "$set": {
                     f"stages.{stage_id}.tasks.{task_id}.workers.{worker_id}": {
-                        "user_id": ObjectId(worker_id),
                         "name": worker.name,
                         "role": worker.role,
                     }
