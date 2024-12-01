@@ -7,7 +7,7 @@
         <div class="header-container">
           <!-- Контейнер для заголовка -->
           <div class="header-left">
-            <h2>{{projectName}}</h2>
+            <h1>{{projectName}}</h1>
 <!--            <p>СПбГЭТУ "ЛЭТИ"</p>-->
           </div>
 
@@ -121,13 +121,13 @@ export default {
 .main-content {
   display: flex;
   margin-left: 150px;
-  padding-top: 60px;
+  padding-top: 30px;
   width: calc(100% - 150px);
 }
 
 .stages-container {
   flex: 1;
-  padding: 16px;
+  padding: 20px;
 }
 
 .header-container {
@@ -157,9 +157,9 @@ export default {
 .add-stage-button {
   background-color: #625b71;
   color: white;
-  padding: 12px;
+  padding: 8px;
   border: none;
-  border-radius: 4px;
+  border-radius: 10px;
   cursor: pointer;
   margin-left: 10px; /* Добавляем отступ для кнопки */
 }
