@@ -170,7 +170,7 @@ export default {
   margin-top: 20px;
 }
 
-.task-actions button {
+button {
   padding: 5px 10px;
   margin-right: 10px;
   background-color: #625b71;
@@ -178,9 +178,10 @@ export default {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  border-radius: 10px;
 }
 
-.task-actions button:hover {
+button:hover {
   background-color: #4d4069;
 }
 </style>
