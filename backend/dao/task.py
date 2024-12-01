@@ -116,7 +116,7 @@ class TaskDAO(BaseDao):
             for stage_id, stage in project.get("stages", {}).items():
                 for task_id, task in stage.get("tasks", {}).items():
                     for worker_id, worker in task.get("workers", {}).items():
-                        if worker.get("user_id") == ObjectId(user_id):
+                        if worker_id == user_id:
                             tasks.append(TaskResponse(id=task_id, **task))
 
         return tasks
