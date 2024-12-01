@@ -4,15 +4,14 @@
   <div class="task-page">
     <div class="task-header">
       <div>
-        <h1>{{projectName}}</h1>
+        <h1>{{ projectName }}</h1>
         <div class="task-title">
-          <h2>Этап: {{stageName}}</h2>
-          <h2>Задача: </h2>
-          <h2 v-if="!isEditing">{{taskName}}</h2>
-          <input v-else type="text" v-model="taskName" class="task-name-input" />
-          <button v-if="!isEditing" @click="startEdit">Редактировать</button>
-          <button v-if="isEditing" @click="saveEdit">Сохранить</button>
-          <button v-if="isEditing" @click="cancelEdit">Отмена</button>
+          <h2>Этап: {{ stageName }}</h2>
+          <div class="task-name-container">
+            <h2>Задача:</h2>
+            <h2 v-if="!isEditing">{{ taskName }}</h2>
+            <input v-else type="text" v-model="taskName" class="task-name-input" />
+          </div>
         </div>
       </div>
     </div>
@@ -51,6 +50,9 @@
     </div>
 
     <div class="task-actions">
+      <button v-if="!isEditing" @click="startEdit">Редактировать</button>
+      <button v-if="isEditing" @click="saveEdit">Сохранить</button>
+      <button v-if="isEditing" @click="cancelEdit">Отмена</button>
       <button @click="goToTasks" class="go-to-tasks-button">Перейти к задачам</button>
     </div>
   </div>
@@ -61,8 +63,8 @@ import HeaderComponent from '../bars/HeaderComponent.vue';
 import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
 import ContactsComponent from '../project/ContactsComponent.vue';
 import axios from 'axios';
-import {clearAllCookies, useCookies} from '@/src/js/useCookies';
-const { getProjectId,getProjectName,getStageId,getStageName,getTaskId } = useCookies();
+import { clearAllCookies, useCookies } from '@/src/js/useCookies';
+const { getProjectId, getProjectName, getStageId, getStageName, getTaskId } = useCookies();
 
 export default {
   components: {
@@ -89,7 +91,7 @@ export default {
     };
   },
   methods: {
-    deleteWorker(id){
+    deleteWorker(id) {
       this.contacts = this.contacts.filter(contact => contact.id !== id);
     },
     async fetchTaskData() {
@@ -99,9 +101,9 @@ export default {
         this.taskName = response.data.name;
         this.startDate = this.formatDate(response.data.start_date);
         this.endDate = this.formatDate(response.data.end_date);
-        this.status= response.data.status;
+        this.status = response.data.status;
         this.taskDescription = response.data.description;
-        this.taskId= response.data.id;
+        this.taskId = response.data.id;
         this.contacts = Object.entries(response.data.workers).map(([id, contact]) => ({
           id, // ID пользователя (ключ объекта)
           userName: contact.name,
@@ -149,7 +151,7 @@ export default {
         });
         this.$emit('update-stage', { ...this.stage, ...this.editStageData });
       } catch (error) {
-        if(error.response.status === 401){
+        if (error.response.status === 401) {
           this.$store.commit('removeUsers');  // Изменяем состояние
           clearAllCookies();
           this.$router.push("/login");
@@ -202,35 +204,47 @@ export default {
 }
 
 .task-title {
-  display: flex;
-  align-items: center;
   margin-top: 10px;
 }
 
 .task-title h2 {
   font-size: 20px;
-  margin-right: 10px;
+  margin-bottom: 10px;
 }
 
-.task-title input.task-name-input {
+.task-name-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.task-name-container h2 {
+  margin: 0;
+}
+
+.task-name-container input.task-name-input {
   font-size: 20px;
-  margin-right: 10px;
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
 
-.task-title button {
+.task-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.task-actions button {
   padding: 8px 12px;
   background-color: #625b71;
   color: white;
   border: none;
   border-radius: 15px;
   cursor: pointer;
-  margin-right: 15px;
 }
 
-.task-title button:hover {
+.task-actions button:hover {
   background-color: #4f416d;
 }
 
@@ -242,10 +256,10 @@ export default {
 
 .task-description {
   flex: 1;
-  width: 80%;
+  width: 50%;
 }
 
-.task-description p{
+.task-description p {
   width: 80%;
 }
 
