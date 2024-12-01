@@ -225,7 +225,7 @@ export default {
   background-color: #625b71;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 15px;
   cursor: pointer;
   margin-right: 15px;
 }
@@ -297,7 +297,7 @@ export default {
   background-color: #625b71;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 15px;
   cursor: pointer;
 }
 
