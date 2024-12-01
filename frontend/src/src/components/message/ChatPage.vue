@@ -52,7 +52,8 @@ export default {
       newMessage: '',
       errorMessage: '',
       messages: [
-      ]
+      ],
+      socket: null
     };
   },
   computed: {
@@ -61,6 +62,41 @@ export default {
     }
   },
   methods: {
+    async connectWebSocket() {
+      if (!this.chatId) return;
+
+      this.socket = new WebSocket(`ws://localhost:8080/api/message/chat/${this.chatId}`); // Замените на ваш WebSocket URL
+      this.socket.onopen = () => console.log('WebSocket соединение установлено');  // Логируем успешное подключение
+      this.socket.onopen = () => {
+        console.log("WebSocket подключен.");
+      };
+
+      this.socket.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        console.log("hfghfh");
+        // Обновляем сообщения
+        this.messages.push({
+          text: message.content,
+          date: message.timestamp,
+          status: message.status,
+          sender: message.sender === getUserId() ? "self" : "other",
+        });
+
+        this.$nextTick(() => this.scrollToBottom());
+      };
+
+      this.socket.onerror = (error) => {
+        console.error("WebSocket ошибка:", error);
+      };
+
+      this.socket.onclose = () => {
+        console.log("WebSocket отключен.");
+        setTimeout(() => {
+          // Попытка переподключения
+          this.connectWebSocket();
+        }, 5000);
+      };
+    },
     async fetchChat() {
       this.chatId = getChatId();
       if(!this.chatId){
@@ -84,6 +120,8 @@ export default {
               status: message.status,
               sender: message.sender === getUserId() ? "self" : "other"
           }));
+          console.log("вызываю сокет");
+          await this.connectWebSocket(); // Подключаем WebSocket после загрузки чата
         } catch (error) {
           if(error.response.status === 401){
             this.$store.commit('removeUsers');  // Изменяем состояние
@@ -93,6 +131,7 @@ export default {
           this.errorMessage = error;
           console.error('Ошибка при загрузке чата:', error);
         }
+
       }
     },
     async sendMessage() {
@@ -146,6 +185,9 @@ export default {
           this.newMessage = "";
           // console.log(dataToSend);
           try {
+            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+              this.socket.send(JSON.stringify(dataToSend));
+            }
             const res = await axios.post(`/api/message/create_message`, dataToSend, {
               headers: {
                 'Content-Type': 'application/json',
@@ -184,6 +226,11 @@ export default {
   },
   beforeMount() {
     this.fetchChat();
+  },
+  beforeUnmount() {
+    if (this.socket) {
+      this.socket.close();
+    }
   },
 };
 </script>
