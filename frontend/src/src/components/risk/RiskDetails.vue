@@ -134,6 +134,7 @@ export default {
   color: white;
   border: none;
   cursor: pointer;
+  border-radius: 10px;
 }
 
 .cancel-button {
@@ -142,6 +143,7 @@ export default {
   color: white;
   border: none;
   cursor: pointer;
+  border-radius: 10px;
 }
 
 .edit-title {
