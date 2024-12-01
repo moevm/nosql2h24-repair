@@ -18,15 +18,15 @@
     </div>
 
     <!-- Отображаем список пользователей только если хотя бы один фильтр изменен -->
-      <div v-for="user in users" :key="user.id" class="user-item">
-        <div>
-          <p>{{ user.lastname }} {{ user.name }} {{ user.middlename }}</p>
-          <p>Должность - {{ user.role }}</p>
-        </div>
-        <div class="user-item-actions">
-          <button @click="addToContacts(user)">Добавить в контакты</button>
-        </div>
+    <div v-for="user in users" :key="user.id" class="user-item">
+      <div>
+        <p>{{ user.username }}</p>
+        <p>Должность - {{ user.role }}</p>
       </div>
+      <div class="user-item-actions">
+        <button @click="addToContacts(user)">Добавить в задачу</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -35,7 +35,7 @@ import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
-const { getProjectId } = useCookies();
+const { getProjectId} = useCookies();
 
 
 export default {
@@ -76,20 +76,17 @@ export default {
         if(this.lastname){
           params.append('lastname', this.lastname);
         }
-        // console.log(params.toString());
-        // console.log(this.lastname);
-        // console.log(`/api/user/find/?${params.toString()}`);
-        const response = await axios.get(`/api/user/find/?${params.toString()}`);
-        // console.log("это дата",response.data);
-        // this.users.push(response.data);
+        console.log(params.toString());
+        console.log(this.lastname);
+        console.log(`/api/projects/get_users/${getProjectId()}?${params.toString()}`);
+        const response = await axios.get(`/api/projects/get_users/${getProjectId()}?${params.toString()}`);
+        console.log("это дата",response.data);
         this.users = Object.values(response.data).map(user => ({
-          name: user.name,
-          lastname: user.lastname,
-          middlename: user.middlename,
+          username: user.username,
           id: user.id,
           role: user.role,
         }));
-        // console.log(this.users);
+        console.log(this.users);
       } catch (error) {
         if(error.response.status === 401){
           this.$store.commit('removeUsers');  // Изменяем состояние
@@ -103,32 +100,9 @@ export default {
       }
     },
     async addToContacts(user) {
-      const dataToSend = {
-        user_id: user.id,
-      };
-      console.log(dataToSend.user_id);
-      try {
-        const res = await axios.post(`/api/projects/${getProjectId()}/add_contact`, dataToSend, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          withCredentials: true,
-        });
-        console.log(res);
-        alert(`Пользователь ${user.lastname} ${user.name} ${user.middlename} добавлен в контакты`);
-        this.$router.push(`/project`);
-      } catch (error) {
-        if(error.response.status === 401){
-          this.$store.commit('removeUsers');  // Изменяем состояние
-          clearAllCookies();
-          this.$router.push("/login");
-        }
-        console.error("Ошибка сети:", error.message);
-        if (error.response && error.response.data.detail) {
-          this.errorMessage = error.response.data.detail;
-        }
-      }
+      this.$store.commit('addSingleWorker', user);
+      alert(`Пользователь ${user.username} добавлен в задачу`);
+      this.$router.push(`/add_task`);
     },
     // searchUsers() {
     //   // Метод для обработки поиска при нажатии кнопки "Поиск"

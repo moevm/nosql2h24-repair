@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import { useCookies } from '@/src/js/useCookies';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 import axios from 'axios';
 const { setMaterialId,getProjectId } = useCookies();
 export default {
@@ -77,6 +77,11 @@ export default {
           });
           this.$emit('delete', this.material.materialId);
         } catch (error) {
+          if(error.response.status === 401){
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
           // Обработка ошибки, если нужно
           console.error(error);
         }

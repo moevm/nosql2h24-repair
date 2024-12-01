@@ -30,7 +30,7 @@
   import HeaderComponent from '../bars/HeaderComponent.vue';
   import SidebarComponent from '../bars/SidebarComponent.vue';
   import axios from 'axios';
-  import { useCookies } from '@/src/js/useCookies';
+  import {clearAllCookies, useCookies} from '@/src/js/useCookies';
   const { getUserId,setChatId,setChatName,setReceiverId } = useCookies();
   export default {
     components: {
@@ -75,6 +75,11 @@
           );
           console.log(this.chats);
         } catch (error) {
+          if(error.response.status === 401){
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
           console.error('Ошибка при загрузке чатов:', error);
         }
       },

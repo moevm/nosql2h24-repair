@@ -37,7 +37,7 @@
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
-import { useCookies } from '@/src/js/useCookies';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getReceiverId, getChatName,getChatId,getUserId } = useCookies();
 
 export default {
@@ -52,42 +52,6 @@ export default {
       newMessage: '',
       errorMessage: '',
       messages: [
-        /*{
-          text: "Как обстоят дела с ремонтом, когда завершите?",
-          date: new Date("2024-10-03T21:37:00"),
-          sender: "other",
-          status: "read"
-        },
-        {
-          text: "Работаем, но возникли задержки с поставками материалов. Без них продолжить не можем.",
-          date: new Date("2024-10-03T21:38:00"),
-          sender: "self",
-          status: "read"
-        },
-        {
-          text: "Опять? Это уже третья неделя идёт!",
-          date: new Date("2024-10-03T21:39:00"),
-          sender: "other",
-          status: "read"
-        },
-        {
-          text: "К сожалению, задержки по вине поставщика. Мы делаем всё возможное на нашем уровне.",
-          date: new Date("2024-10-03T21:40:00"),
-          sender: "self",
-          status: "read"
-        },
-        {
-          text: "Хорошо, но постарайтесь уложиться в сроки. Ещё неделя – и начнутся проблемы.",
-          date: new Date("2024-10-03T21:41:00"),
-          sender: "other",
-          status: "read"
-        },
-        {
-          text: "Приложим максимум усилий, однако если материалы вновь задержатся, это не будет зависеть от нас.",
-          date: new Date("2024-10-03T21:42:00"),
-          sender: "self",
-          status: "unread"
-        }*/
       ]
     };
   },
@@ -121,6 +85,11 @@ export default {
               sender: message.sender === getUserId() ? "self" : "other"
           }));
         } catch (error) {
+          if(error.response.status === 401){
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
           this.errorMessage = error;
           console.error('Ошибка при загрузке чата:', error);
         }
@@ -154,6 +123,11 @@ export default {
               });
             }
           } catch (error) {
+            if(error.response.status === 401){
+              this.$store.commit('removeUsers');  // Изменяем состояние
+              clearAllCookies();
+              this.$router.push("/login");
+            }
             this.errorMessage = error;
             console.error("Ошибка сети:", error.message);
             if (error.response && error.response.data.detail) {
@@ -186,6 +160,11 @@ export default {
               status: res.data.status,
             });
           } catch (error) {
+            if(error.response.status === 401){
+              this.$store.commit('removeUsers');  // Изменяем состояние
+              clearAllCookies();
+              this.$router.push("/login");
+            }
             this.errorMessage = error;
             console.error("Ошибка сети:", error.message);
             if (error.response && error.response.data.detail) {

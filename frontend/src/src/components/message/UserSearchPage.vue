@@ -34,7 +34,7 @@
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
-import { useCookies } from '@/src/js/useCookies';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { setReceiverId, setChatName, setChatId } = useCookies();
 
 
@@ -87,6 +87,11 @@ export default {
         }));
         // console.log(this.users);
       } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
         console.error('Ошибка при загрузке контактов:', error);
         if (error.response && error.response.data.detail) {
           this.errorMessage = error.response.data.detail;

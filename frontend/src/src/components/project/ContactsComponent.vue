@@ -40,6 +40,9 @@ export default {
       if(this.$route.path === '/tasks/viewRedactorTask') {
         router.push(`/add_worker`);
       }
+      if(this.$route.path === '/add_task') {
+        router.push(`/add_new_worker`);
+      }
     },
     async deleteContact(contact) {
       if(this.$route.path === '/tasks/viewRedactorTask') {

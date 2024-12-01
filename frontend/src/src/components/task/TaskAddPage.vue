@@ -45,9 +45,6 @@
         </div>
       </div>
 
-      <div class="task-contacts">
-        <ContactsComponent />
-      </div>
     </div>
     <div class="task-title">
       <button @click="toggleAdd">Сохранить</button>
@@ -59,7 +56,6 @@
 <script>
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
-import ContactsComponent from '../project/ContactsComponent.vue';
 import axios from 'axios';
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getProjectId, getStageId, getStageName, getProjectName } = useCookies();
@@ -68,7 +64,6 @@ export default {
   components: {
     HeaderComponent,
     ProjectSidebarComponent,
-    ContactsComponent
   },
   data() {
     return {

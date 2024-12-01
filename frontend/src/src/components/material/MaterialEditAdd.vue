@@ -40,7 +40,7 @@
   import HeaderComponent from '../bars/HeaderComponent.vue';
   import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
   import axios from 'axios';
-  import { useCookies } from '@/src/js/useCookies';
+  import {clearAllCookies, useCookies} from '@/src/js/useCookies';
   const { getProjectId,getMaterialId } = useCookies();
 
   export default {
@@ -71,6 +71,11 @@
             this.material.pricePerUnit = response.data.procurement.price;
             this.material.inStock = response.data.procurement.inStock;
           } catch (error) {
+            if(error.response.status === 401){
+              this.$store.commit('removeUsers');  // Изменяем состояние
+              clearAllCookies();
+              this.$router.push("/login");
+            }
             console.error('Ошибка при загрузке Закупки:', error);
           }
           this.isEditMode = true;
@@ -100,6 +105,11 @@
               alert('Закупка успешно изменена!');
               this.$router.push(`/procurements`);
             } catch (error) {
+              if(error.response.status === 401){
+                this.$store.commit('removeUsers');  // Изменяем состояние
+                clearAllCookies();
+                this.$router.push("/login");
+              }
               console.error("Ошибка сети:", error.message);
               if (error.response && error.response.data.detail) {
                 this.errorMessage = error.response.data.detail;
@@ -119,6 +129,11 @@
               alert('Закупка успешно создана!');
               this.$router.push(`/procurements`);
             } catch (error) {
+              if(error.response.status === 401){
+                this.$store.commit('removeUsers');  // Изменяем состояние
+                clearAllCookies();
+                this.$router.push("/login");
+              }
               console.error("Ошибка сети:", error.message);
               if (error.response && error.response.data.detail) {
                 this.errorMessage = error.response.data.detail;

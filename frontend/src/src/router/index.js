@@ -20,6 +20,7 @@ import UserSearchPage from '../components/message/UserSearchPage.vue';
 import AddTaskPage from '../components/task/TaskAddPage.vue';
 import AddContactPage from "@/src/components/message/AddContactPage.vue";
 import StatisticsPage from '../components/statics/StatisticsPage.vue';
+import AddWorkerNewPage from "@/src/components/message/AddWorkerNewPage.vue";
 
 const routes = [
   { path: '/', component: LoginPage }, // Начальная страница - страница логина
@@ -45,6 +46,7 @@ const routes = [
   { path: '/user-search', component: UserSearchPage },
   { path: '/statistics', component: StatisticsPage },
   {path: '/add_worker', component: AddWorkerPage},
+  {path: '/add_new_worker', component: AddWorkerNewPage},
 ];
 
 const router = createRouter({
