@@ -31,6 +31,7 @@ class TaskResponse(Task):
     
 
 class TaskUpdate(BaseModel):
+    name: str
     description: str
     status: TaskStatus = TaskStatus.none_status
     start_date: Optional[datetime] = Field(None)

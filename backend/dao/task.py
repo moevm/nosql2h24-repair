@@ -67,6 +67,7 @@ class TaskDAO(BaseDao):
             },
             {
                 "$set": {
+                    f"stages.{stage_id}.tasks.{task_id}.name": update_data["name"],
                     f"stages.{stage_id}.tasks.{task_id}.description": update_data["description"],
                     f"stages.{stage_id}.tasks.{task_id}.status": update_data["status"],
                     f"stages.{stage_id}.tasks.{task_id}.start_date": update_data["start_date"],
