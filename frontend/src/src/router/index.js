@@ -21,7 +21,6 @@ import AddTaskPage from '../components/task/TaskAddPage.vue';
 import AddContactPage from "@/src/components/message/AddContactPage.vue";
 import StatisticsPage from '../components/statics/StatisticsPage.vue';
 import AddWorkerNewPage from "@/src/components/message/AddWorkerNewPage.vue";
-import WorkerPage from '../components/main_content/WorkerContentComponent.vue';
 
 const routes = [
   { path: '/', component: LoginPage }, // Начальная страница - страница логина
@@ -48,7 +47,6 @@ const routes = [
   { path: '/statistics', component: StatisticsPage },
   {path: '/add_worker', component: AddWorkerPage},
   {path: '/add_new_worker', component: AddWorkerNewPage},
-  {path: '/worker', component: WorkerPage},
 ];
 
 const router = createRouter({

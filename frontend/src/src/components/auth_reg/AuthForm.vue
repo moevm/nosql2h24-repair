@@ -180,13 +180,13 @@ export default {
           const newUserData = { name: res.data.lastname + ' ' + res.data.name + ' ' + res.data.middlename, role: res.data.role };
           this.$store.commit('addSingleUser', newUserData);  // Изменяем состояние
           console.log(newUserData);
-          // this.$router.push("/main");
-          if(newUserData.role === "Рабочий") {
+          this.$router.push("/main");
+          /*if(newUserData.role === "Рабочий") {
             this.$router.push('/worker');
           }
           else{
             this.$router.push("/main");
-          }
+          }*/
 
         })
             .catch(err => {

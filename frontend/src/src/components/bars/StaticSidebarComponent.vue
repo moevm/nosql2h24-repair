@@ -1,6 +1,6 @@
 <template>
   <aside class="sidebar">
-    <div v-if="isCustomer" class="menu-item" @click="goToStatistics">
+    <div v-if="userRole === 'Заказчик'" class="menu-item" @click="goToStatistics">
       <img src="@/assets/icons/statics.png" alt="Static Icon" class="static-icon">
       <p>Статистика</p>
     </div>
@@ -25,6 +25,10 @@ export default {
   computed: {
     isMainPage() {
       return this.$route.path === '/main';
+    },
+    userRole() {
+      const user = this.$store.getters.getUser[0];
+      return user ? user.role : null;
     },
   },
   methods: {
