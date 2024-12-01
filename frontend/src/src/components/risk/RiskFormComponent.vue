@@ -1,6 +1,6 @@
 <template>
     <HeaderComponent />
-    <ProjectSidebarComponent :projectId="projectId" :projectName="nameProject"/>
+    <SidebarComponent :projectId="projectId" :projectName="nameProject"/>
     <div class="form-container">
       <h2>{{ taskId ? 'Редактировать риск' : 'Новая карточка риска' }}</h2>
       
@@ -23,14 +23,14 @@
   
   <script>
   import HeaderComponent from '../bars/HeaderComponent.vue';
-  import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
+  import SidebarComponent from '../bars/SidebarComponent.vue';
   import axios from 'axios';
   import {clearAllCookies, useCookies} from '@/src/js/useCookies';
   const { getProjectId } = useCookies();
   export default {
     components: {
         HeaderComponent,
-        ProjectSidebarComponent,
+        SidebarComponent,
     },
     data() {
       return {

@@ -1,6 +1,6 @@
 <template>
   <HeaderComponent />
-  <ProjectSidebarComponent />
+  <SidebarComponent />
   <div class="task-page">
     <div class="task-header">
       <div>
@@ -52,7 +52,7 @@
 
 <script>
 import HeaderComponent from '../bars/HeaderComponent.vue';
-import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
+import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
 import { clearAllCookies, useCookies } from '@/src/js/useCookies';
 const { getProjectId, getStageId, getStageName, getProjectName } = useCookies();
@@ -60,7 +60,7 @@ const { getProjectId, getStageId, getStageName, getProjectName } = useCookies();
 export default {
   components: {
     HeaderComponent,
-    ProjectSidebarComponent,
+    SidebarComponent,
   },
   data() {
     return {

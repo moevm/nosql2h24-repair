@@ -1,7 +1,7 @@
 <template>
   <div class="main-container">
     <HeaderComponent />
-    <ProjectSidebarComponent />
+    <SidebarComponent />
 
     <div class="content">
       <div class="edit-material-container">
@@ -41,7 +41,7 @@
 
 <script>
 import HeaderComponent from '../bars/HeaderComponent.vue';
-import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
+import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getProjectId, getMaterialId } = useCookies();
@@ -49,7 +49,7 @@ const { getProjectId, getMaterialId } = useCookies();
 export default {
   components: {
     HeaderComponent,
-    ProjectSidebarComponent,
+    SidebarComponent,
   },
   data() {
     return {

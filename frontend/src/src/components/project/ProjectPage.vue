@@ -1,7 +1,7 @@
 <template>
   <div class="project-page">
     <HeaderComponent />
-    <ProjectSidebarComponent/>
+    <SidebarComponent/>
     <main class="content">
       <div class="main-content">
         <div class="project-description">
@@ -56,7 +56,7 @@
 <script>
 import axios from 'axios';
 import HeaderComponent from '../bars/HeaderComponent.vue';
-import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
+import SidebarComponent from '../bars/SidebarComponent.vue';
 import ContactsComponent from '../project/ContactsComponent.vue';
 
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
@@ -65,7 +65,7 @@ const { getProjectId } = useCookies();
 export default {
   components: {
     HeaderComponent,
-    ProjectSidebarComponent,
+    SidebarComponent,
     ContactsComponent,
   },
   data() {

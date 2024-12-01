@@ -1,7 +1,7 @@
 <template>
   <div class="main-container">
     <HeaderComponent />
-    <ProjectSidebarComponent/>
+    <SidebarComponent/>
 
     <div class="content">
       <div class="task-container">
@@ -33,7 +33,7 @@
 <script>
 import axios from 'axios';
 import HeaderComponent from '../bars/HeaderComponent.vue';
-import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
+import SidebarComponent from '../bars/SidebarComponent.vue';
 import TaskItemComponent from '../risk/TaskItemComponent.vue';
 
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
@@ -42,7 +42,7 @@ const { getProjectId, getProjectName,setRiskId } = useCookies();
 export default {
   components: {
     HeaderComponent,
-    ProjectSidebarComponent,
+    SidebarComponent,
     TaskItemComponent,
   },
   data() {

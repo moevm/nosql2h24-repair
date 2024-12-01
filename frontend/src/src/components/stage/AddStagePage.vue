@@ -1,7 +1,7 @@
 <template>
   <div class="add-stage-page">
     <HeaderComponent />
-    <ProjectSidebarComponent />
+    <SidebarComponent />
     <div class="main-content">
       <div class="add-stage-container">
         <h2>Добавить этап</h2>
@@ -37,7 +37,7 @@
 
 <script>
 import HeaderComponent from '../bars/HeaderComponent.vue';
-import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
+import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getProjectId } = useCookies();
@@ -45,7 +45,7 @@ const { getProjectId } = useCookies();
 export default {
   components: {
     HeaderComponent,
-    ProjectSidebarComponent,
+    SidebarComponent,
   },
   data() {
     return {

@@ -1,7 +1,7 @@
 <template>
   <div class="stages-page">
     <HeaderComponent />
-    <ProjectSidebarComponent />
+    <SidebarComponent />
     <div class="main-content">
       <div class="stages-container">
         <div class="header-container">
@@ -35,7 +35,7 @@
 
 <script>
 import HeaderComponent from '../bars/HeaderComponent.vue';
-import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
+import SidebarComponent from '../bars/SidebarComponent.vue';
 import StageComponent from './StageComponent.vue';
 import axios from 'axios';
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
@@ -44,7 +44,7 @@ const { getProjectId, getProjectName } = useCookies();
 export default {
   components: {
     HeaderComponent,
-    ProjectSidebarComponent,
+    SidebarComponent,
     StageComponent,
   },
 

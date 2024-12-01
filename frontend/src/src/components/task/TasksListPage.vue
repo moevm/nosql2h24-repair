@@ -1,6 +1,6 @@
 <template>
   <HeaderComponent />
-  <ProjectSidebarComponent />
+  <SidebarComponent />
   <div class="tasks-list-page">
     <h2>Задачи этапа: {{ stageName }}</h2>
 
@@ -45,7 +45,7 @@
 
 <script>
 import HeaderComponent from '../bars/HeaderComponent.vue';
-import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
+import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getProjectId, getStageId, getStageName,setTaskId } = useCookies();
@@ -53,7 +53,7 @@ const { getProjectId, getStageId, getStageName,setTaskId } = useCookies();
 export default {
   components: {
     HeaderComponent,
-    ProjectSidebarComponent,
+    SidebarComponent,
   },
   data() {
     return {

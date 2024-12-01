@@ -1,7 +1,7 @@
 <template>
   <div class="main-page">
     <HeaderComponent />
-    <StaticSidebarComponent />
+    <SidebarComponent />
     <WorkerContentComponent v-if="userRole === 'Рабочий'" />
     <ContentComponent v-else-if="userRole !== 'Рабочий'" />
   </div>
@@ -9,14 +9,14 @@
 
 <script>
 import HeaderComponent from '../components/bars/HeaderComponent.vue';
-import StaticSidebarComponent from '../components/bars/StaticSidebarComponent.vue';
+import SidebarComponent from '../components/bars/SidebarComponent.vue';
 import ContentComponent from '../components/ContentComponent.vue';
 import WorkerContentComponent from '../components/main_content/WorkerContentComponent.vue';
 
 export default {
   components: {
     HeaderComponent,
-    StaticSidebarComponent,
+    SidebarComponent,
     ContentComponent,
     WorkerContentComponent,
   },
