@@ -11,7 +11,9 @@
           <div>{{ contact.userName }}</div>
           <span>{{ contact.role }}</span>
         </div>
-        <button v-if="isEditing" @click="deleteContact(contact)" class="delete-button">Удалить</button>
+        <button v-if="isEditing" @click="deleteContact(contact)" class="delete-button">
+          <img :src="require(`@/assets/icons/delete_person.png`)" alt="Delete Icon" class="delete-icon">
+        </button>
       </li>
     </ul>
   </div>
@@ -94,7 +96,6 @@ export default {
   border: none;
   padding: 5px 10px;
   cursor: pointer;
-  border-radius: 4px;
   border-radius: 10px;
 }
 
@@ -123,13 +124,15 @@ export default {
 }
 
 .delete-button {
-  background-color: #625b71;
-  color: white;
+  background-color: transparent;
   border: none;
-  padding: 5px 10px;
   cursor: pointer;
-  border-radius: 4px;
+  padding: 5px;
   margin-left: 10px;
-  border-radius: 10px;
+}
+
+.delete-icon {
+  width: 30px;
+  height: 30px;
 }
 </style>
