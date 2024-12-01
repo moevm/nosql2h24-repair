@@ -5,7 +5,7 @@
     <main class="content">
       <div class="main-content">
         <div class="project-description">
-          <h2> {{ nameProject }}</h2>
+          <h1> {{ nameProject }}</h1>
 
           <!-- Статус, начало и конец одной строчкой над описанием -->
           <div class="project-info">
@@ -194,7 +194,7 @@ export default {
 <style scoped>
 .content {
   margin-left: 150px;
-  padding-top: 60px;
+  padding-top: 30px;
 }
 
 .main-content {
@@ -282,6 +282,7 @@ export default {
 
 .contacts {
   flex: 1;
+  margin-top: 15px;
 }
 
 .edit-buttons {
