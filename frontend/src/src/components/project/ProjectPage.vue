@@ -145,7 +145,7 @@ export default {
           withCredentials: true,
         });
         console.log(res);
-        this.$router.push('/projects'); // Переход на страницу списка проектов после удаления
+        this.$router.push('/main'); // Переход на страницу списка проектов после удаления
       } catch (error) {
         console.error("Ошибка сети:", error.message);
         if (error.response) {
