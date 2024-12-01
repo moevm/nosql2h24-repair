@@ -121,7 +121,7 @@ button {
   background-color: #625b71;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 15px;
   cursor: pointer;
   font-size: 16px;
 }
