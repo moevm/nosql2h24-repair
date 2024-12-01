@@ -38,6 +38,7 @@
             <div class="edit-buttons">
               <button @click="saveChanges" class="save-button">Сохранить</button>
               <button @click="cancelEdit" class="cancel-button">Отмена</button>
+              <button @click="deleteProject" class="delete-button">Удалить проект</button>
             </div>
           </div>
           <div v-else>
@@ -46,7 +47,7 @@
           </div>
         </div>
 
-        <ContactsComponent :contacts="contacts"/>
+        <ContactsComponent :contacts="contacts" :isEditing="isEditing"/>
       </div>
     </main>
   </div>
@@ -97,42 +98,64 @@ export default {
       this.editedDateStart = this.dateStart;
       this.editedDateEnd = this.dateEnd;
     },
-   async saveChanges() {
-    this.description = this.editedDescription;
-    this.status = this.editedStatus;
-    this.dateStart = this.editedDateStart;
-    this.dateEnd = this.editedDateEnd;
-    this.isEditing = false;
-    console.log(this.description);
-     const dataToSend = {
-       description:this.description,
-       status:this.status,
-       start_date: this.formatToDateTime(this.dateStart),
-       end_date: this.formatToDateTime(this.dateEnd)
-     };
-     console.log(dataToSend)
-     try {
-       const res = await axios.put(`/api/projects/update/${getProjectId()}`, dataToSend, {
-         headers: {
-           'Content-Type': 'application/json',
-           'Accept': 'application/json',
-         },
-         withCredentials: true,
-       });
-       console.log(res);
-     } catch (error) {
-       console.error("Ошибка сети:", error.message);
-       if (error.response) {
-         console.error("Данные ответа:", error.response.data);
-         // Вывод ошибки с сервера
-         if (error.response.data.detail) {
-           this.errorMessage = error.response.data.detail; // Сохраняем ошибку с сервера
-         }
-       }
-     }
-  },
+    async saveChanges() {
+      this.description = this.editedDescription;
+      this.status = this.editedStatus;
+      this.dateStart = this.editedDateStart;
+      this.dateEnd = this.editedDateEnd;
+      this.isEditing = false;
+      console.log(this.description);
+      const dataToSend = {
+        description:this.description,
+        status:this.status,
+        start_date: this.formatToDateTime(this.dateStart),
+        end_date: this.formatToDateTime(this.dateEnd)
+      };
+      console.log(dataToSend)
+      try {
+        const res = await axios.put(`/api/projects/update/${getProjectId()}`, dataToSend, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          withCredentials: true,
+        });
+        console.log(res);
+      } catch (error) {
+        console.error("Ошибка сети:", error.message);
+        if (error.response) {
+          console.error("Данные ответа:", error.response.data);
+          // Вывод ошибки с сервера
+          if (error.response.data.detail) {
+            this.errorMessage = error.response.data.detail; // Сохраняем ошибку с сервера
+          }
+        }
+      }
+    },
     cancelEdit() {
       this.isEditing = false;
+    },
+    async deleteProject() {
+      try {
+        const res = await axios.delete(`/api/projects/delete/${getProjectId()}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          withCredentials: true,
+        });
+        console.log(res);
+        this.$router.push('/projects'); // Переход на страницу списка проектов после удаления
+      } catch (error) {
+        console.error("Ошибка сети:", error.message);
+        if (error.response) {
+          console.error("Данные ответа:", error.response.data);
+          // Вывод ошибки с сервера
+          if (error.response.data.detail) {
+            this.errorMessage = error.response.data.detail; // Сохраняем ошибку с сервера
+          }
+        }
+      }
     },
     async fetchProjectData() {
       try {
@@ -239,25 +262,22 @@ export default {
   box-sizing: border-box;
 }
 
-.edit-button, .save-button, .cancel-button {
+.edit-button, .save-button, .cancel-button, .delete-button {
   margin-top: 10px;
-  padding: 5px 10px;
+  padding: 10px 15px;
   cursor: pointer;
+  background-color: #625b71;
+  color: white;
+  border: none;
+  border-radius: 20px; /* Rounded corners */
 }
 
 .save-button {
-  background-color: #625b71;
-  color: white;
-  border: none;
-  border-radius: 4px;
+  margin-right: 10px;
 }
 
 .cancel-button {
-  background-color: #625b71;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  margin-left: 10px;
+  margin-right: 10px;
 }
 
 .contacts {
