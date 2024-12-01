@@ -1,6 +1,9 @@
 <template>
   <aside class="sidebar">
-    <button v-if="!isMainPage" @click="goToMain" class="to-main-button">На основную</button>
+    <div :class="['menu-item', { 'active': isMainPage }]" @click="goToMain">
+      <img src="@/assets/icons/home.png" alt="Home Icon" class="icon">
+      <p>На основную</p>
+    </div>
     <div :class="['menu-item', { 'active': isPhasesPage }]" @click="goToPhases">
       <img src="@/assets/icons/phases.png" alt="Phases Icon" class="icon">
       <p>Этапы</p>
