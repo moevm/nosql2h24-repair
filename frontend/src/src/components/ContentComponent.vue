@@ -10,7 +10,7 @@
       />
     </div>
     <div class="projects-container">
-      <div v-for="(item, index) in filteredItems" :key="index">
+      <div v-for="(item, index) in filteredItems" :key="index" class="project-item">
         <Project
             v-if="item.type === 'project'"
             :projectName="item.name"
@@ -21,7 +21,7 @@
             :projectStatus="item.status"
             :projectId="item.projectId"
         />
-        <NewProjectButton v-if="item.type === 'newProjectButton'" />
+        <NewProjectButton v-if="item.type === 'newProjectButton' && userRole !== 'Рабочий'" />
       </div>
     </div>
   </div>
@@ -31,7 +31,7 @@
 import axios from 'axios';
 import NewProjectButton from '../components/project/NewProjectButton.vue';
 import Project from '../components/project/ProjectComponent.vue';
-import {clearAllCookies} from "@/src/js/useCookies";
+import { clearAllCookies } from "@/src/js/useCookies";
 
 export default {
   components: {
@@ -55,10 +55,14 @@ export default {
           (item.type === 'project' && item.name.toLowerCase().includes(this.searchQuery.toLowerCase()))
       );
     },
+    userRole() {
+      const user = this.$store.getters.getUser[0];
+      return user ? user.role : null;
+    },
   },
   methods: {
     async fetchProjects() {
-      console.log(this.$store.getters.getUser)
+      console.log(this.$store.getters.getUser);
       try {
         const response = await axios.get('/api/projects/all');
         console.log(response.data);
@@ -74,7 +78,7 @@ export default {
           })),
         ];
       } catch (error) {
-        if(error.response.status === 401){
+        if (error.response.status === 401) {
           this.$store.commit('removeUsers');  // Изменяем состояние
           clearAllCookies();
           this.$router.push("/login");
@@ -121,6 +125,9 @@ export default {
 .projects-container {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+}
+
+.project-item {
+  box-sizing: border-box;
 }
 </style>

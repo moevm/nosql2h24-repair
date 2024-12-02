@@ -43,7 +43,7 @@
           </div>
           <div v-else>
             <p>{{ description }}</p>
-            <button @click="editProject" class="edit-button">Редактировать</button>
+            <button v-if="userRole !== 'Заказчик'" @click="editProject" class="edit-button">Редактировать</button>
           </div>
         </div>
 
@@ -82,6 +82,12 @@ export default {
       editedDateStart: '',
       editedDateEnd: ''
     };
+  },
+  computed: {
+    userRole() {
+      const user = this.$store.getters.getUser[0];
+      return user ? user.role : null;
+    },
   },
   created() {
     this.fetchProjectData();
