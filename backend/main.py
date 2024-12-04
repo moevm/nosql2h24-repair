@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from database import db, create_indexation
 from init_users import create_users
-from routers import auth, user, project, task, message, risk, stage, contact, procurement
+from routers import auth, user, project, task, message, risk, stage, contact, procurement, stat
 
 
 @asynccontextmanager
@@ -42,6 +42,7 @@ app.include_router(procurement.router, tags=['Procurement'], prefix="/api/projec
 app.include_router(task.router, tags=['Task'], prefix="/api/tasks")
 
 app.include_router(message.router, tags=['Message'], prefix="/api/message")
+app.include_router(stat.router, tags=['Stats'], prefix="/api/statistic")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
