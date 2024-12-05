@@ -25,6 +25,7 @@
         </div>
         <div class="user-item-actions">
           <button @click="goToChat(user)">Перейти в чат</button>
+          <button v-if="userRole === 'Администратор'">Удалить пользователя</button>
         </div>
       </div>
   </div>
@@ -52,6 +53,12 @@ export default {
       users: [
       ],
     };
+  },
+  computed: {
+    userRole() {
+      const user = this.$store.getters.getUser[0];
+      return user ? user.role : null;
+    },
   },
   methods: {
     async searchUsers() {
