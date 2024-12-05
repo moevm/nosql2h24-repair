@@ -128,6 +128,11 @@ export default {
         });
         console.log(res);
       } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
         console.error("Ошибка сети:", error.message);
         if (error.response) {
           console.error("Данные ответа:", error.response.data);
@@ -142,26 +147,34 @@ export default {
       this.isEditing = false;
     },
     async deleteProject() {
-      try {
-        const res = await axios.delete(`/api/projects/delete/${getProjectId()}`, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          withCredentials: true,
-        });
-        console.log(res);
-        this.$router.push('/main'); // Переход на страницу списка проектов после удаления
-      } catch (error) {
-        console.error("Ошибка сети:", error.message);
-        if (error.response) {
-          console.error("Данные ответа:", error.response.data);
-          // Вывод ошибки с сервера
-          if (error.response.data.detail) {
-            this.errorMessage = error.response.data.detail; // Сохраняем ошибку с сервера
+      if (confirm(`Удалить проект "${this.nameProject}"?`)) {
+        try {
+          const res = await axios.delete(`/api/projects/delete/${getProjectId()}`, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            withCredentials: true,
+          });
+          console.log(res);
+          this.$router.push('/main'); // Переход на страницу списка проектов после удаления
+        } catch (error) {
+          if(error.response.status === 401){
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
+          console.error("Ошибка сети:", error.message);
+          if (error.response) {
+            console.error("Данные ответа:", error.response.data);
+            // Вывод ошибки с сервера
+            if (error.response.data.detail) {
+              this.errorMessage = error.response.data.detail; // Сохраняем ошибку с сервера
+            }
           }
         }
       }
+
     },
     async fetchProjectData() {
       try {
