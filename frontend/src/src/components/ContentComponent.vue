@@ -62,10 +62,8 @@ export default {
   },
   methods: {
     async fetchProjects() {
-      console.log(this.$store.getters.getUser);
       try {
         const response = await axios.get('/api/projects/all');
-        console.log(response.data);
         this.items = [
           { type: 'newProjectButton' },
           ...response.data.map(project => ({

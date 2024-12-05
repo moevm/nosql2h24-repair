@@ -12,7 +12,7 @@
                 <select v-model="selectedStatType" id="statType">
                   <option value="" disabled>Не выбрано</option>
                   <option value="risks">Риски</option>
-                  <option value="purchases">Закупки</option>
+                  <option value="procurements">Закупки</option>
                 </select>
               </div>
   
@@ -65,6 +65,8 @@
 import HeaderComponent from "../bars/HeaderComponent.vue";
 import SidebarComponent from "../bars/SidebarComponent.vue";
 import BarChart from "./BarChart.vue";
+import axios from 'axios';
+import {clearAllCookies} from "@/src/js/useCookies";
 
 export default {
   components: {
@@ -81,9 +83,9 @@ export default {
       isDropdownOpen: false,
       chartData: [], // Пустой массив для скрытия графика
       projects: [
-        { id: 1, name: "Проект 1" },
-        { id: 2, name: "Проект 2" },
-        { id: 3, name: "Проект 3" },
+        // { id: 1, name: "Проект 1" },
+        // { id: 2, name: "Проект 2" },
+        // { id: 3, name: "Проект 3" },
       ],
     };
   },
@@ -97,10 +99,46 @@ export default {
     toggleDropdown() {
       this.isDropdownOpen = !this.isDropdownOpen;
     },
-    applyFilters() {
+    formatToDateTime(date) {
+      return `${date}T00:00:00`; // Преобразует в формат `YYYY-MM-DDT00:00:00`
+    },
+    async applyFilters() {
       // Проверяем, выбраны ли фильтры, и обновляем график
       if (this.selectedStatType && this.selectedProjects.length > 0 && this.startDate && this.endDate) {
-        this.chartData = this.getFilteredData();
+        const dataToSend = {
+          project_ids: this.selectedProjects,
+          stat_type: this.selectedStatType,
+          start_date: this.formatToDateTime(this.startDate),
+          end_date: this.formatToDateTime(this.endDate),
+        };
+        // console.log(dataToSend);
+        try {
+          const res = await axios.post(`/api/statistic/get_stat`, dataToSend, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            withCredentials: true,
+          });
+          // console.log(res.data);
+          this.chartData = Object.entries(res.data).map(([key, value]) => {
+            const matchedProject = this.projects.find(project => project.id === key);
+            return matchedProject
+                ? { label: matchedProject.name, value: value }
+                : null;
+          }).filter(item => item !== null);
+        } catch (error) {
+          if (error.response.status === 401) {
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
+          console.error("Ошибка сети:", error.message);
+          if (error.response && error.response.data.detail) {
+            this.errorMessage = error.response.data.detail;
+          }
+        }
+        // this.chartData = this.getFilteredData();
       } else {
         alert("Пожалуйста, выберите все фильтры");
       }
@@ -119,6 +157,28 @@ export default {
     exportData() {
       alert("Экспорт данных");
     },
+    async fetchProjects() {
+      try {
+        const response = await axios.get('/api/projects/all');
+        this.projects = [
+          ...response.data.map(project => ({
+            name: project.name,
+            id: project.id,
+          })),
+        ];
+        // console.log(this.projects);
+      } catch (error) {
+        if (error.response.status === 401) {
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        console.error('Ошибка при загрузке проектов:', error);
+      }
+    },
+  },
+  beforeMount() {
+    this.fetchProjects();
   },
 };
 </script>
