@@ -4,6 +4,10 @@
       <img src="@/assets/icons/home.png" alt="Home Icon" class="icon">
       <p>На основную</p>
     </div>
+    <div v-if="userRole === 'Администратор'" class="menu-item" @click="goToUsers">
+      <img src="@/assets/icons/user.png" alt="User Icon" class="icon">
+      <p>Пользователи</p>
+    </div>
     <div v-if="!isMainPage && !isMessages && userRole !== 'Рабочий'" :class="['menu-item', { 'active': isPhasesPage }]" @click="goToPhases">
       <img src="@/assets/icons/phases.png" alt="Phases Icon" class="icon">
       <p>Этапы</p>
@@ -91,6 +95,9 @@ export default {
     },
     goToStatistics() {
       this.$router.push('/statistics');
+    },
+    goToUsers() {
+      this.$router.push('/user-search');
     },
     async logOut() {
       try {
