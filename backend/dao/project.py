@@ -1,7 +1,6 @@
 from bson import ObjectId
 
 from dao.base import BaseDao
-from dao.user import UserDao
 from database import db
 from schemas.project import ProjectCreate, ProjectResponse, Procurement, Stage, Risk, ProcurementResponse, \
     RiskResponse, \
@@ -107,6 +106,28 @@ class ProjectDao(BaseDao):
         if not contact or contact.get("user_id") != ObjectId(contact_id):
             return None
         return ContactResponse(**contact)
+
+    @classmethod
+    async def delete_contact(cls, project_id, contact_id: str) -> ProjectResponse | None:
+        result = await cls._update_with_query(
+            {"_id": ObjectId(project_id)},
+            {"$unset": {f"contacts.{contact_id}": ""}}
+        )
+
+        if result is None:
+            return None
+
+        update_task_result = await cls.collection.update_many(
+            {
+                "_id": ObjectId(project_id),  # Ищем проект
+                f"stages.tasks.workers.{contact_id}": {"$exists": True}  # Ищем задачи, где есть worker с этим ID
+            },
+            {
+                "$unset": {f"stages.$[].tasks.$[].workers.{contact_id}": ""}  # Удаляем worker из всех задач
+            }
+        )
+
+        return await cls.get_project_by_id(project_id)
 
     @classmethod
     async def add_procurement_to_project(cls, project_id: str,

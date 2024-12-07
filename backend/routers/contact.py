@@ -31,3 +31,14 @@ async def get_contacts(project_id: str, user: User = Depends(get_current_user)):
             detail='Проекта не существует'
         )
     return {"contacts": contacts}
+
+
+@router.delete("/{project_id}/delete_contact/{contact_id}", response_model=dict[str, ProjectResponse | None])
+async def delete_contact(project_id:str, contact_id: str, foreman: User = Depends(get_foreman_role)):
+    updated_project = await ProjectDao.delete_contact(project_id, contact_id)
+    if updated_project is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Проекта не существует'
+        )
+    return {"updated_project": updated_project}
