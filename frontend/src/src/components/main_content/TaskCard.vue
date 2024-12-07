@@ -20,8 +20,8 @@
       <div class="task-field">
         <label>Статус</label>
         <div class="status-dropdown">
-          <button @click="toggleDropdown" :style="{ backgroundColor: statuses[status]}">
-            {{ status }}
+          <button @click="toggleDropdown" :style="{ backgroundColor: statuses[currentStatus]}">
+            {{currentStatus}}
           </button>
           <ul v-if="dropdownOpen" class="dropdown-menu">
             <li
@@ -59,7 +59,7 @@
       },
       status: {
         type: String,
-        default: 'В процессе',
+        default: 'Нет статуса',
       },
       // key:{
       //   type: String,
@@ -71,9 +71,9 @@
       //   endDate: "2024-12-25",
         projectName: "Нет в бд",
         dropdownOpen: false,
-        currentStatus: { text: "В процессе", color: "orange" },
+        currentStatus: this.status,
         statuses: {
-          "-не выбрано-": "#e0e0e0",
+          "Нет статуса": "#e0e0e0",
           "Готово": "green",
           "Опоздание": "red",
           "В процессе": "orange"
@@ -86,6 +86,8 @@
         this.dropdownOpen = !this.dropdownOpen;
       },
       selectStatus(status) {
+        console.log(status);
+
         this.currentStatus = status;
         this.dropdownOpen = false;
       },
