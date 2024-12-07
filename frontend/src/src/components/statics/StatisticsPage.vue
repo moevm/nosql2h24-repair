@@ -8,11 +8,11 @@
         <!-- Графики -->
         <div class="graphs-container">
           <div class="graph" v-if="chartData.length > 0">
-            <h2>Текущий график</h2>
+            <h2>Текущий график {{selectedStatType ==='risks'? "рисков": "закупок"}}</h2>
             <BarChart :data="chartData" />
           </div>
           <div class="graph" v-if="chartImportData.length > 0">
-            <h2>Импортированный график</h2>
+            <h2>Импортированный график {{importType ==='risks'? "рисков": "закупок"}}</h2>
             <BarChart :data="chartImportData" />
           </div>
         </div>
@@ -86,6 +86,7 @@ export default {
   },
   data() {
     return {
+      importType:"",
       selectedStatType: "",
       selectedProjects: [],
       startDate: "",
@@ -107,6 +108,7 @@ export default {
     },
   },
   methods: {
+
     toggleDropdown() {
       this.isDropdownOpen = !this.isDropdownOpen;
     },
@@ -138,6 +140,7 @@ export default {
               ? { label: matchedProject.name, value: value }
               : null;
           }).filter(item => item !== null);
+          console.log(this.chartData);
         } catch (error) {
           if (error.response.status === 401) {
             this.$store.commit('removeUsers');  // Изменяем состояние
@@ -173,13 +176,21 @@ export default {
       reader.onload = (e) => {
         try {
           const jsonData = JSON.parse(e.target.result);
+          const typeObject = jsonData.find((item) => item.type);
 
+          if (typeObject) {
+            // Присваиваем значение `type` в importType
+            this.importType = typeObject.type;
+
+            // Удаляем объект с ключом `type` из данных
+            this.chartImportData = jsonData.filter((item) => !item.type);
+          }
           // Проверка, что это массив объектов с ключами `label` и `value`
-          if (this.validateDataFormat(jsonData)) {
-            this.chartImportData = jsonData;
+          if (this.validateDataFormat(this.chartData)) {
             alert("Данные успешно импортированы!");
             console.log(this.chartImportData)
           } else {
+            this.chartImportData = [];
             alert("Ошибка: Неверный формат данных. Ожидается массив объектов с ключами 'label' и 'value'.");
           }
         } catch (error) {
@@ -207,6 +218,7 @@ export default {
     },
     exportData() {
       if (this.chartData.length > 0) {
+        this.chartData.push({type:this.selectedStatType});
         const json = JSON.stringify(this.chartData, null, 2); // Преобразуем объект в JSON строку
         const blob = new Blob([json], { type: "application/json" }); // Создаём Blob объект
         const url = URL.createObjectURL(blob); // Генерируем URL
@@ -214,7 +226,7 @@ export default {
         // Создаём временный <a> элемент для скачивания файла
         const link = document.createElement("a");
         link.href = url;
-        link.download = "data.json"; // Имя файла
+        link.download = `data_${this.selectedStatType}.json`; // Имя файла
         link.click();
         // Освобождаем память
         URL.revokeObjectURL(url);
