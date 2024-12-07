@@ -76,7 +76,10 @@ class TaskDAO(BaseDao):
             }
         )
 
-        return await cls.get_task_by_id(project_id, stage_id, updated_id)
+        if updated_id is None:
+            return None
+
+        return await cls.get_task_by_id(project_id, stage_id, task_id)
 
     @classmethod
     async def update_task_status(cls, project_id: str, stage_id: str, task_id: str,

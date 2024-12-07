@@ -109,24 +109,34 @@ class ProjectDao(BaseDao):
 
     @classmethod
     async def delete_contact(cls, project_id, contact_id: str) -> ProjectResponse | None:
-        result = await cls._update_with_query(
-            {"_id": ObjectId(project_id)},
-            {"$unset": {f"contacts.{contact_id}": ""}}
-        )
-
-        if result is None:
+        project = await cls._get_one_by_id(project_id)
+        
+        if not project:
             return None
 
-        update_task_result = await cls.collection.update_many(
-            {
-                "_id": ObjectId(project_id),  # Ищем проект
-                f"stages.tasks.workers.{contact_id}": {"$exists": True}  # Ищем задачи, где есть worker с этим ID
-            },
-            {
-                "$unset": {f"stages.$[].tasks.$[].workers.{contact_id}": ""}  # Удаляем worker из всех задач
-            }
-        )
+        contacts = project.get("contacts", {})
+        if contact_id in contacts:
+            del contacts[contact_id]
 
+        stages = project.get("stages", {})
+        modified_tasks_count = 0
+    
+        for stage_id, stage in stages.items():
+            tasks = stage.get("tasks", {})
+            for task_id, task in tasks.items():
+                workers = task.get("workers", {})
+                if contact_id in workers:
+                    del workers[contact_id]
+                    modified_tasks_count += 1
+    
+        update_result = await cls.collection.replace_one(
+            {"_id": ObjectId(project_id)},
+            project
+        )
+        
+        if update_result.modified_count == 0:
+            return None
+    
         return await cls.get_project_by_id(project_id)
 
     @classmethod
