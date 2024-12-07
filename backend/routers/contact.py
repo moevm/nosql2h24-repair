@@ -39,6 +39,6 @@ async def delete_contact(project_id:str, contact_id: str, foreman: User = Depend
     if updated_project is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail='Проекта не существует'
+            detail='Проекта или контакта не существует'
         )
     return {"updated_project": updated_project}
