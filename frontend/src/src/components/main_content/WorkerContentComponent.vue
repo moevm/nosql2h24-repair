@@ -37,6 +37,7 @@
             :startDate="task.startDate"
             :name="task.name"
             :status="task.status"
+            :projectName="task.projectName"
         />
       </div>
     </div>
@@ -100,7 +101,8 @@
             endDate: this.formatDate(task.end_date),
             status: task.status,
             description: task.description,
-            taskId: task.id
+            taskId: task.id,
+            projectName: task.project_name,
           }));
           console.log(this.tasks)
         } catch (error) {

@@ -61,6 +61,10 @@
         type: String,
         default: 'Нет статуса',
       },
+      projectName: {
+        type: String,
+        default: "Нет в бд"
+      }
       // key:{
       //   type: String,
       // }
@@ -69,7 +73,6 @@
       return {
       //   startDate: "2024-12-25",
       //   endDate: "2024-12-25",
-        projectName: "Нет в бд",
         dropdownOpen: false,
         currentStatus: this.status,
         statuses: {
