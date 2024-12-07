@@ -1,11 +1,12 @@
 from bson import ObjectId
 
 from dao.base import BaseDao
+from dao.user import UserDao
 from database import db
 from schemas.project import ProjectCreate, ProjectResponse, Procurement, Stage, Risk, ProcurementResponse, \
     RiskResponse, \
     StageResponse, ProjectUpdate, RiskUpdate, ProcurementUpdate, StageUpdate
-from schemas.user import User, Contact, ContactResponse
+from schemas.user import User, Contact, ContactResponse, UserCreateSchema
 from schemas.utils import object_id_to_str, generate_id, get_date_now
 
 
@@ -13,7 +14,7 @@ class ProjectDao(BaseDao):
     collection = db.get_collection('project')
 
     @classmethod
-    async def create_project(cls, project_create: ProjectCreate, user: User) -> ProjectResponse:
+    async def create_project(cls, project_create: ProjectCreate, user: User) -> ProjectResponse | None:
         contact = Contact(
             username=f'{user.lastname} {user.name} {user.middlename}',
             role=user.role

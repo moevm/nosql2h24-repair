@@ -1,11 +1,11 @@
 import re
-
 from bson import ObjectId
 
 from dao.base import BaseDao
 from database import db
 from schemas.user import UserCreateSchema, User, UserResponse, Contact, ContactResponse, Role
 from schemas.utils import object_id_to_str, get_date_now
+from utils.password import get_password_hash
 
 
 class UserDao(BaseDao):
@@ -129,3 +129,11 @@ class UserDao(BaseDao):
     async def create_user(cls, user: UserCreateSchema):
         user_dict = user.model_dump()
         return await cls._create(user_dict)
+    
+    @classmethod
+    async def update_user(cls, user_id: str, user_update: UserCreateSchema):
+        update_data = user_update.model_dump()
+        update_data["password"] = get_password_hash(update_data["password"])
+        updated_id = await cls._update(user_id, update_data)
+        return await cls.find_user_by_id(updated_id)
+

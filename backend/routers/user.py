@@ -1,4 +1,3 @@
-from anyio.abc import value
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from dao.user import UserDao
@@ -31,7 +30,8 @@ async def get_users() -> dict[str, list[UserResponse]]:
 
 
 @router.get("/find/", response_model=list[UserResponse | None])
-async def find_users_by_filters(name: str = "", lastname: str = "", middlename: str = "", role: Role = None, user: User = Depends(get_foreman_role)) -> list[UserResponse | None]:
+async def find_users_by_filters(name: str = "", lastname: str = "", middlename: str = "", role: Role = None,
+                                user: User = Depends(get_foreman_role)) -> list[UserResponse | None]:
     users = await UserDao.find_users(name, lastname, middlename, role)
     return users
 
@@ -44,3 +44,12 @@ async def get_user(user_id: str, ser: User = Depends(get_current_user)):
 
     del finded_user.password
     return finded_user
+
+
+@router.put("/update/{user_id}", response_model=User)
+async def update_user(user_id: str, updated_data: UserCreateSchema, admin: User = Depends(get_admin_role)):
+    updated_user = await UserDao.update_user(user_id, updated_data)
+    if updated_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    del updated_user.password
+    return updated_user

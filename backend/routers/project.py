@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from dao.user import UserDao
 from schemas.project import ProjectResponse, ProjectCreate, ProjectUpdate
-from schemas.user import User, Role, UserResponse, ContactResponse
+from schemas.user import User, Role, UserResponse, ContactResponse, UserCreateSchema
 from utils.role import get_customer_role, get_foreman_role
 from utils.token import get_current_user
 from dao.project import ProjectDao
@@ -36,6 +36,11 @@ async def create(project_data: ProjectCreate, customer: User = Depends(get_custo
             detail='Проект уже существует'
         )
     new_project = await ProjectDao.create_project(project_data, customer)
+    if new_project is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Ошибка создания проекта'
+        )
     return {"new_project": new_project}
 
 
