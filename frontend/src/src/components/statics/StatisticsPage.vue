@@ -48,13 +48,17 @@
             </div>
             <button class="apply-button" @click="applyFilters">Применить</button>
             <div class="database-actions">
-              <button class="action-button" @click="importData">Импортировать</button>
+              <input type="file" @change="importData" accept=".json" hidden ref="fileInput" />
+              <button class="action-button" @click="triggerImport">Импортировать</button>
               <button class="action-button" @click="exportData">Экспортировать</button>
             </div>
           </div>
   
           <div class="graph" v-if="chartData.length > 0">
             <BarChart :data="chartData" />
+          </div>
+          <div class="graph" v-if="chartImportData.length > 0">
+            <BarChart :data="chartImportData" />
           </div>
         </div>
       </div>
@@ -81,6 +85,7 @@ export default {
       startDate: "",
       endDate: "",
       isDropdownOpen: false,
+      chartImportData:[],
       chartData: [], // Пустой массив для скрытия графика
       projects: [
         // { id: 1, name: "Проект 1" },
@@ -104,12 +109,12 @@ export default {
     },
     async applyFilters() {
       // Проверяем, выбраны ли фильтры, и обновляем график
-      if (this.selectedStatType && this.selectedProjects.length > 0 && this.startDate && this.endDate) {
+      if (this.selectedStatType && this.selectedProjects.length > 0) {
         const dataToSend = {
           project_ids: this.selectedProjects,
           stat_type: this.selectedStatType,
-          start_date: this.formatToDateTime(this.startDate),
-          end_date: this.formatToDateTime(this.endDate),
+          ...(this.startDate && { start_date: this.formatToDateTime(this.startDate) }),
+          ...(this.endDate && { end_date: this.formatToDateTime(this.endDate) }),
         };
         // console.log(dataToSend);
         try {
@@ -151,11 +156,66 @@ export default {
         { label: "Проект 3", value: 7 },
       ];
     },
-    importData() {
-      alert("Импорт данных");
+    triggerImport() {
+      this.$refs.fileInput.click(); // Триггерим клик по скрытому <input>
+    },
+    importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const jsonData = JSON.parse(e.target.result);
+
+          // Проверка, что это массив объектов с ключами `label` и `value`
+          if (this.validateDataFormat(jsonData)) {
+            this.chartImportData = jsonData;
+            alert("Данные успешно импортированы!");
+            console.log(this.chartImportData)
+          } else {
+            alert("Ошибка: Неверный формат данных. Ожидается массив объектов с ключами 'label' и 'value'.");
+          }
+        } catch (error) {
+          alert("Ошибка импорта данных: неверный формат файла.");
+        }
+      };
+      reader.readAsText(file);
+    },
+    validateDataFormat(data) {
+      // Проверяем, что это массив
+      if (!Array.isArray(data)) {
+        return false;
+      }
+
+      // Проверяем каждый объект в массиве
+      return data.every(
+          (item) =>
+              typeof item === "object" &&
+              item !== null &&
+              "label" in item &&
+              "value" in item &&
+              typeof item.label === "string" &&
+              typeof item.value === "number"
+      );
     },
     exportData() {
-      alert("Экспорт данных");
+      if(this.chartData.length > 0) {
+        const json = JSON.stringify(this.chartData, null, 2); // Преобразуем объект в JSON строку
+        const blob = new Blob([json], { type: "application/json" }); // Создаём Blob объект
+        const url = URL.createObjectURL(blob); // Генерируем URL
+
+        // Создаём временный <a> элемент для скачивания файла
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "data.json"; // Имя файла
+        link.click();
+        // Освобождаем память
+        URL.revokeObjectURL(url);
+      } else {
+        alert("У вас нет данных для графика, которые можно экспортировать")
+      }
+
     },
     async fetchProjects() {
       try {
