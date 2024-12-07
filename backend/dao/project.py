@@ -117,9 +117,10 @@ class ProjectDao(BaseDao):
         contacts = project.get("contacts", {})
         if contact_id in contacts:
             del contacts[contact_id]
+        else:
+            return None
 
         stages = project.get("stages", {})
-        modified_tasks_count = 0
     
         for stage_id, stage in stages.items():
             tasks = stage.get("tasks", {})
@@ -127,7 +128,6 @@ class ProjectDao(BaseDao):
                 workers = task.get("workers", {})
                 if contact_id in workers:
                     del workers[contact_id]
-                    modified_tasks_count += 1
     
         update_result = await cls.collection.replace_one(
             {"_id": ObjectId(project_id)},
