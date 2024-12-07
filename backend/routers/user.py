@@ -31,7 +31,7 @@ async def get_users() -> dict[str, list[UserResponse]]:
 
 @router.get("/find/", response_model=list[UserResponse | None])
 async def find_users_by_filters(name: str = "", lastname: str = "", middlename: str = "", role: Role = None,
-                                user: User = Depends(get_foreman_role)) -> list[UserResponse | None]:
+                                user: User = Depends(get_current_user)) -> list[UserResponse | None]:
     users = await UserDao.find_users(name, lastname, middlename, role)
     return users
 
