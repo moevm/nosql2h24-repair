@@ -38,6 +38,9 @@
             :name="task.name"
             :status="task.status"
             :projectName="task.projectName"
+            :id="task.taskId"
+            :projectId="task.projectId"
+            :stageId="task.stageId"
         />
       </div>
     </div>
@@ -102,6 +105,8 @@
             status: task.status,
             description: task.description,
             taskId: task.id,
+            stageId: task.stage_id,
+            projectId:task.project_id,
             projectName: task.project_name,
           }));
           console.log(this.tasks)

@@ -38,6 +38,8 @@
     </div>
   </template>
   <script>
+  import axios from 'axios';
+  import {clearAllCookies} from "@/src/js/useCookies";
   export default {
     // components: {TaskCard},
     props: {
@@ -64,6 +66,18 @@
       projectName: {
         type: String,
         default: "Нет в бд"
+      },
+      id:{
+        type: String,
+        required: true,
+      },
+      stageId:{
+        type: String,
+        required: true,
+      },
+      projectId:{
+        type: String,
+        required: true,
       }
       // key:{
       //   type: String,
@@ -88,9 +102,34 @@
       toggleDropdown() {
         this.dropdownOpen = !this.dropdownOpen;
       },
-      selectStatus(status) {
-        console.log(status);
-
+      async selectStatus(status) {
+        const dataToSend = {
+          status: status,
+        };
+        // console.log(dataToSend)
+        try {
+          await axios.put(`/api/tasks/update_status_task/${this.projectId}/${this.stageId}/${this.id}`, dataToSend, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            withCredentials: true,
+          });
+        } catch (error) {
+          if (error.response.status === 401) {
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
+          console.error("Ошибка сети:", error.message);
+          if (error.response) {
+            console.error("Данные ответа:", error.response.data);
+            // Вывод ошибки с сервера
+            if (error.response.data.detail) {
+              this.errorMessage = error.response.data.detail; // Сохраняем ошибку с сервера
+            }
+          }
+        }
         this.currentStatus = status;
         this.dropdownOpen = false;
       },
