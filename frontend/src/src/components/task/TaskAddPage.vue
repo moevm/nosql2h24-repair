@@ -11,7 +11,7 @@
             v-model="taskName"
             :class="{ 'input-error': !taskName && showErrors }"
             type="text"
-            placeholder="Название нового этапа"
+            placeholder="Название новой задачи"
             class="stage-name-input"
           />
           <button @click="toggleAdd" class="save-button">Сохранить</button>
