@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from dao.project import ProjectDao
 from dao.task import TaskDAO
-from schemas.task import Task, TaskResponse, TaskUpdate, ProjectTaskResponse
+from schemas.task import Task, TaskResponse, TaskUpdate, ProjectTaskResponse, TaskStatusUpdate
 from schemas.user import User, Worker
 from utils.role import get_foreman_role
 from utils.token import get_current_user
@@ -53,6 +53,17 @@ async def update_task(project_id: str, stage_id: str, task_id: str, task_data: T
             detail='Задача не найдена'
         )
     return task
+
+@router.put('/update_status_task/{project_id}/{stage_id}/{task_id}', response_model=TaskResponse)
+async def update_status_task(project_id: str, stage_id: str, task_id: str, task_data: TaskStatusUpdate,
+                             user: User = Depends(get_current_user)):
+    updated_task = await TaskDAO.update_task_status(project_id, stage_id, task_id, task_data)
+    if updated_task is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Задача не найдена'
+        )
+    return updated_task
 
 
 @router.get('/get_stage_tasks/{project_id}/{stage_id}', response_model=list[TaskResponse] | list[None])
