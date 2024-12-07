@@ -71,6 +71,27 @@ export default {
           }
         }
       }
+      if(this.$route.path === '/project') {
+        if (confirm(`Удалить контакта "${contact.userName}"?`)) {
+          try {
+            await axios.delete(`/api/projects/${getProjectId()}/delete_contact/${contact.id}`, {
+              headers: {
+                'Accept': 'application/json',
+              },
+              withCredentials: true,
+            });
+            this.$emit('delete', contact.id);
+          } catch (error) {
+            if(error.response.status === 401){
+              this.$store.commit('removeUsers');  // Изменяем состояние
+              clearAllCookies();
+              this.$router.push("/login");
+            }
+            // Обработка ошибки, если нужно
+            console.error(error);
+          }
+        }
+      }
     }
   },
 };

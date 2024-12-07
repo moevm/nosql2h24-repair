@@ -47,7 +47,7 @@
           </div>
         </div>
 
-        <ContactsComponent :contacts="contacts" :isEditing="isEditing"/>
+        <ContactsComponent :contacts="contacts" :isEditing="isEditing" @delete="deleteContact" />
       </div>
     </main>
   </div>
@@ -94,6 +94,9 @@ export default {
     console.log(this.nameProject)
   },
   methods: {
+    deleteContact(id) {
+      this.contacts = this.contacts.filter(contact => contact.id !== id);
+    },
     formatToDateTime(date) {
       return `${date}T00:00:00`; // Преобразует в формат `YYYY-MM-DDT00:00:00`
     },
