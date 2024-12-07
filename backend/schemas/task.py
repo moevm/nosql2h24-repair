@@ -33,6 +33,7 @@ class ProjectTaskResponse(TaskResponse):
     id: str
     project_id: str
     project_name: str
+    stage_id: str
     
 
 class TaskUpdate(BaseModel):

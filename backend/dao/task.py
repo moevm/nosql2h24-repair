@@ -140,6 +140,7 @@ class TaskDAO(BaseDao):
                                 id=task_id, 
                                 project_id=str(project["_id"]),
                                 project_name=project["name"],
+                                stage_id=str(stage_id),
                                 **task
                             ))
 
