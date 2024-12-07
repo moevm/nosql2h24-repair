@@ -2,9 +2,12 @@ from datetime import datetime
 
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.params import Depends
 from fastapi.responses import JSONResponse
 
 from database import db
+from schemas.user import User
+from utils.role import get_admin_role
 
 router = APIRouter()
 
@@ -20,7 +23,7 @@ def convert_to_serializable(data):
     return data
 
 @router.get("/export/json")
-async def export_json():
+async def export_json(admin: User = Depends(get_admin_role)):
     """Экспорт всей базы данных в формате JSON."""
     collections = await db.list_collection_names()
     if not collections:
