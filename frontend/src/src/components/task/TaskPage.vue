@@ -111,6 +111,17 @@ export default {
         }));
         console.log(this.contacts);
       } catch (error) {
+        if (error.response.status === 401) {
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        // if (error.code === "ERR_NETWORK") {
+        //   this.$store.commit('removeUsers');  // Изменяем состояние
+        //   clearAllCookies();
+        //   this.$router.push("/login");
+        //   alert("Ошибка сети проверьте соединение")
+        // }
         console.error('Ошибка при загрузке Задачи:', error);
       }
     },

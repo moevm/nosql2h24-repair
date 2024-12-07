@@ -175,6 +175,7 @@ export default {
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
+          console.log("Импорт")
           const jsonData = JSON.parse(e.target.result);
           const typeObject = jsonData.find((item) => item.type);
 
@@ -185,6 +186,7 @@ export default {
             // Удаляем объект с ключом `type` из данных
             this.chartImportData = jsonData.filter((item) => !item.type);
           }
+          console.log(this.chartImportData)
           // Проверка, что это массив объектов с ключами `label` и `value`
           if (this.validateDataFormat(this.chartData)) {
             alert("Данные успешно импортированы!");
