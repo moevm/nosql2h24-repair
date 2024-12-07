@@ -124,6 +124,11 @@ export default {
           clearAllCookies();
           this.$router.push("/login");
         }
+        if(error.response.status === 400){
+          if (confirm(`Не удалось добавить {user.lastname} ${user.name} ${user.middlename} в контакты. Убедитесь что он уже не добавлен. Хотите вернуться к задаче?`)) {
+            this.$router.push(`/project`);
+          }
+        }
         console.error("Ошибка сети:", error.message);
         if (error.response && error.response.data.detail) {
           this.errorMessage = error.response.data.detail;
