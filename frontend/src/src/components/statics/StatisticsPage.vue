@@ -1,76 +1,82 @@
 <template>
-    <div class="statistics-page">
-      <HeaderComponent />
-      <SidebarComponent />
-      <div class="content">
-        <h1>Статистика</h1>
-        <div class="main-content">
-          <div class="filters-and-actions">
-            <div class="filters">
-              <div class="filter-item">
-                <label for="statType">Тип статистики</label>
-                <select v-model="selectedStatType" id="statType">
-                  <option value="" disabled>Не выбрано</option>
-                  <option value="risks">Риски</option>
-                  <option value="procurements">Закупки</option>
-                </select>
-              </div>
-  
-              <div class="filter-item">
-                <label>Проекты</label>
-                <div class="dropdown">
-                  <button class="dropdown-button" @click="toggleDropdown">
-                    {{ getSelectedProjectsLabel }}
-                  </button>
-                  <div v-if="isDropdownOpen" class="dropdown-menu">
-                    <div v-for="project in projects" :key="project.id" class="dropdown-item">
-                      <input
-                        type="checkbox"
-                        :id="'project-' + project.id"
-                        :value="project.id"
-                        v-model="selectedProjects"
-                      />
-                      <label :for="'project-' + project.id">{{ project.name }}</label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-  
-              <div class="filter-item">
-                <label>Период времени</label>
-                <div class="date-filters">
-                  <label for="startDate">С</label>
-                  <input type="date" id="startDate" v-model="startDate" />
-                  <label for="endDate">До</label>
-                  <input type="date" id="endDate" v-model="endDate" />
-                </div>
-              </div>
-            </div>
-            <button class="apply-button" @click="applyFilters">Применить</button>
-            <div class="database-actions">
-              <input type="file" @change="importData" accept=".json" hidden ref="fileInput" />
-              <button class="action-button" @click="triggerImport">Импортировать</button>
-              <button class="action-button" @click="exportData">Экспортировать</button>
-            </div>
-          </div>
-  
+  <div class="statistics-page">
+    <HeaderComponent />
+    <SidebarComponent />
+    <div class="content">
+      <h1>Статистика</h1>
+      <div class="main-content">
+        <!-- Графики -->
+        <div class="graphs-container">
           <div class="graph" v-if="chartData.length > 0">
+            <h2>Текущий график</h2>
             <BarChart :data="chartData" />
           </div>
           <div class="graph" v-if="chartImportData.length > 0">
+            <h2>Импортированный график</h2>
             <BarChart :data="chartImportData" />
+          </div>
+        </div>
+
+        <!-- Фильтры и действия -->
+        <div class="filters-and-actions">
+          <div class="filters">
+            <div class="filter-item">
+              <label for="statType">Тип статистики</label>
+              <select v-model="selectedStatType" id="statType">
+                <option value="" disabled>Не выбрано</option>
+                <option value="risks">Риски</option>
+                <option value="procurements">Закупки</option>
+              </select>
+            </div>
+
+            <div class="filter-item">
+              <label>Проекты</label>
+              <div class="dropdown">
+                <button class="dropdown-button" @click="toggleDropdown">
+                  {{ getSelectedProjectsLabel }}
+                </button>
+                <div v-if="isDropdownOpen" class="dropdown-menu">
+                  <div v-for="project in projects" :key="project.id" class="dropdown-item">
+                    <input
+                      type="checkbox"
+                      :id="'project-' + project.id"
+                      :value="project.id"
+                      v-model="selectedProjects"
+                    />
+                    <label :for="'project-' + project.id">{{ project.name }}</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-item">
+              <label>Период времени</label>
+              <div class="date-filters">
+                <label for="startDate">С</label>
+                <input type="date" id="startDate" v-model="startDate" />
+                <label for="endDate">До</label>
+                <input type="date" id="endDate" v-model="endDate" />
+              </div>
+            </div>
+          </div>
+          <button class="apply-button" @click="applyFilters">Применить</button>
+          <div class="database-actions">
+            <input type="file" @change="importData" accept=".json" hidden ref="fileInput" />
+            <button class="action-button" @click="triggerImport">Импортировать</button>
+            <button class="action-button" @click="exportData">Экспортировать</button>
           </div>
         </div>
       </div>
     </div>
-  </template>  
-  
-  <script>
+  </div>
+</template>
+
+<script>
 import HeaderComponent from "../bars/HeaderComponent.vue";
 import SidebarComponent from "../bars/SidebarComponent.vue";
 import BarChart from "./BarChart.vue";
 import axios from 'axios';
-import {clearAllCookies} from "@/src/js/useCookies";
+import { clearAllCookies } from "@/src/js/useCookies";
 
 export default {
   components: {
@@ -85,7 +91,7 @@ export default {
       startDate: "",
       endDate: "",
       isDropdownOpen: false,
-      chartImportData:[],
+      chartImportData: [],
       chartData: [], // Пустой массив для скрытия графика
       projects: [
         // { id: 1, name: "Проект 1" },
@@ -129,8 +135,8 @@ export default {
           this.chartData = Object.entries(res.data).map(([key, value]) => {
             const matchedProject = this.projects.find(project => project.id === key);
             return matchedProject
-                ? { label: matchedProject.name, value: value }
-                : null;
+              ? { label: matchedProject.name, value: value }
+              : null;
           }).filter(item => item !== null);
         } catch (error) {
           if (error.response.status === 401) {
@@ -190,17 +196,17 @@ export default {
 
       // Проверяем каждый объект в массиве
       return data.every(
-          (item) =>
-              typeof item === "object" &&
-              item !== null &&
-              "label" in item &&
-              "value" in item &&
-              typeof item.label === "string" &&
-              typeof item.value === "number"
+        (item) =>
+          typeof item === "object" &&
+          item !== null &&
+          "label" in item &&
+          "value" in item &&
+          typeof item.label === "string" &&
+          typeof item.value === "number"
       );
     },
     exportData() {
-      if(this.chartData.length > 0) {
+      if (this.chartData.length > 0) {
         const json = JSON.stringify(this.chartData, null, 2); // Преобразуем объект в JSON строку
         const blob = new Blob([json], { type: "application/json" }); // Создаём Blob объект
         const url = URL.createObjectURL(blob); // Генерируем URL
@@ -243,7 +249,6 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .statistics-page {
   display: flex;
@@ -258,8 +263,30 @@ export default {
 
 .main-content {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 20px;
+}
+
+.graphs-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.graph {
+  flex: 1 1 45%; /* Flex-grow, flex-shrink, flex-basis */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.graph h2 {
+  margin-bottom: 10px;
 }
 
 .filters-and-actions {
@@ -285,7 +312,8 @@ export default {
   position: relative;
 }
 
-.dropdown-button, .filter-item select{
+.dropdown-button,
+.filter-item select {
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -365,17 +393,6 @@ export default {
   background-color: #47366a;
 }
 
-.graph {
-  flex: 2;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #f9f9f9;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-}
-
 .date-filters {
   display: flex;
   align-items: center;
@@ -393,5 +410,15 @@ export default {
   border-radius: 4px;
   padding: 5px 10px;
   cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .graphs-container {
+    flex-direction: column;
+  }
+
+  .graph {
+    flex: 1 1 100%; /* Flex-grow, flex-shrink, flex-basis */
+  }
 }
 </style>
