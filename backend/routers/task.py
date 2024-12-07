@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from dao.project import ProjectDao
 from dao.task import TaskDAO
-from schemas.task import Task, TaskResponse, TaskUpdate
+from schemas.task import Task, TaskResponse, TaskUpdate, ProjectTaskResponse
 from schemas.user import User, Worker
 from utils.role import get_foreman_role
 from utils.token import get_current_user
@@ -61,7 +61,7 @@ async def get_stage_tasks(project_id: str, stage_id: str):
     return tasks
 
 
-@router.get('/get_all', response_model=list[TaskResponse] | list[None])
+@router.get('/get_all', response_model=list[ProjectTaskResponse] | list[None])
 async def get_all_tasks(user: User = Depends(get_current_user)):
     tasks = await TaskDAO.get_all_tasks_by_user(user.id)
     return tasks

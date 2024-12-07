@@ -2,7 +2,7 @@ from bson import ObjectId
 
 from dao.base import BaseDao
 from database import db
-from schemas.task import Task, TaskResponse, TaskUpdate
+from schemas.task import Task, TaskResponse, TaskUpdate, TaskStatusUpdate, ProjectTaskResponse
 from schemas.user import Worker
 from schemas.utils import generate_id, get_date_now
 
@@ -58,9 +58,8 @@ class TaskDAO(BaseDao):
                                 task_update: TaskUpdate) -> TaskResponse | None:
 
         update_data = task_update.model_dump()
-        update_data["updated_at"] = get_date_now()
 
-        result = await cls.collection.update_one(
+        updated_id = await cls._update_with_query(
             {
                 "_id": ObjectId(project_id),
                 f"stages.{stage_id}.tasks.{task_id}": {"$exists": True}
@@ -72,15 +71,32 @@ class TaskDAO(BaseDao):
                     f"stages.{stage_id}.tasks.{task_id}.status": update_data["status"],
                     f"stages.{stage_id}.tasks.{task_id}.start_date": update_data["start_date"],
                     f"stages.{stage_id}.tasks.{task_id}.end_date": update_data["end_date"],
-                    f"stages.{stage_id}.tasks.{task_id}.updated_at": update_data["updated_at"],
+                    f"stages.{stage_id}.tasks.{task_id}.updated_at": get_date_now(),
                 }
             }
         )
 
-        if result.modified_count == 0:
-            return None
+        return await cls.get_task_by_id(project_id, stage_id, updated_id)
 
-        return await cls.get_task_by_id(project_id, stage_id, task_id)
+    @classmethod
+    async def update_task_status(cls, project_id: str, stage_id: str, task_id: str,
+                                 task_update: TaskStatusUpdate) -> TaskResponse | None:
+        update_data = task_update.model_dump()
+
+        updated_id = await cls._update_with_query(
+            {
+                "_id": ObjectId(project_id),
+                f"stages.{stage_id}.tasks.{task_id}": {"$exists": True}
+            },
+            {
+                "$set": {
+                    f"stages.{stage_id}.tasks.{task_id}.status": update_data["status"],
+                    f"stages.{stage_id}.tasks.{task_id}.updated_at": get_date_now(),
+                }
+            }
+        )
+
+        return await cls.get_task_by_id(project_id, stage_id, updated_id)
 
     @classmethod
     async def get_tasks_by_stage_id(cls, project_id: str, stage_id: str) -> list[TaskResponse] | list[None]:
@@ -102,7 +118,7 @@ class TaskDAO(BaseDao):
         return tasks_list
 
     @classmethod
-    async def get_all_tasks_by_user(cls, user_id: str) -> list[Task] | list[None]:
+    async def get_all_tasks_by_user(cls, user_id: str) -> list[ProjectTaskResponse] | list[None]:
         cursor = cls.collection.find(
             {
                 "stages": {
@@ -117,7 +133,12 @@ class TaskDAO(BaseDao):
                 for task_id, task in stage.get("tasks", {}).items():
                     for worker_id, worker in task.get("workers", {}).items():
                         if worker_id == user_id:
-                            tasks.append(TaskResponse(id=task_id, **task))
+                            tasks.append(ProjectTaskResponse(
+                                id=task_id, 
+                                project_id=str(project["_id"]),
+                                project_name=project["name"],
+                                **task
+                            ))
 
         return tasks
 
