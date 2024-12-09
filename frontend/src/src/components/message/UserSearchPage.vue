@@ -2,11 +2,12 @@
   <HeaderComponent />
   <SidebarComponent />
   <div class="user-search-page">
-    <div class="header-buttons">
-      <h1>Поиск пользователя</h1>
-      <button v-if="userRole === 'Администратор'">Импорт БД</button>
-      <button v-if="userRole === 'Администратор'">Экспорт БД</button>
+    <div v-if="userRole === 'Администратор'" class="header-buttons">
+      <h1>Данные приложения</h1>
+      <button>Импорт БД</button>
+      <button>Экспорт БД</button>
     </div>
+    <h1>Поиск пользователя</h1>
     <div class="search-filters">
       <input v-model="lastname" placeholder="Фамилия" class="input-field" />
       <input v-model="name" placeholder="Имя" class="input-field" />
