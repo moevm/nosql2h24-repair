@@ -5,7 +5,7 @@ from database import db
 from schemas.project import ProjectCreate, ProjectResponse, Procurement, Stage, Risk, ProcurementResponse, \
     RiskResponse, \
     StageResponse, ProjectUpdate, RiskUpdate, ProcurementUpdate, StageUpdate
-from schemas.user import User, Contact, ContactResponse, UserCreateSchema
+from schemas.user import User, Contact, ContactResponse
 from schemas.utils import object_id_to_str, generate_id, get_date_now
 
 

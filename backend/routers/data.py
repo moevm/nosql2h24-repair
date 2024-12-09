@@ -1,7 +1,8 @@
+import json
 from datetime import datetime
 
 from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
 
@@ -41,3 +42,52 @@ async def export_json(admin: User = Depends(get_admin_role)):
 
     # Ответ в формате JSON
     return JSONResponse(content=data)
+
+
+@router.post("/import")
+async def import_database(file: UploadFile):
+    """
+    Импортирует коллекции из JSON-файла в MongoDB с проверкой существования коллекций.
+
+    :param file: JSON-файл с данными
+    """
+    if not file.filename.endswith(".json"):
+        raise HTTPException(status_code=400, detail="Only JSON files are allowed")
+
+    try:
+        # Считываем содержимое файла
+        file_content = await file.read()
+        data = json.loads(file_content)
+
+        if not isinstance(data, dict):
+            raise HTTPException(status_code=400, detail="JSON file must contain a dictionary of collections")
+
+        # Получаем список существующих коллекций
+        existing_collections = db.list_collection_names()
+
+        # Проверка каждой коллекции в JSON
+        for collection_name in data.keys():
+            if collection_name not in existing_collections:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Collection '{collection_name}' does not exist in the database."
+                )
+
+        # Импорт данных
+        for collection_name, documents in data.items():
+            if not isinstance(documents, list):
+                raise HTTPException(status_code=400, detail=f"Collection '{collection_name}' must contain a list of documents")
+
+            # Преобразование _id в ObjectId
+            for doc in documents:
+                if "_id" in doc:
+                    doc["_id"] = ObjectId(doc["_id"])
+
+            # Вставка данных в коллекцию
+            collection = db[collection_name]
+            collection.insert_many(documents)
+
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON file")
+
+    return {"message": "Database imported successfully"}
