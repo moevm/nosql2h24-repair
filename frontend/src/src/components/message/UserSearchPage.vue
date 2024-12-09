@@ -2,8 +2,8 @@
   <HeaderComponent />
   <SidebarComponent />
   <div class="user-search-page">
+    <h1 v-if="userRole === 'Администратор'">Данные приложения</h1>
     <div v-if="userRole === 'Администратор'" class="header-buttons">
-      <h1>Данные приложения</h1>
       <button>Импорт БД</button>
       <button>Экспорт БД</button>
     </div>
