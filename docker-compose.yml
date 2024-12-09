@@ -13,7 +13,6 @@ services:
 
   app-backend:
     container_name: repair-backend
-    image: app
     restart: on-failure
     ports:
       - "8000:8000"
@@ -25,7 +24,6 @@ services:
   
   app-frontend:
     container_name: repair-frontend
-    image: app_vue
     restart: on-failure
     build: ./frontend
     ports:
