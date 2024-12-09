@@ -123,7 +123,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 15px;
-  margin-bottom: 20px;
+  margin-bottom: 50px;
 }
 
 .search-filters {
