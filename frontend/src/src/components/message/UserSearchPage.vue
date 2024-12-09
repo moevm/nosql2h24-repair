@@ -93,18 +93,31 @@ export default {
             throw new Error("Коллекция `user` должна существовать и содержать данные!");
           }
 
-          // Разрешаем отсутствие других коллекций
-          const validatedData = {
-            user: importedData.user,
-            chat: importedData.chat || [], // Пустой массив, если коллекция отсутствует
-            message: importedData.message || [],
-            project: importedData.project || [],
-          };
-          console.log(validatedData);
+          const formData = new FormData();
+          formData.append("file", file);
 
-          // Если проверка пройдена, отправляем данные на сервер
-          // const response = await axios.post("/api/data/import", validatedData);
-          alert("Данные успешно импортированы!");
+          // Удаляем `Content-Type` из заголовков, так как браузер сам установит правильный
+          try {
+            const res = await axios.post(`api/data/import`, formData, {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+              withCredentials: true,
+            });
+            console.log(res);
+            this.showErrors = false;
+            alert('Данные успешно импортированы!');
+          } catch (error) {
+            if (error.response && error.response.status === 401) {
+              this.$store.commit('removeUsers'); // Изменяем состояние
+              clearAllCookies();
+              this.$router.push("/login");
+            }
+            console.error("Ошибка сети:", error);
+            if (error.response && error.response.data.detail) {
+              this.errorMessage = error.response.data.detail;
+            }
+          }
         } catch (error) {
           console.error("Ошибка импорта:", error);
           alert(error.message || "Произошла ошибка при импорте данных.");
@@ -147,7 +160,7 @@ export default {
         // Создаём временный <a> элемент для скачивания файла
         const link = document.createElement("a");
         link.href = url;
-        link.download = `dampBd.json`; // Имя файла
+        link.download = `dumpBd.json`; // Имя файла
         document.body.appendChild(link); // Добавляем в DOM, чтобы клик сработал
         link.click(); // Программно кликаем по ссылке
         document.body.removeChild(link); // Удаляем элемент ссылки из DOM
