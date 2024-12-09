@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str
     
     CLIENT_ORIGIN: str
+
+    DEFAULT_DATA_FILE: str
     
     class Config:
         env_file = "../.env"

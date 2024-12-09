@@ -4,8 +4,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from database import db, create_indexation
-from init_users import create_users
+from database import db, create_indexation, is_database_empty, load_default_data
 from routers import (auth, user, project, task, message, risk, 
                      stage, contact, procurement, stat, data)
 
@@ -13,8 +12,9 @@ from routers import (auth, user, project, task, message, risk,
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.database = db
+    if await is_database_empty():
+        load_default_data()
     await create_indexation()
-    await create_users()
     yield
 
 

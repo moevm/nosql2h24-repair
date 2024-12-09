@@ -63,7 +63,7 @@ async def import_database(file: UploadFile):
             raise HTTPException(status_code=400, detail="JSON file must contain a dictionary of collections")
 
         # Получаем список существующих коллекций
-        existing_collections = db.list_collection_names()
+        existing_collections = await db.list_collection_names()
 
         # Проверка каждой коллекции в JSON
         for collection_name in data.keys():
