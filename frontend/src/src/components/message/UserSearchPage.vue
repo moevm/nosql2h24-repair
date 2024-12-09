@@ -113,6 +113,9 @@ export default {
               clearAllCookies();
               this.$router.push("/login");
             }
+            if (error.response && error.response.status === 400) {
+              alert('Бд не пуста');
+            }
             console.error("Ошибка сети:", error);
             if (error.response && error.response.data.detail) {
               this.errorMessage = error.response.data.detail;
