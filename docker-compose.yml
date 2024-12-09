@@ -1,5 +1,5 @@
 services:
-  mongo_db:
+  db:
     image: mongo:latest
     container_name: mongo_db
     environment:
@@ -21,7 +21,7 @@ services:
     volumes:
       - "./backend:/app"
     depends_on:
-      - mongo_db
+      - db
     networks:
       - app-network
   
