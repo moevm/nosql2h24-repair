@@ -5,6 +5,7 @@ from bson import ObjectId
 from fastapi import APIRouter, HTTPException, UploadFile
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
+from pymongo.errors import BulkWriteError
 
 from database import db
 from schemas.user import User
@@ -85,9 +86,11 @@ async def import_database(file: UploadFile):
 
             # Вставка данных в коллекцию
             collection = db[collection_name]
-            collection.insert_many(documents)
+            await collection.insert_many(documents)
 
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid JSON file")
+    except BulkWriteError as e:
+        raise HTTPException(status_code=400, detail="Идентичные данные уже существуют")
 
     return {"message": "Database imported successfully"}
