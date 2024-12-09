@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 
 from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile
+from fastapi import APIRouter, HTTPException, UploadFile
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
 
