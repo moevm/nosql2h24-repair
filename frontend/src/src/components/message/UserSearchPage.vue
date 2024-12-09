@@ -2,7 +2,11 @@
   <HeaderComponent />
   <SidebarComponent />
   <div class="user-search-page">
-    <h1>Поиск пользователя</h1>
+    <div class="header-buttons">
+      <h1>Поиск пользователя</h1>
+      <button v-if="userRole === 'Администратор'">Импорт БД</button>
+      <button v-if="userRole === 'Администратор'">Экспорт БД</button>
+    </div>
     <div class="search-filters">
       <input v-model="lastname" placeholder="Фамилия" class="input-field" />
       <input v-model="name" placeholder="Имя" class="input-field" />
@@ -37,7 +41,6 @@ import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { setReceiverId, setChatName, setChatId } = useCookies();
-
 
 export default {
   components: {
@@ -74,17 +77,12 @@ export default {
           params.append('name', this.name);
         }
         if (this.middelname) {
-          params.append('middlename', this.middelname);
+          params.append('middlename', this.middlename);
         }
         if(this.lastname){
           params.append('lastname', this.lastname);
         }
-        // console.log(params.toString());
-        // console.log(this.lastname);
-        // console.log(`/api/user/find/?${params.toString()}`);
         const response = await axios.get(`/api/user/find/?${params.toString()}`);
-        // console.log("это дата",response.data);
-        // this.users.push(response.data);
         this.users = Object.values(response.data).map(user => ({
           name: user.name,
           lastname: user.lastname,
@@ -92,10 +90,9 @@ export default {
           id: user.id,
           role: user.role,
         }));
-        // console.log(this.users);
       } catch (error) {
         if(error.response.status === 401){
-          this.$store.commit('removeUsers');  // Изменяем состояние
+          this.$store.commit('removeUsers');
           clearAllCookies();
           this.$router.push("/login");
         }
@@ -119,6 +116,13 @@ export default {
 .user-search-page {
   margin-left: 150px;
   padding-top: 60px;
+}
+
+.header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
 }
 
 .search-filters {
@@ -174,6 +178,7 @@ export default {
   gap: 10px;
 }
 
+.header-buttons button,
 .user-item button {
   background-color: #625b71;
   color: #fff;
