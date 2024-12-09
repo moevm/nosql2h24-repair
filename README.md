@@ -22,31 +22,56 @@
 - Администратор
 ```json
 {
-  "email": "ivan.petrov@example.com",
-  "password": "admin123"
-}
-```
-
-- Прораб
-```json
-{
-  "email": "maria.smirnova@example.com",
-  "password": "securepassword1"
-}
-```
-
-- Работник
-```json
-{
-  "email": "dmitry.kuznetsov@example.com",
-  "password": "securepassword2"
+  "email": "admin1@example.com",
+  "password": "AdminPass123"
 }
 ```
 
 - Заказчик
 ```json
 {
-  "email": "alex.sidorov@example.com",
-  "password": "securepassword3"
+  "email": "customer1@example.com",
+  "password": "CustPass123"
 }
 ```
+
+- Прораб
+```json
+{
+  "email": "foreman1@example.com",
+  "password": "ForemanPass123"
+}
+```
+
+- Работник 1
+```json
+{
+  "email": "worker1@example.com",
+  "password": "WorkerPass123"
+}
+```
+
+- Работник 2
+```json
+{
+  "email": "worker2@example.com:",
+  "password": "WorkerPass456"
+}
+```
+
+- Работник 3
+```json
+{
+  "email": "worker3@example.com:",
+  "password": "WorkerPass789"
+}
+```
+
+- Работник 4
+```json
+{
+  "email": "worker4@example.com",
+  "password": "MysticWolf2024!"
+}
+```
+
