@@ -1,13 +1,13 @@
 <template>
   <div class="stages-page">
     <HeaderComponent />
-    <ProjectSidebarComponent />
+    <SidebarComponent />
     <div class="main-content">
       <div class="stages-container">
         <div class="header-container">
           <!-- Контейнер для заголовка -->
           <div class="header-left">
-            <h2>{{projectName}}</h2>
+            <h1>{{projectName}}</h1>
 <!--            <p>СПбГЭТУ "ЛЭТИ"</p>-->
           </div>
 
@@ -35,16 +35,16 @@
 
 <script>
 import HeaderComponent from '../bars/HeaderComponent.vue';
-import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
+import SidebarComponent from '../bars/SidebarComponent.vue';
 import StageComponent from './StageComponent.vue';
 import axios from 'axios';
-import { useCookies } from '@/src/js/useCookies';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getProjectId, getProjectName } = useCookies();
 
 export default {
   components: {
     HeaderComponent,
-    ProjectSidebarComponent,
+    SidebarComponent,
     StageComponent,
   },
 
@@ -63,13 +63,13 @@ export default {
   },
   methods: {
     updateStage(updatedStage) {
-      const index = this.stages.findIndex(stage => stage.id === updatedStage.id);
+      const index = this.stages.findIndex(stage => stage.stageId === updatedStage.stageId);
       if (index !== -1) {
         this.stages.splice(index, 1, updatedStage);
       }
     },
     deleteStage(stageId) {
-      this.stages = this.stages.filter(stage => stage.id !== stageId);
+      this.stages = this.stages.filter(stage => stage.stageId !== stageId);
     },
     goToTasks() {
       // this.$router.push(`/tasks-list/${stageId}`);
@@ -89,6 +89,11 @@ export default {
         }));
         // console.log(this.stages);
       } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
         console.error('Ошибка при загрузке Этапов:', error);
       }
     },
@@ -97,7 +102,7 @@ export default {
       const day = String(date.getDate()).padStart(2, '0');
       const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 по 11, поэтому +1
       const year = date.getFullYear();
-      return `${day}.${month}.${year}`;
+      return `${year}-${month}-${day}`;
     },
   },
   beforeMount() {
@@ -116,13 +121,13 @@ export default {
 .main-content {
   display: flex;
   margin-left: 150px;
-  padding-top: 60px;
+  padding-top: 30px;
   width: calc(100% - 150px);
 }
 
 .stages-container {
   flex: 1;
-  padding: 16px;
+  padding: 20px;
 }
 
 .header-container {
@@ -150,16 +155,16 @@ export default {
 }
 
 .add-stage-button {
-  background-color: #4CAF50;
+  background-color: #625b71;
   color: white;
-  padding: 12px;
+  padding: 8px;
   border: none;
-  border-radius: 4px;
+  border-radius: 10px;
   cursor: pointer;
   margin-left: 10px; /* Добавляем отступ для кнопки */
 }
 
 .add-stage-button:hover {
-  background-color: #45a049;
+  background-color: #4e4168;
 }
 </style>

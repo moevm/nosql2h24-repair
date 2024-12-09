@@ -1,20 +1,20 @@
 <template>
   <HeaderComponent />
-  <ProjectSidebarComponent />
+  <SidebarComponent />
   <div class="risk-details">
     <h1>Детали риска</h1>
-    <div v-if="riskName">
+    <div v-if="risk.name">
       <div v-if="isEditing">
-        <input v-model="riskName" class="edit-title" />
-        <textarea v-model="riskDescription" class="edit-description"></textarea>
+        <input v-model="risk.name" class="edit-title" />
+        <textarea v-model="risk.description" class="edit-description"></textarea>
         <div class="button-group">
           <button @click="saveRisk" class="button">Сохранить</button>
           <button @click="cancelEdit" class="cancel-button">Отмена</button>
         </div>
       </div>
       <div v-else>
-        <h2>{{ riskName }}</h2>
-        <p>{{ riskDescription }}</p>
+        <h2>{{ risk.name }}</h2>
+        <p>{{ risk.description }}</p>
         <div class="button-group">
           <button @click="editRisk" class="button">Редактировать</button>
           <button @click="goBack" class="button">Назад</button>
@@ -29,34 +29,24 @@
 
 <script>
 import HeaderComponent from '../bars/HeaderComponent.vue';
-import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
+import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
-import { useCookies } from '@/src/js/useCookies';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getProjectId,getRiskId } = useCookies();
 
 export default {
   components: {
     HeaderComponent,
-    ProjectSidebarComponent,
+    SidebarComponent,
   },
   data() {
     return {
-      riskName:"",
-      riskDescription:"",
-      risk: null,
       editedRisk: null,
       isEditing: false,
-      // tasks: [
-      //   // { id: 1, title: 'Износ, поломка', description: 'Студенты могут разбить дорогой кафель...' },
-      //   // { id: 2, title: 'Задержка в работах', description: 'Из-за санкций некоторые материалы...' },
-      //   // Добавьте дополнительные риски сюда
-      // ],
+      risk: [
+      ],
     };
   },
-  // created() {
-  //   const taskId = parseInt(this.$route.params.taskId);
-  //   this.risk = this.tasks.find(task => task.id === taskId);
-  // },
   methods: {
     goBack() {
       this.$router.push('/risks');
@@ -65,9 +55,36 @@ export default {
       this.isEditing = true;
       this.editedRisk = { ...this.risk };
     },
-    saveRisk() {
-      this.risk.title = this.editedRisk.title;
-      this.risk.description = this.editedRisk.description;
+    async saveRisk() {
+      const dataToSend = {
+        name: this.risk.name,
+        description: this.risk.description,
+      };
+      console.log(dataToSend)
+      try {
+        const res = await axios.put(`/api/projects/${getProjectId()}/update_risk/${getRiskId()}`, dataToSend, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          withCredentials: true,
+        });
+        console.log(res);
+      } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        console.error("Ошибка сети:", error.message);
+        if (error.response) {
+          console.error("Данные ответа:", error.response.data);
+          // Вывод ошибки с сервера
+          if (error.response.data.detail) {
+            this.errorMessage = error.response.data.detail; // Сохраняем ошибку с сервера
+          }
+        }
+      }
       this.isEditing = false;
     },
     cancelEdit() {
@@ -78,8 +95,14 @@ export default {
       try {
         const response = await axios.get(`/api/projects/${getProjectId()}/get_risk/${getRiskId()}`);
         console.log(response.data);
-        this.riskName = response.data.risk.name;
-        this.riskDescription = response.data.risk.description;
+        this.risk = {
+          id: response.data.risk.id, // Можно сохранить ID для идентификации риска
+          name: response.data.risk.name,
+          description: response.data.risk.description,
+        };
+
+        // Добавляем риск в массив
+        console.log(this.risk);
         // console.log(this.riskName);
       } catch (error) {
         console.error('Ошибка при загрузке Риска:', error);
@@ -107,18 +130,20 @@ export default {
 
 .button {
   padding: 8px 16px;
-  background-color: #007bff;
+  background-color: #625b71;
   color: white;
   border: none;
   cursor: pointer;
+  border-radius: 10px;
 }
 
 .cancel-button {
   padding: 8px 16px;
-  background-color: #dc3545;
+  background-color: #625b71;
   color: white;
   border: none;
   cursor: pointer;
+  border-radius: 10px;
 }
 
 .edit-title {

@@ -34,7 +34,7 @@
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
-import { useCookies } from '@/src/js/useCookies';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getProjectId } = useCookies();
 
 
@@ -61,19 +61,41 @@ export default {
     async searchUsers() {
       this.users = [];
       try {
-        console.log(this.lastname);
-        const response = await axios.get(`/api/auth/get_user/${this.lastname}`);
-        // console.log(response.data);
-        this.users.push(response.data);
-        // this.users = Object.values(response.data).map(user => ({
-        //   name: user.name,
-        //   lastname: user.lastname,
-        //   middlename: user.middlename,
-        //   id: user.id,
-        //   role: user.role,
-        // }));
-        console.log(this.users);
+        const params = new URLSearchParams({
+        });
+
+        if (this.selectedRole) {
+          params.append('role', this.selectedRole);
+        }
+        if(this.name){
+          params.append('name', this.name);
+        }
+        if (this.middelname) {
+          params.append('middlename', this.middelname);
+        }
+        if(this.lastname){
+          params.append('lastname', this.lastname);
+        }
+        // console.log(params.toString());
+        // console.log(this.lastname);
+        // console.log(`/api/user/find/?${params.toString()}`);
+        const response = await axios.get(`/api/user/find/?${params.toString()}`);
+        // console.log("это дата",response.data);
+        // this.users.push(response.data);
+        this.users = Object.values(response.data).map(user => ({
+          name: user.name,
+          lastname: user.lastname,
+          middlename: user.middlename,
+          id: user.id,
+          role: user.role,
+        }));
+        // console.log(this.users);
       } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
         console.error('Ошибка при загрузке контактов:', error);
         if (error.response && error.response.data.detail) {
           this.errorMessage = error.response.data.detail;
@@ -97,6 +119,16 @@ export default {
         alert(`Пользователь ${user.lastname} ${user.name} ${user.middlename} добавлен в контакты`);
         this.$router.push(`/project`);
       } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        if(error.response.status === 400){
+          if (confirm(`Не удалось добавить {user.lastname} ${user.name} ${user.middlename} в контакты. Убедитесь что он уже не добавлен. Хотите вернуться к задаче?`)) {
+            this.$router.push(`/project`);
+          }
+        }
         console.error("Ошибка сети:", error.message);
         if (error.response && error.response.data.detail) {
           this.errorMessage = error.response.data.detail;
@@ -137,7 +169,7 @@ export default {
 }
 
 .input-field:focus {
-  border-color: #007BFF;
+  border-color: #625b71;
   outline: none;
 }
 
@@ -150,7 +182,7 @@ export default {
 }
 
 .select-field:focus {
-  border-color: #007BFF;
+  border-color: #625b71;
   outline: none;
 }
 
@@ -174,7 +206,7 @@ export default {
 }
 
 .user-item button {
-  background-color: #007BFF;
+  background-color: #625b71;
   color: #fff;
   border: none;
   padding: 6px 12px;
@@ -184,11 +216,11 @@ export default {
 }
 
 .user-item button:hover {
-  background-color: #0056b3;
+  background-color: #625b71;
 }
 
 .search-filters button {
-  background-color: #007BFF;
+  background-color: #625b71;
   color: #fff;
   padding: 8px 15px;
   font-size: 16px;
@@ -199,7 +231,7 @@ export default {
 }
 
 .search-filters button:hover {
-  background-color: #0056b3;
+  background-color: #625b71;
   transform: scale(1.05);
 }
 

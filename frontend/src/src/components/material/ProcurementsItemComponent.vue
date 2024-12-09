@@ -45,23 +45,50 @@
 
     <!-- Кнопки внизу карточки -->
     <div class="button-group">
-      <!-- Переход на страницу о материале при нажатии на кнопку "Подробнее" -->
-      <button @click="viewDetails" class="details-button">Подробнее</button>
-      <button @click="$emit('delete', material.id)" class="delete-button">Удалить</button>
+      <!-- Переход на страницу редактирования материала при нажатии на кнопку "Редактировать" -->
+      <button @click="editMaterial" class="details-button">Редактировать</button>
+      <button @click="deleteMaterial" class="delete-button">Удалить</button>
     </div>
   </div>
 </template>
 
 <script>
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
+import axios from 'axios';
+const { setMaterialId,getProjectId } = useCookies();
 export default {
   props: {
     material: Object,
   },
   methods: {
-    // Метод для перехода на страницу о материале
-    viewDetails() {
-      // this.$router.push(`/material/${this.material.id}`);
+    // Метод для перехода на страницу редактирования материала
+    editMaterial() {
+      setMaterialId(this.material.materialId);
+      this.$router.push('/material');
     },
+    async deleteMaterial() {
+      if (confirm(`Удалить материал "${this.material.name}"?`)) {
+        try {
+          await axios.delete(`/api/projects/${getProjectId()}/delete_procurement/${this.material.materialId}`, {
+            headers: {
+              'Accept': 'application/json',
+            },
+            withCredentials: true,
+          });
+          this.$emit('delete', this.material.materialId);
+        } catch (error) {
+          if(error.response.status === 401){
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
+          // Обработка ошибки, если нужно
+          console.error(error);
+        }
+
+
+      }
+    }
   },
 };
 </script>
@@ -127,15 +154,16 @@ export default {
   padding: 5px 10px;
   border: none;
   cursor: pointer;
+  border-radius: 10px;
 }
 
 .details-button {
-  background-color: #007bff;
+  background-color: #625b71;
   color: white;
 }
 
 .delete-button {
-  background-color: #dc3545;
+  background-color: #625b71;
   color: white;
 }
 </style>

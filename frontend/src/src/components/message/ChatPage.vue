@@ -37,7 +37,7 @@
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
-import { useCookies } from '@/src/js/useCookies';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getReceiverId, getChatName,getChatId,getUserId } = useCookies();
 
 export default {
@@ -52,43 +52,8 @@ export default {
       newMessage: '',
       errorMessage: '',
       messages: [
-        /*{
-          text: "Как обстоят дела с ремонтом, когда завершите?",
-          date: new Date("2024-10-03T21:37:00"),
-          sender: "other",
-          status: "read"
-        },
-        {
-          text: "Работаем, но возникли задержки с поставками материалов. Без них продолжить не можем.",
-          date: new Date("2024-10-03T21:38:00"),
-          sender: "self",
-          status: "read"
-        },
-        {
-          text: "Опять? Это уже третья неделя идёт!",
-          date: new Date("2024-10-03T21:39:00"),
-          sender: "other",
-          status: "read"
-        },
-        {
-          text: "К сожалению, задержки по вине поставщика. Мы делаем всё возможное на нашем уровне.",
-          date: new Date("2024-10-03T21:40:00"),
-          sender: "self",
-          status: "read"
-        },
-        {
-          text: "Хорошо, но постарайтесь уложиться в сроки. Ещё неделя – и начнутся проблемы.",
-          date: new Date("2024-10-03T21:41:00"),
-          sender: "other",
-          status: "read"
-        },
-        {
-          text: "Приложим максимум усилий, однако если материалы вновь задержатся, это не будет зависеть от нас.",
-          date: new Date("2024-10-03T21:42:00"),
-          sender: "self",
-          status: "unread"
-        }*/
-      ]
+      ],
+      socket: null
     };
   },
   computed: {
@@ -97,6 +62,41 @@ export default {
     }
   },
   methods: {
+    async connectWebSocket() {
+      if (!this.chatId) return;
+
+      this.socket = new WebSocket(`ws://localhost:8080/api/message/chat/${this.chatId}`); // Замените на ваш WebSocket URL
+      this.socket.onopen = () => console.log('WebSocket соединение установлено');  // Логируем успешное подключение
+      this.socket.onopen = () => {
+        console.log("WebSocket подключен.");
+      };
+
+      this.socket.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        console.log("hfghfh");
+        // Обновляем сообщения
+        this.messages.push({
+          text: message.content,
+          date: message.timestamp,
+          status: message.status,
+          sender: message.sender === getUserId() ? "self" : "other",
+        });
+
+        this.$nextTick(() => this.scrollToBottom());
+      };
+
+      this.socket.onerror = (error) => {
+        console.error("WebSocket ошибка:", error);
+      };
+
+      this.socket.onclose = () => {
+        console.log("WebSocket отключен.");
+        setTimeout(() => {
+          // Попытка переподключения
+          this.connectWebSocket();
+        }, 5000);
+      };
+    },
     async fetchChat() {
       this.chatId = getChatId();
       if(!this.chatId){
@@ -120,10 +120,18 @@ export default {
               status: message.status,
               sender: message.sender === getUserId() ? "self" : "other"
           }));
+          console.log("вызываю сокет");
+          await this.connectWebSocket(); // Подключаем WebSocket после загрузки чата
         } catch (error) {
+          if(error.response.status === 401){
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
           this.errorMessage = error;
           console.error('Ошибка при загрузке чата:', error);
         }
+
       }
     },
     async sendMessage() {
@@ -133,6 +141,7 @@ export default {
             id_receiver: getReceiverId(),
             content: this.newMessage
           };
+          this.newMessage = "";
           // console.log(this.messages.length);
           try {
             const res = await axios.post(`/api/message/create_chat`, dataToSend, {
@@ -153,6 +162,11 @@ export default {
               });
             }
           } catch (error) {
+            if(error.response.status === 401){
+              this.$store.commit('removeUsers');  // Изменяем состояние
+              clearAllCookies();
+              this.$router.push("/login");
+            }
             this.errorMessage = error;
             console.error("Ошибка сети:", error.message);
             if (error.response && error.response.data.detail) {
@@ -168,8 +182,12 @@ export default {
             receiver: getReceiverId(),
             content: this.newMessage
           };
+          this.newMessage = "";
           // console.log(dataToSend);
           try {
+            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+              this.socket.send(JSON.stringify(dataToSend));
+            }
             const res = await axios.post(`/api/message/create_message`, dataToSend, {
               headers: {
                 'Content-Type': 'application/json',
@@ -183,8 +201,12 @@ export default {
               sender: res.data.sender === getUserId() ? "self" : "other",
               status: res.data.status,
             });
-            this.newMessage = "";
           } catch (error) {
+            if(error.response.status === 401){
+              this.$store.commit('removeUsers');  // Изменяем состояние
+              clearAllCookies();
+              this.$router.push("/login");
+            }
             this.errorMessage = error;
             console.error("Ошибка сети:", error.message);
             if (error.response && error.response.data.detail) {
@@ -204,6 +226,11 @@ export default {
   },
   beforeMount() {
     this.fetchChat();
+  },
+  beforeUnmount() {
+    if (this.socket) {
+      this.socket.close();
+    }
   },
 };
 </script>

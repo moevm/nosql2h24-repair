@@ -7,7 +7,7 @@
     <div class="project-status">
       Статус
 <!--      <span class="phase">{{ projectPhase }}</span>-->
-      <span class="status">{{ projectStatus }}</span>
+      <span class="status">{{ projectPhase }}</span>
     </div>
     <button class="project-button" @click="goToProject">Страница проекта</button>
   </div>
@@ -112,15 +112,15 @@ export default {
 
 .project-button {
   padding: 10px 15px;
-  background-color: #007bff;
+  background-color: #625b71;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 15px;
   cursor: pointer;
   font-size: 16px;
 }
 
 .project-button:hover {
-  background-color: #0056b3; /* Цвет кнопки при наведении */
+  background-color: #4d3d6e; /* Цвет кнопки при наведении */
 }
 </style>

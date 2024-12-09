@@ -1,14 +1,13 @@
-from datetime import datetime, timezone
 from bson import ObjectId
-from fastapi.params import Depends
 
 from database import db
-from schemas.messager import Participant, LastMessage, Chat, Message, CreateChatResponse, ChatResponse, CreateMessage, \
+from schemas.messager import Participant, LastMessage, Chat, Message, ChatResponse, CreateMessage, \
     StatusMsg, MessageResponse
-from schemas.user import UserDao
+from schemas.user import User
+from schemas.utils import get_date_now
 
 
-async def create_chat(user_sender: UserDao, user_receiver: UserDao, content: str) -> ChatResponse | None:
+async def create_chat(user_sender: User, user_receiver: User, content: str) -> ChatResponse | None:
     chat_collection = db.get_collection('chat')
     message_collection = db.get_collection('message')
 
@@ -138,7 +137,7 @@ async def add_message_to_chat(user_id: str, message_data: CreateMessage) -> str 
         {
             "$set": {
                 "lastMessage": last_message.model_dump(),
-                "updated_at": datetime.now(timezone.utc)
+                "updated_at": get_date_now()
             }
         },
         return_document=True
@@ -159,7 +158,7 @@ async def create_message(user_id: str, message_data: CreateMessage) -> MessageRe
         sender=user_id,
         content=message_data.content,
         status=StatusMsg.unread,
-        timestamp=datetime.now(timezone.utc)
+        timestamp=get_date_now()
     )
 
     insert_result = await message_collection.insert_one(message.model_dump())

@@ -177,7 +177,17 @@ export default {
           console.log(res);
           setUserName(res.data.lastname + ' ' + res.data.name + ' ' + res.data.middlename);
           setUserId(res.data.id)
+          const newUserData = { name: res.data.lastname + ' ' + res.data.name + ' ' + res.data.middlename, role: res.data.role };
+          this.$store.commit('addSingleUser', newUserData);  // Изменяем состояние
+          console.log(newUserData);
           this.$router.push("/main");
+          /*if(newUserData.role === "Рабочий") {
+            this.$router.push('/worker');
+          }
+          else{
+            this.$router.push("/main");
+          }*/
+
         })
             .catch(err => {
               console.log(err);
@@ -208,7 +218,7 @@ export default {
       };
 
       try {
-        const res = await axios.post('/api/auth/register', dataToSend, {
+        const res = await axios.post('/api/user/register', dataToSend, {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',

@@ -2,6 +2,17 @@
   <HeaderComponent />
   <SidebarComponent />
   <div class="user-search-page">
+    <h1 v-if="userRole === 'Администратор'">Данные приложения</h1>
+    <div v-if="userRole === 'Администратор'" class="header-buttons">
+      <button @click="triggerFileInput">Импорт БД</button>
+      <input
+          type="file"
+          ref="fileInput"
+          @change="importBD"
+          style="display: none;"
+      />
+      <button @click="exportBD">Экспорт БД</button>
+    </div>
     <h1>Поиск пользователя</h1>
     <div class="search-filters">
       <input v-model="lastname" placeholder="Фамилия" class="input-field" />
@@ -25,6 +36,7 @@
         </div>
         <div class="user-item-actions">
           <button @click="goToChat(user)">Перейти в чат</button>
+          <!-- <button v-if="userRole === 'Администратор'">Удалить пользователя</button> -->
         </div>
       </div>
   </div>
@@ -34,9 +46,8 @@
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
-import { useCookies } from '@/src/js/useCookies';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { setReceiverId, setChatName, setChatId } = useCookies();
-
 
 export default {
   components: {
@@ -45,6 +56,7 @@ export default {
   },
   data() {
     return {
+      jsonData:[],
       lastname: '',
       name: '',
       middelname: '',
@@ -53,23 +65,147 @@ export default {
       ],
     };
   },
+  computed: {
+    userRole() {
+      const user = this.$store.getters.getUser[0];
+      return user ? user.role : null;
+    },
+  },
   methods: {
+    triggerFileInput() {
+      this.$refs.fileInput.click();
+    },
+    async importBD(event) {
+      const file = event.target.files[0];
+      if (!file) {
+        alert("Файл не выбран!");
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = async (e) => {
+        try {
+          const importedData = JSON.parse(e.target.result);
+
+          // Проверяем наличие поля `users` и его содержимого
+          if (!importedData.user || !Array.isArray(importedData.user) || importedData.user.length === 0) {
+            throw new Error("Коллекция `user` должна существовать и содержать данные!");
+          }
+
+          const formData = new FormData();
+          formData.append("file", file);
+
+          // Удаляем `Content-Type` из заголовков, так как браузер сам установит правильный
+          try {
+            const res = await axios.post(`api/data/import`, formData, {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+              withCredentials: true,
+            });
+            console.log(res);
+            this.showErrors = false;
+            alert('Данные успешно импортированы!');
+          } catch (error) {
+            if (error.response && error.response.status === 401) {
+              this.$store.commit('removeUsers'); // Изменяем состояние
+              clearAllCookies();
+              this.$router.push("/login");
+            }
+            if (error.response && error.response.status === 400) {
+              alert('Бд не пуста');
+            }
+            console.error("Ошибка сети:", error);
+            if (error.response && error.response.data.detail) {
+              this.errorMessage = error.response.data.detail;
+            }
+          }
+        } catch (error) {
+          console.error("Ошибка импорта:", error);
+          alert(error.message || "Произошла ошибка при импорте данных.");
+        }
+      };
+
+      reader.onerror = () => {
+        alert("Ошибка чтения файла!");
+      };
+
+      reader.readAsText(file);
+    },
+    async exportBD() {
+      try {
+        const response = await axios.get(`api/data/export/json`);
+        this.jsonData = response.data;
+      } catch (error) {
+        if (error.response?.status === 401) {
+          this.$store.commit('removeUsers');
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        console.error('Ошибка при загрузке контактов:', error);
+        if (error.response?.data?.detail) {
+          this.errorMessage = error.response.data.detail;
+        }
+        return;
+      }
+
+      console.log(this.jsonData);
+
+      if (Object.keys(this.jsonData).length > 0) {
+        // Преобразуем Proxy в обычный объект, если требуется
+        const normalizedData = JSON.parse(JSON.stringify(this.jsonData));
+
+        const json = JSON.stringify(normalizedData, null, 2); // Преобразуем объект в JSON строку
+        const blob = new Blob([json], { type: "application/json" }); // Создаём Blob объект
+        const url = URL.createObjectURL(blob); // Генерируем URL
+
+        // Создаём временный <a> элемент для скачивания файла
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `dumpBd.json`; // Имя файла
+        document.body.appendChild(link); // Добавляем в DOM, чтобы клик сработал
+        link.click(); // Программно кликаем по ссылке
+        document.body.removeChild(link); // Удаляем элемент ссылки из DOM
+
+        // Освобождаем память
+        URL.revokeObjectURL(url);
+      } else {
+        alert("У вас нет данных БД, которые можно экспортировать");
+      }
+    },
     async searchUsers() {
       this.users = [];
       try {
-        // console.log(this.lastname);
-        const response = await axios.get(`/api/auth/get_user/${this.lastname}`);
-        // console.log(response.data);
-        this.users.push(response.data);
-        // this.users = Object.values(response.data).map(user => ({
-        //   name: user.name,
-        //   lastname: user.lastname,
-        //   middlename: user.middlename,
-        //   id: user.id,
-        //   role: user.role,
-        // }));
-        // console.log(this.users);
+        const params = new URLSearchParams({
+        });
+
+        if (this.selectedRole) {
+          params.append('role', this.selectedRole);
+        }
+        if(this.name){
+          params.append('name', this.name);
+        }
+        if (this.middelname) {
+          params.append('middlename', this.middlename);
+        }
+        if(this.lastname){
+          params.append('lastname', this.lastname);
+        }
+        const response = await axios.get(`/api/user/find/?${params.toString()}`);
+        this.users = Object.values(response.data).map(user => ({
+          name: user.name,
+          lastname: user.lastname,
+          middlename: user.middlename,
+          id: user.id,
+          role: user.role,
+        }));
       } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');
+          clearAllCookies();
+          this.$router.push("/login");
+        }
         console.error('Ошибка при загрузке контактов:', error);
         if (error.response && error.response.data.detail) {
           this.errorMessage = error.response.data.detail;
@@ -92,6 +228,13 @@ export default {
   padding-top: 60px;
 }
 
+.header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 50px;
+}
+
 .search-filters {
   display: flex;
   gap: 15px;
@@ -109,7 +252,7 @@ export default {
 }
 
 .input-field:focus {
-  border-color: #007BFF;
+  border-color: #625b71;
   outline: none;
 }
 
@@ -122,7 +265,7 @@ export default {
 }
 
 .select-field:focus {
-  border-color: #007BFF;
+  border-color: #625b71;
   outline: none;
 }
 
@@ -145,27 +288,28 @@ export default {
   gap: 10px;
 }
 
+.header-buttons button,
 .user-item button {
-  background-color: #007BFF;
+  background-color: #625b71;
   color: #fff;
   border: none;
   padding: 6px 12px;
-  border-radius: 5px;
+  border-radius: 15px;
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
 .user-item button:hover {
-  background-color: #0056b3;
+  background-color: #625b71;
 }
 
 .search-filters button {
-  background-color: #007BFF;
+  background-color: #625b71;
   color: #fff;
   padding: 8px 15px;
   font-size: 16px;
   border: none;
-  border-radius: 5px;
+  border-radius: 15px;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
 }

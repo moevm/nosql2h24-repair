@@ -1,7 +1,7 @@
 <template>
   <div class="main-container">
     <HeaderComponent />
-    <ProjectSidebarComponent/>
+    <SidebarComponent/>
 
     <div class="content">
       <div class="purchases-container">
@@ -21,7 +21,7 @@
         <div class="materials-list">
           <ProcurementsItemComponent
             v-for="material in filteredMaterials"
-            :key="material.id"
+            :key="material.materialId"
             :material="material"
             @viewDetails="viewDetails"
             @delete="deleteMaterial"
@@ -34,16 +34,16 @@
 
 <script>
 import HeaderComponent from '../bars/HeaderComponent.vue';
-import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
+import SidebarComponent from '../bars/SidebarComponent.vue';
 import ProcurementsItemComponent from '../material/ProcurementsItemComponent.vue';
 import axios from 'axios';
-import { useCookies } from '@/src/js/useCookies';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getProjectId, getProjectName } = useCookies();
 
 export default {
   components: {
     HeaderComponent,
-    ProjectSidebarComponent,
+    SidebarComponent,
     ProcurementsItemComponent,
   },
   data() {
@@ -69,7 +69,7 @@ export default {
       // this.$router.push({ path: `/material-details/${materialId}` });
     },
     deleteMaterial(materialId) {
-      this.materials = this.materials.filter(material => material.id !== materialId);
+      this.procurements = this.procurements.filter(material => material.materialId !== materialId);
     },
     async fetchStageData() {
       try {
@@ -88,6 +88,11 @@ export default {
         }));
         console.log(this.procurements);
       } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
         console.error('Ошибка при загрузке Закупок:', error);
       }
     }
@@ -107,7 +112,7 @@ export default {
 .content {
   display: flex;
   margin-left: 150px;
-  padding-top: 60px;
+  padding-top: 30px;
 }
 
 .purchases-container {
@@ -137,11 +142,12 @@ export default {
 .add-button {
   margin-top: 10px;
   padding: 10px;
-  background-color: #007bff;
+  background-color: #625b71;
   color: white;
   border: none;
   cursor: pointer;
   margin-left: auto;
+  border-radius: 15px;
 }
 
 .materials-list {

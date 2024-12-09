@@ -1,7 +1,7 @@
 <template>
   <div class="add-stage-page">
     <HeaderComponent />
-    <ProjectSidebarComponent />
+    <SidebarComponent />
     <div class="main-content">
       <div class="add-stage-container">
         <h2>Добавить этап</h2>
@@ -37,15 +37,15 @@
 
 <script>
 import HeaderComponent from '../bars/HeaderComponent.vue';
-import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
+import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
-import { useCookies } from '@/src/js/useCookies';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getProjectId } = useCookies();
 
 export default {
   components: {
     HeaderComponent,
-    ProjectSidebarComponent,
+    SidebarComponent,
   },
   data() {
     return {
@@ -78,6 +78,11 @@ export default {
           alert('Этап успешно создан!');
           this.$router.push(`/stages`);
         } catch (error) {
+          if(error.response.status === 401){
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
           console.error("Ошибка сети:", error.message);
           if (error.response && error.response.data.detail) {
             this.errorMessage = error.response.data.detail;
@@ -122,7 +127,7 @@ export default {
   border-radius: 4px;
 }
 .add-stage-form button {
-  background-color: #4CAF50;
+  background-color: #625b71;
   color: white;
   padding: 8px;
   border: none;
@@ -130,7 +135,7 @@ export default {
   cursor: pointer;
 }
 .add-stage-form button:hover {
-  background-color: #45a049;
+  background-color: #554a6d;
 }
 .input-error {
   border-color: red;

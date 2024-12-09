@@ -1,7 +1,9 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field
+
+from schemas.utils import get_date_now
 
 
 class Role(str, Enum):
@@ -23,10 +25,10 @@ class UserCreateSchema(BaseModel):
         from_attributes = True
 
 
-class UserBaseSchema(UserCreateSchema):
+class UserResponse(UserCreateSchema):
     id: str
-    created_at: datetime | None = datetime.now(timezone.utc)
-    updated_at: datetime | None = datetime.now(timezone.utc)
+    created_at: Optional[datetime] = Field(get_date_now())
+    updated_at: Optional[datetime] = Field(get_date_now())
 
 
 class UserLoginSchema(BaseModel):
@@ -34,15 +36,15 @@ class UserLoginSchema(BaseModel):
     password: str = Field(min_length=8)
 
 
-class UserDao(UserBaseSchema):
+class User(UserResponse):
     password: str = Field(min_length=8)
 
 
 class Contact(BaseModel):
     username: str
     role: Role = Role.worker
-    created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
+    created_at: Optional[datetime] = Field(get_date_now())
+    updated_at: Optional[datetime] = Field(get_date_now())
 
 
 class ContactResponse(Contact):
@@ -60,3 +62,9 @@ class Worker(BaseModel):
 
 class WorkerResponse(Worker):
     id: str
+
+
+class WorkerCreate(BaseModel):
+    user_id: str
+    role: Role = Role.worker
+    username: str

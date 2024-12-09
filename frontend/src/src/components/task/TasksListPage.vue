@@ -1,6 +1,6 @@
 <template>
   <HeaderComponent />
-  <ProjectSidebarComponent />
+  <SidebarComponent />
   <div class="tasks-list-page">
     <h2>Задачи этапа: {{ stageName }}</h2>
 
@@ -20,8 +20,9 @@
           <tr 
             v-for="task in tasks" 
             :key="task.taskId"
-            :class="{ selected: selectedTaskId === task.taskId }"
-            @click="selectTask(task.taskId)"
+            :taskName="task.taskName"
+            :class="{ selected: selectedTaskId === task.taskId}"
+            @click="selectTask(task)"
           >
             <td>{{ task.taskName }}</td>
             <td>{{ task.startDate }}</td>
@@ -44,18 +45,19 @@
 
 <script>
 import HeaderComponent from '../bars/HeaderComponent.vue';
-import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
+import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
-import { useCookies } from '@/src/js/useCookies';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getProjectId, getStageId, getStageName,setTaskId } = useCookies();
 
 export default {
   components: {
     HeaderComponent,
-    ProjectSidebarComponent,
+    SidebarComponent,
   },
   data() {
     return {
+      taskName: '',
       stageName: getStageName(),
       tasks: [
       ],
@@ -66,16 +68,36 @@ export default {
     addTask() {
       this.$router.push(`/add_task`); // переход на страницу новой задачи
     },
-    deleteTask(taskId) {
-      this.tasks = this.tasks.filter(task => task.id !== taskId);
-      this.selectedTaskId = null;  // сбрасываем выбор после удаления
+    async deleteTask(taskId) {
+      if (confirm(`Удалить задачу ${this.taskName}?`)) {
+        try {
+          await axios.delete(`/api/tasks/delete/${getProjectId()}/${getStageId()}/${taskId}`, {
+            headers: {
+              'Accept': 'application/json',
+            },
+            withCredentials: true,
+          });
+          this.tasks = this.tasks.filter(task => task.taskId !== taskId);
+          this.selectedTaskId = null;  // сбрасываем выбор после удаления
+        } catch (error) {
+          if(error.response.status === 401){
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
+          // Обработка ошибки, если нужно
+          console.error(error);
+        }
+      }
+
     },
     viewTask() {
       setTaskId(this.selectedTaskId);
       this.$router.push(`/tasks/viewRedactorTask`);
     },
-    selectTask(taskId) {
-      this.selectedTaskId = taskId;
+    selectTask(task) {
+      this.selectedTaskId = task.taskId;
+      this.taskName = task.taskName;
     },
     async fetchTaskData() {
       try {
@@ -148,17 +170,18 @@ export default {
   margin-top: 20px;
 }
 
-.task-actions button {
+button {
   padding: 5px 10px;
   margin-right: 10px;
-  background-color: #007bff;
+  background-color: #625b71;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  border-radius: 10px;
 }
 
-.task-actions button:hover {
-  background-color: #0056b3;
+button:hover {
+  background-color: #4d4069;
 }
 </style>

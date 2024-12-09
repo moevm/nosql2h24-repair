@@ -4,8 +4,8 @@
     <div class="stage-content">
       <div v-if="isEditing">
         <input v-model="editStageData.name" placeholder="Название этапа" />
-        <input v-model="editStageData.startDate" placeholder="Дата начала" />
-        <input v-model="editStageData.endDate" placeholder="Дата окончания" />
+        <input type="date" v-model="editStageData.startDate" placeholder="Дата начала" />
+        <input type="date" v-model="editStageData.endDate" placeholder="Дата окончания" />
         <button @click="saveEdit">Сохранить</button>
         <button @click="cancelEdit">Отмена</button>
       </div>
@@ -46,8 +46,10 @@
 </template>
 
 <script>
-import { useCookies } from '@/src/js/useCookies';
-const { setStageId,setStageName } = useCookies();
+import axios from 'axios';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
+const { setStageId,setStageName, getProjectId } = useCookies();
+
 
 export default {
   props: {
@@ -75,20 +77,68 @@ export default {
     },
   },
   methods: {
+    formatToDateTime(date) {
+      return `${date}T00:00:00`; // Преобразует в формат `YYYY-MM-DDT00:00:00`
+    },
     editStage() {
       this.isEditing = true;
     },
-    saveEdit() {
-      this.isEditing = false;
-      this.$emit('update-stage', { ...this.stage, ...this.editStageData });
+    async saveEdit() {
+      const dataToSend = {
+        name:this.editStageData.name,
+        start_date: this.formatToDateTime(this.editStageData.startDate),
+        end_date:  this.formatToDateTime(this.editStageData.endDate),
+      };
+      console.log(dataToSend)
+      try {
+        const res = await axios.put(`/api/projects/${getProjectId()}/update_stage/${this.stage.stageId}`, dataToSend, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          withCredentials: true,
+        });
+        console.log(res);
+        this.isEditing = false;
+        this.$emit('update-stage', { ...this.stage, ...this.editStageData });
+      } catch (error) {
+        console.error("Ошибка сети:", error.message);
+        if (error.response) {
+          console.error("Данные ответа:", error.response.data);
+          // Вывод ошибки с сервера
+          if (error.response.data.detail) {
+            this.errorMessage = error.response.data.detail; // Сохраняем ошибку с сервера
+          }
+        }
+      }
+
+
     },
     cancelEdit() {
       this.isEditing = false;
       this.editStageData = { ...this.stage };
     },
-    deleteStage() {
+    async deleteStage() {
       if (confirm(`Удалить этап "${this.stage.name}"?`)) {
-        this.$emit("delete", this.stage.id);
+        try {
+          await axios.delete(`/api/projects/${getProjectId()}/delete_stage/${this.stage.stageId}`, {
+            headers: {
+              'Accept': 'application/json',
+            },
+            withCredentials: true,
+          });
+          this.$emit("delete", this.stage.stageId);
+        } catch (error) {
+          if(error.response.status === 401){
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
+          // Обработка ошибки, если нужно
+          console.error(error);
+        }
+
+
       }
     },
     async goToTasks() {

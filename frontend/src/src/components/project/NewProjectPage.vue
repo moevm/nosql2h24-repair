@@ -1,6 +1,6 @@
 <template>
   <HeaderComponent />
-  <StaticSidebarComponent />
+  <SidebarComponent />
   <div class="create-project-page">
     <h1>Опишите проект</h1>
     <input v-model="projectName" type="text" placeholder="Введите название проекта" />
@@ -17,12 +17,13 @@
 <script>
 import axios from 'axios';
 import HeaderComponent from '../bars/HeaderComponent.vue';
-import StaticSidebarComponent from '../bars/StaticSidebarComponent.vue';
+import SidebarComponent from '../bars/SidebarComponent.vue';
+import {clearAllCookies} from "@/src/js/useCookies";
 
 export default {
   components: {
     HeaderComponent,
-    StaticSidebarComponent
+    SidebarComponent
   },
   data() {
     return {
@@ -63,6 +64,11 @@ export default {
         this.$router.push('/main');
         console.log(res);
       } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
         console.error("Ошибка сети:", error.message);
         if (error.response) {
           console.error("Данные ответа:", error.response.data);
@@ -112,16 +118,16 @@ textarea {
 
 button {
   padding: 10px 20px;
-  background-color: #007bff;
+  background-color: #625b71;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 15px;
   cursor: pointer;
   font-size: 16px;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: #554c69;
 }
 
 .error {

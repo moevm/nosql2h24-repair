@@ -1,5 +1,4 @@
-import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 from enum import Enum
 from typing import Dict, Optional
 
@@ -7,7 +6,7 @@ from pydantic import BaseModel, Field, model_validator
 
 from schemas.task import Task
 from schemas.user import Contact
-from schemas.utils import generate_id
+from schemas.utils import generate_id, get_date_now
 
 
 class Stage(BaseModel):
@@ -15,8 +14,8 @@ class Stage(BaseModel):
     start_date: datetime
     end_date: datetime
     tasks: Dict[str, Task] = {}
-    created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
+    created_at: Optional[datetime] = Field(get_date_now())
+    updated_at: Optional[datetime] = Field(get_date_now())
 
     def add_task(self, task: Task):
         self.tasks[generate_id()] = task
@@ -29,11 +28,17 @@ class StageResponse(Stage):
     id: str
 
 
+class StageUpdate(BaseModel):
+    name: str
+    start_date: datetime
+    end_date: datetime
+
+
 class Risk(BaseModel):
     name: str
     description: str
-    created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
+    created_at: Optional[datetime] = Field(get_date_now())
+    updated_at: Optional[datetime] = Field(get_date_now())
 
     class Config:
         from_attributes = True
@@ -41,6 +46,11 @@ class Risk(BaseModel):
 
 class RiskResponse(Risk):
     id: str
+
+
+class RiskUpdate(BaseModel):
+    name: str
+    description: str
 
 
 class Procurement(BaseModel):
@@ -51,8 +61,8 @@ class Procurement(BaseModel):
     units: Optional[str] = Field(None)
     delivery_date: Optional[datetime] = Field(None)
     created_by: Optional[Contact] = Field(None)
-    created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
+    created_at: Optional[datetime] = Field(get_date_now())
+    updated_at: Optional[datetime] = Field(get_date_now())
 
 
 class ProcurementResponse(Procurement):
@@ -65,10 +75,21 @@ class ProcurementResponse(Procurement):
         return self
 
 
+class ProcurementUpdate(BaseModel):
+    item_name: str
+    quantity: int
+    price: float
+    inStock: Optional[bool] = Field(False)
+    units: Optional[str] = Field(None)
+    delivery_date: Optional[datetime] = Field(None)
+    created_by: Optional[Contact] = Field(None)
+
+
 class ProjectStatus(str, Enum):
     in_progress = "В процессе"
     done = "Готово"
     lateness = "Опоздание"
+    new_status = "Новый"
     none_status = "Нет статуса"
 
 
@@ -77,9 +98,9 @@ class ProjectCreate(BaseModel):
     description: Optional[str] = Field(None)
     start_date: Optional[datetime] = Field(None)
     end_date: Optional[datetime] = Field(None)
-    status: ProjectStatus = Field(ProjectStatus.none_status)
-    created_at: Optional[datetime] = Field(datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = Field(datetime.now(timezone.utc))
+    status: ProjectStatus = Field(ProjectStatus.new_status)
+    created_at: Optional[datetime] = Field(get_date_now())
+    updated_at: Optional[datetime] = Field(get_date_now())
     contacts: Dict[str, Contact] = {}
     stages: Dict[str, Stage] = {}
     procurements: Dict[str, Procurement] = {}
@@ -101,5 +122,12 @@ class ProjectCreate(BaseModel):
         from_attributes = True
 
 
-class Project(ProjectCreate):
+class ProjectResponse(ProjectCreate):
     id: str
+
+
+class ProjectUpdate(BaseModel):
+    description: Optional[str] = Field(None)
+    status: ProjectStatus
+    start_date: Optional[datetime] = Field(None)
+    end_date: Optional[datetime] = Field(None)

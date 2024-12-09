@@ -1,37 +1,53 @@
 <template>
   <div class="project-page">
     <HeaderComponent />
-    <ProjectSidebarComponent/>
+    <SidebarComponent/>
     <main class="content">
       <div class="main-content">
         <div class="project-description">
-          <h2> {{ nameProject }}</h2>
-<!--          <p>СПбГЭТУ "ЛЭТИ"</p>-->
+          <h1> {{ nameProject }}</h1>
+
+          <!-- Статус, начало и конец одной строчкой над описанием -->
+          <div class="project-info">
+            <div class="status-info">
+              <label for="status" class="status-label">Статус:</label>
+              <span v-if="!isEditing" class="status-value">{{ status }}</span>
+              <select v-if="isEditing" v-model="editedStatus" class="status-select">
+                <option value="В процессе">В процессе</option>
+                <option value="Готово">Готово</option>
+                <option value="Новый">Новый</option>
+                <option value="Опоздание">Опоздание</option>
+                <option value="Нет статуса">Нет статуса</option>
+              </select>
+            </div>
+            <div class="date-info">
+              <label for="dateStart" class="date-label">Начало:</label>
+              <span v-if="!isEditing" class="date-value">{{ dateStart }}</span>
+              <input v-if="isEditing" type="date" v-model="editedDateStart" class="date-input" />
+            </div>
+            <div class="date-info">
+              <label for="dateEnd" class="date-label">Конец:</label>
+              <span v-if="!isEditing" class="date-value">{{ dateEnd }}</span>
+              <input v-if="isEditing" type="date" v-model="editedDateEnd" class="date-input" />
+            </div>
+          </div>
 
           <!-- Описание проекта -->
           <div v-if="isEditing">
-            <div
-              class="edit-description"
-              contenteditable="true"
-              v-html="editedDescription"
-              @input="updateDescription">
+            <textarea class="edit-description" v-model="editedDescription"></textarea>
+            <div class="edit-buttons">
+              <button @click="saveChanges" class="save-button">Сохранить</button>
+              <button @click="cancelEdit" class="cancel-button">Отмена</button>
+              <button @click="deleteProject" class="delete-button">Удалить проект</button>
             </div>
-            <button @click="saveDescription" class="save-button">Сохранить</button>
-            <button @click="cancelEdit" class="cancel-button">Отмена</button>
           </div>
           <div v-else>
             <p>{{ description }}</p>
-            <button @click="editDescription" class="edit-button">Редактировать описание</button>
+            <button v-if="userRole !== 'Заказчик'" @click="editProject" class="edit-button">Редактировать</button>
           </div>
-
         </div>
 
-        <div class="date-selectors">
-          <DateSelectorComponent label="Начало" :date="dateStart" />
-          <DateSelectorComponent label="Конец" :date="dateEnd" />
-        </div>
-
-        <ContactsComponent :contacts="contacts" />
+        <ContactsComponent :contacts="contacts" :isEditing="isEditing" @delete="deleteContact" />
       </div>
     </main>
   </div>
@@ -40,18 +56,16 @@
 <script>
 import axios from 'axios';
 import HeaderComponent from '../bars/HeaderComponent.vue';
-import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
-import DateSelectorComponent from '../project/DateSelectorComponent.vue';
+import SidebarComponent from '../bars/SidebarComponent.vue';
 import ContactsComponent from '../project/ContactsComponent.vue';
 
-import { useCookies } from '@/src/js/useCookies';
+import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getProjectId } = useCookies();
 
 export default {
   components: {
     HeaderComponent,
-    ProjectSidebarComponent,
-    DateSelectorComponent,
+    SidebarComponent,
     ContactsComponent,
   },
   data() {
@@ -60,31 +74,110 @@ export default {
       description: '',
       dateStart:'',
       dateEnd:'',
-      contacts:[
-
-      ],
+      contacts:[],
       isEditing: false,
-      editedDescription: ''
+      editedDescription: '',
+      status: '',
+      editedStatus: '',
+      editedDateStart: '',
+      editedDateEnd: ''
     };
+  },
+  computed: {
+    userRole() {
+      const user = this.$store.getters.getUser[0];
+      return user ? user.role : null;
+    },
   },
   created() {
     this.fetchProjectData();
     console.log(this.nameProject)
   },
   methods: {
-    editDescription() {
+    deleteContact(id) {
+      this.contacts = this.contacts.filter(contact => contact.id !== id);
+    },
+    formatToDateTime(date) {
+      return `${date}T00:00:00`; // Преобразует в формат `YYYY-MM-DDT00:00:00`
+    },
+    editProject() {
       this.isEditing = true;
       this.editedDescription = this.description;
+      this.editedStatus = this.status;
+      this.editedDateStart = this.dateStart;
+      this.editedDateEnd = this.dateEnd;
     },
-    saveDescription() {
+    async saveChanges() {
       this.description = this.editedDescription;
+      this.status = this.editedStatus;
+      this.dateStart = this.editedDateStart;
+      this.dateEnd = this.editedDateEnd;
       this.isEditing = false;
+      console.log(this.description);
+      const dataToSend = {
+        description:this.description,
+        status:this.status,
+        start_date: this.formatToDateTime(this.dateStart),
+        end_date: this.formatToDateTime(this.dateEnd)
+      };
+      console.log(dataToSend)
+      try {
+        const res = await axios.put(`/api/projects/update/${getProjectId()}`, dataToSend, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          withCredentials: true,
+        });
+        console.log(res);
+      } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        console.error("Ошибка сети:", error.message);
+        if (error.response) {
+          console.error("Данные ответа:", error.response.data);
+          // Вывод ошибки с сервера
+          if (error.response.data.detail) {
+            this.errorMessage = error.response.data.detail; // Сохраняем ошибку с сервера
+          }
+        }
+      }
     },
     cancelEdit() {
       this.isEditing = false;
     },
-    updateDescription(event) {
-      this.editedDescription = event.target.innerHTML;
+    async deleteProject() {
+      if (confirm(`Удалить проект "${this.nameProject}"?`)) {
+        try {
+          const res = await axios.delete(`/api/projects/delete/${getProjectId()}`, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            withCredentials: true,
+          });
+          console.log(res);
+          this.$router.push('/main'); // Переход на страницу списка проектов после удаления
+        } catch (error) {
+          if(error.response.status === 401){
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
+          console.error("Ошибка сети:", error.message);
+          if (error.response) {
+            console.error("Данные ответа:", error.response.data);
+            // Вывод ошибки с сервера
+            if (error.response.data.detail) {
+              this.errorMessage = error.response.data.detail; // Сохраняем ошибку с сервера
+            }
+          }
+        }
+      }
+
     },
     async fetchProjectData() {
       try {
@@ -93,12 +186,20 @@ export default {
         this.description = response.data.project.description;
         this.dateStart = this.formatDate(response.data.project.created_at);
         this.dateEnd = this.formatDate(response.data.project.end_date);
-        this.contacts = Object.values(response.data.project.contacts).map(contact => ({
+        this.status = response.data.project.status || 'Нет статуса';
+        this.contacts = Object.entries(response.data.project.contacts).map(([id, contact]) => ({
+          id, // ID пользователя (ключ объекта)
           userName: contact.username,
           role: contact.role,
         }));
+        console.log(this.contacts);
       } catch (error) {
-        console.error('Ошибка при загрузке проекта:', error);
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        console.error(error.response.status);
       }
     },
     formatDate(dateString) {
@@ -106,7 +207,7 @@ export default {
       const day = String(date.getDate()).padStart(2, '0');
       const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 по 11, поэтому +1
       const year = date.getFullYear();
-      return `${day}.${month}.${year}`;
+      return `${year}-${month}-${day}`; // Формат YYYY-MM-DD для input type="date"
     },
   },
 };
@@ -115,7 +216,7 @@ export default {
 <style scoped>
 .content {
   margin-left: 150px;
-  padding-top: 60px;
+  padding-top: 30px;
 }
 
 .main-content {
@@ -131,6 +232,41 @@ export default {
   overflow-y: auto;
   padding-right: 10px;
   width: 900px;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.status-info, .date-info {
+  display: flex;
+  align-items: center;
+}
+
+.status-label, .date-label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.status-value, .date-value {
+  display: inline-block;
+  padding: 5px 10px;
+  border: 2px solid;
+  border-radius: 4px;
+  background-color: #f0f0f0;
+}
+
+.status-select, .date-input {
+  width: 150px;
+  padding: 8px;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 .edit-description {
@@ -148,35 +284,32 @@ export default {
   box-sizing: border-box;
 }
 
-
-.edit-button, .save-button, .cancel-button {
+.edit-button, .save-button, .cancel-button, .delete-button {
   margin-top: 10px;
-  padding: 5px 10px;
+  padding: 10px 15px;
   cursor: pointer;
+  background-color: #625b71;
+  color: white;
+  border: none;
+  border-radius: 20px; /* Rounded corners */
 }
 
 .save-button {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
+  margin-right: 10px;
 }
 
 .cancel-button {
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  margin-left: 10px;
-}
-
-.date-selectors {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
+  margin-right: 10px;
 }
 
 .contacts {
   flex: 1;
+  margin-top: 15px;
+}
+
+.edit-buttons {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
 }
 </style>

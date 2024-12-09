@@ -1,19 +1,20 @@
 <template>
   <HeaderComponent />
-  <ProjectSidebarComponent />
+  <SidebarComponent />
   <div class="task-page">
     <div class="task-header">
       <div>
-        <h1>Ремонт кафедры МОЭВМ</h1>
-        <p>СПбГЭТУ "ЛЭТИ"</p>
+        <h1>{{ projectName }}</h1>
+        <p>{{ stageName }}</p>
         <div class="task-title">
           <input
-              v-model="taskName"
-              :class="{'input-error': !taskName && showErrors}"
-              type="text"
-              placeholder="Название нового этапа"
-              class="stage-name-input"
+            v-model="taskName"
+            :class="{ 'input-error': !taskName && showErrors }"
+            type="text"
+            placeholder="Название новой задачи"
+            class="stage-name-input"
           />
+          <button @click="toggleAdd" class="save-button">Сохранить</button>
         </div>
       </div>
     </div>
@@ -31,7 +32,7 @@
           </div>
           <div class="task-date">
             <p>Конец</p>
-            <input type="date" v-model="endDate"  />
+            <input type="date" v-model="endDate" />
           </div>
         </div>
         <div class="task-status">
@@ -44,13 +45,6 @@
           </select>
         </div>
       </div>
-
-      <div class="task-contacts">
-        <ContactsComponent />
-      </div>
-    </div>
-    <div class="task-title">
-      <button @click="toggleAdd">Сохранить</button>
     </div>
     <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
   </div>
@@ -58,20 +52,20 @@
 
 <script>
 import HeaderComponent from '../bars/HeaderComponent.vue';
-import ProjectSidebarComponent from '../bars/ProjectSidebarComponent.vue';
-import ContactsComponent from '../project/ContactsComponent.vue';
+import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
-import { useCookies } from '@/src/js/useCookies';
-const { getProjectId, getStageId } = useCookies();
+import { clearAllCookies, useCookies } from '@/src/js/useCookies';
+const { getProjectId, getStageId, getStageName, getProjectName } = useCookies();
 
 export default {
   components: {
     HeaderComponent,
-    ProjectSidebarComponent,
-    ContactsComponent
+    SidebarComponent,
   },
   data() {
     return {
+      projectName: getProjectName(),
+      stageName: getStageName(),
       taskName: '',
       startDate: '',
       endDate: '',
@@ -105,6 +99,11 @@ export default {
           alert('Этап задача успешно создана!');
           this.$router.push(`/tasks`);
         } catch (error) {
+          if (error.response.status === 401) {
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
           console.error("Ошибка сети:", error.message);
           if (error.response && error.response.data.detail) {
             this.errorMessage = error.response.data.detail;
@@ -130,35 +129,49 @@ export default {
 
 .task-header h1 {
   font-size: 24px;
+  margin-bottom: 10px;
 }
 
 .task-header p {
   font-size: 18px;
   color: #666;
+  margin-bottom: 20px;
 }
 
 .task-title {
-  display: flex;
   align-items: center;
-  margin-top: 10px;
+  gap: 10px;
 }
 
-.task-title h2 {
-  font-size: 20px;
-  margin-right: 10px;
+.task-title input{
+  width: 40%;
+  margin-right: 15px;
 }
 
-.task-title button {
-  padding: 8px 12px;
-  background-color: #007bff;
+.stage-name-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.input-error {
+  border-color: red;
+}
+
+.save-button {
+  padding: 10px 20px;
+  background-color: #625b71;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 15px;
   cursor: pointer;
+  font-size: 16px;
 }
 
-.task-title button:hover {
-  background-color: #0056b3;
+.save-button:hover {
+  background-color: #51446e;
 }
 
 .task-content {
@@ -172,15 +185,12 @@ export default {
   width: 80%;
 }
 
-.task-description p {
-  width: 80%;
-}
-
 .task-description textarea {
-  width: 80%;
+  width: 90%;
   padding: 10px;
   border-radius: 4px;
   border: 1px solid #ccc;
+  font-size: 16px;
 }
 
 .task-dates-status {
@@ -209,10 +219,6 @@ export default {
   border-radius: 4px;
   border: 1px solid #ccc;
   font-size: 14px;
-}
-
-.task-contacts {
-  margin-left: 20px;
 }
 
 .error-message {

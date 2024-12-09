@@ -3,16 +3,44 @@
       <h3>{{ title }}</h3>
       <p>{{ description }}</p>
       <button @click="$emit('details')">Подробнее</button>
-      <button @click="$emit('delete')">Удалить</button>
+      <button @click="deleteStage">Удалить</button>
     </div>
   </template>
   
   <script>
+  import axios from 'axios';
+  import {clearAllCookies, useCookies} from '@/src/js/useCookies';
+  const { getProjectId } = useCookies();
   export default {
     props: {
+      id: String,
       title: String,
       description: String,
     },
+    methods: {
+      async deleteStage() {
+        if (confirm(`Удалить риск "${this.title}"?`)) {
+          try {
+            await axios.delete(`/api/projects/${getProjectId()}/delete_risk/${this.id}`, {
+              headers: {
+                'Accept': 'application/json',
+              },
+              withCredentials: true,
+            });
+          } catch (error) {
+            if(error.response.status === 401){
+              this.$store.commit('removeUsers');  // Изменяем состояние
+              clearAllCookies();
+              this.$router.push("/login");
+            }
+            // Обработка ошибки, если нужно
+            console.error(error);
+          }
+
+          this.$emit("delete", this.id);
+        }
+      }
+    }
   };
   </script>
   
@@ -27,9 +55,10 @@
   button {
     margin: 5px;
     padding: 5px 10px;
-    background-color: #007bff;
+    background-color: #625b71;
     color: white;
     border: none;
     cursor: pointer;
+    border-radius: 10px;
   }
   </style>  

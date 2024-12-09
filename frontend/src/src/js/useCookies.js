@@ -98,6 +98,13 @@ export function useCookies() {
     const getChatId = () => {
         return Cookies.get('chatId');
     };
+    const setMaterialId = (materialId) => {
+        Cookies.set('materialId', materialId, { expires: 1 }); // Устанавливаем куку на 7 дней
+    };
+
+    const getMaterialId = () => {
+        return Cookies.get('materialId');
+    };
     return {
         setProjectId,
         getProjectId,
@@ -121,5 +128,7 @@ export function useCookies() {
         getChatName,
         setChatId,
         getChatId,
+        setMaterialId,
+        getMaterialId,
     };
 }

@@ -30,7 +30,7 @@
   import HeaderComponent from '../bars/HeaderComponent.vue';
   import SidebarComponent from '../bars/SidebarComponent.vue';
   import axios from 'axios';
-  import { useCookies } from '@/src/js/useCookies';
+  import {clearAllCookies, useCookies} from '@/src/js/useCookies';
   const { getUserId,setChatId,setChatName,setReceiverId } = useCookies();
   export default {
     components: {
@@ -75,6 +75,11 @@
           );
           console.log(this.chats);
         } catch (error) {
+          if(error.response.status === 401){
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
           console.error('Ошибка при загрузке чатов:', error);
         }
       },
@@ -105,6 +110,20 @@
     background-color: #fff;
     padding: 10px 20px;
   }
+
+  button {
+  padding: 8px 12px;
+  background-color: #625b71;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  margin-right: 15px;
+}
+
+button:hover {
+  background-color: #4f416d;
+}
   
   .search-input {
     width: 300px;
