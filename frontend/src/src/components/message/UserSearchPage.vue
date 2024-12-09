@@ -4,8 +4,14 @@
   <div class="user-search-page">
     <h1 v-if="userRole === 'Администратор'">Данные приложения</h1>
     <div v-if="userRole === 'Администратор'" class="header-buttons">
-      <button>Импорт БД</button>
-      <button>Экспорт БД</button>
+      <button @click="triggerFileInput">Импорт БД</button>
+      <input
+          type="file"
+          ref="fileInput"
+          @change="importBD"
+          style="display: none;"
+      />
+      <button @click="exportBD">Экспорт БД</button>
     </div>
     <h1>Поиск пользователя</h1>
     <div class="search-filters">
@@ -50,6 +56,7 @@ export default {
   },
   data() {
     return {
+      jsonData:[],
       lastname: '',
       name: '',
       middelname: '',
@@ -65,6 +72,92 @@ export default {
     },
   },
   methods: {
+    triggerFileInput() {
+      this.$refs.fileInput.click();
+    },
+    async importBD(event) {
+      const file = event.target.files[0];
+      if (!file) {
+        alert("Файл не выбран!");
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = async (e) => {
+        try {
+          const importedData = JSON.parse(e.target.result);
+
+          // Проверяем наличие поля `users` и его содержимого
+          if (!importedData.user || !Array.isArray(importedData.user) || importedData.user.length === 0) {
+            throw new Error("Коллекция `user` должна существовать и содержать данные!");
+          }
+
+          // Разрешаем отсутствие других коллекций
+          const validatedData = {
+            user: importedData.user,
+            chat: importedData.chat || [], // Пустой массив, если коллекция отсутствует
+            message: importedData.message || [],
+            project: importedData.project || [],
+          };
+          console.log(validatedData);
+
+          // Если проверка пройдена, отправляем данные на сервер
+          // const response = await axios.post("/api/data/import", validatedData);
+          alert("Данные успешно импортированы!");
+        } catch (error) {
+          console.error("Ошибка импорта:", error);
+          alert(error.message || "Произошла ошибка при импорте данных.");
+        }
+      };
+
+      reader.onerror = () => {
+        alert("Ошибка чтения файла!");
+      };
+
+      reader.readAsText(file);
+    },
+    async exportBD() {
+      try {
+        const response = await axios.get(`api/data/export/json`);
+        this.jsonData = response.data;
+      } catch (error) {
+        if (error.response?.status === 401) {
+          this.$store.commit('removeUsers');
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        console.error('Ошибка при загрузке контактов:', error);
+        if (error.response?.data?.detail) {
+          this.errorMessage = error.response.data.detail;
+        }
+        return;
+      }
+
+      console.log(this.jsonData);
+
+      if (Object.keys(this.jsonData).length > 0) {
+        // Преобразуем Proxy в обычный объект, если требуется
+        const normalizedData = JSON.parse(JSON.stringify(this.jsonData));
+
+        const json = JSON.stringify(normalizedData, null, 2); // Преобразуем объект в JSON строку
+        const blob = new Blob([json], { type: "application/json" }); // Создаём Blob объект
+        const url = URL.createObjectURL(blob); // Генерируем URL
+
+        // Создаём временный <a> элемент для скачивания файла
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `dampBd.json`; // Имя файла
+        document.body.appendChild(link); // Добавляем в DOM, чтобы клик сработал
+        link.click(); // Программно кликаем по ссылке
+        document.body.removeChild(link); // Удаляем элемент ссылки из DOM
+
+        // Освобождаем память
+        URL.revokeObjectURL(url);
+      } else {
+        alert("У вас нет данных БД, которые можно экспортировать");
+      }
+    },
     async searchUsers() {
       this.users = [];
       try {
