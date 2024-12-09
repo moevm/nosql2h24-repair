@@ -20,6 +20,7 @@ services:
     build: ./backend
     volumes:
       - "./backend:/app"
+      - read_only: true
     depends_on:
       - db
     networks:
@@ -33,6 +34,7 @@ services:
     volumes:
       - "./frontend:/app"
       - "/app/node_modules"
+      - read_only: true
     ports:
       - "8080:8080"
     networks:
