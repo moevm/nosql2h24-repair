@@ -158,7 +158,6 @@ export default {
 
     async authenticate() {
       if (!this.validate()) return; // Прекращаем выполнение, если есть ошибки валидации
-
       const dataToSend = {
         email: this.email,
         password: this.password,
@@ -181,12 +180,6 @@ export default {
           this.$store.commit('addSingleUser', newUserData);  // Изменяем состояние
           console.log(newUserData);
           this.$router.push("/main");
-          /*if(newUserData.role === "Рабочий") {
-            this.$router.push('/worker');
-          }
-          else{
-            this.$router.push("/main");
-          }*/
 
         })
             .catch(err => {
@@ -203,6 +196,7 @@ export default {
           }
         }
       }
+      console.log("вышел")
     },
 
     async register() {

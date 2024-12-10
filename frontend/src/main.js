@@ -5,7 +5,12 @@ import axios from 'axios';
 import store from './src/store';
 
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = 'http://localhost:8000/';  // the FastAPI backend
+if (window.location.hostname.startsWith('127.0.0.1')) {
+	axios.defaults.baseURL = 'http://127.0.0.1:8000/';
+}
+if (window.location.hostname.startsWith('localhost')) {
+	axios.defaults.baseURL = 'http://localhost:8000/';
+}
 axios.defaults.headers = {
 	'Access-Control-Allow-Origin' : '*',
 	'Access-Control-Allow-Methods':'GET,PUT,POST,DELETE,PATCH,OPTIONS',
