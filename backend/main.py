@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import db, create_indexation, is_database_empty, load_default_data
-from routers import (auth, user, project, task, message, risk, 
+from routers import (auth, user, project, task, message, risk,
                      stage, contact, procurement, stat, data)
 
 
@@ -23,6 +23,7 @@ app = FastAPI(lifespan=lifespan)
 allowed_origins = [
     "http://localhost:8080",
     "http://localhost:8000",
+    "http://127.0.0.1:8080",
     "http://localhost",
 ]
 
