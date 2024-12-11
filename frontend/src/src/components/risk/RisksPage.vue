@@ -7,7 +7,10 @@
       <div class="task-container">
         <div class="search-bar">
           <h1>{{projectName}}</h1>
-          <input type="text" placeholder="Название риска" v-model="searchQuery" class="search-input" />
+          <div class = "filter-bar">
+            <input type="text" placeholder="Название риска" v-model="searchQuery" class="search-input" />
+            <button @click="applyFilters">Применить</button>
+          </div>
         </div>
 
         <!-- Кнопка добавления -->
@@ -175,5 +178,19 @@ sidebar-component {
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 4px;
+}
+
+button {
+  background-color: #6e6b93;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+button:hover {
+  background-color: #5c5583;
 }
 </style>
