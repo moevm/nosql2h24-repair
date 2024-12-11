@@ -21,7 +21,7 @@
             :projectStatus="item.status"
             :projectId="item.projectId"
         />
-        <NewProjectButton v-if="item.type === 'newProjectButton' && userRole !== 'Рабочий'" />
+        <NewProjectButton v-if="item.type === 'newProjectButton' && userRole !== 'Рабочий' && userRole !== 'Прораб'" />
       </div>
     </div>
   </div>
