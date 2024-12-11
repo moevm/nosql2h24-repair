@@ -4,8 +4,18 @@
     <div class="stage-content">
       <div v-if="isEditing">
         <input v-model="editStageData.name" placeholder="Название этапа" />
-        <input type="date" v-model="editStageData.startDate" placeholder="Дата начала" />
-        <input type="date" v-model="editStageData.endDate" placeholder="Дата окончания" />
+        <input type="date"
+               v-model="editStageData.startDate"
+               placeholder="Дата начала"
+               :min="$store.getters.getStartDateProject"
+               :max="editStageData.startDate ? editStageData.startDate : $store.getters.getEndDateProject"
+        />
+        <input type="date"
+               v-model="editStageData.endDate"
+               placeholder="Дата окончания"
+               :min="editStageData.endDate ? editStageData.endDate : $store.getters.getStartDateProject"
+               :max="$store.getters.getEndDateProject"
+        />
         <button @click="saveEdit">Сохранить</button>
         <button @click="cancelEdit">Отмена</button>
       </div>
@@ -141,9 +151,11 @@ export default {
 
       }
     },
-    async goToTasks() {
+    goToTasks() {
       setStageId(this.stage.stageId);
       setStageName(this.stage.name);
+      this.$store.commit('addStartStage', this.stage.startDate);
+      this.$store.commit('addEndStage', this.stage.endDate);
       this.$router.push(`/tasks`);
     },
   },
