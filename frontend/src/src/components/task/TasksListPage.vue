@@ -2,11 +2,19 @@
   <HeaderComponent />
   <SidebarComponent />
   <div class="tasks-list-page">
-    <h2>Задачи этапа: {{ stageName }}</h2>
+    <div class="search-header">
+      <h2>Задачи этапа: {{ stageName }}</h2>
 
+      <input
+          type="text"
+          v-model="searchQuery"
+          placeholder="Название задачи"
+          class="search-input"
+      />
+    </div>
     <button @click="addTask">Добавить задачу</button>
 
-    <div v-if="tasks.length">
+    <div v-if="filteredTasks.length">
       <table class="task-table">
         <thead>
           <tr>
@@ -17,8 +25,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr 
-            v-for="task in tasks" 
+          <tr
+            v-for="task in filteredTasks"
             :key="task.taskId"
             :taskName="task.taskName"
             :class="{ selected: selectedTaskId === task.taskId}"
@@ -31,7 +39,7 @@
           </tr>
         </tbody>
       </table>
-      
+
       <div class="task-actions" v-if="selectedTaskId">
         <button @click="viewTask(selectedTaskId)">Описание</button>
         <button @click="deleteTask(selectedTaskId)">Удалить</button>
@@ -48,7 +56,7 @@ import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
-const { getProjectId, getStageId, getStageName,setTaskId } = useCookies();
+const { getProjectId, getStageId, getStageName, setTaskId } = useCookies();
 
 export default {
   components: {
@@ -59,10 +67,17 @@ export default {
     return {
       taskName: '',
       stageName: getStageName(),
-      tasks: [
-      ],
-      selectedTaskId: null  // для отслеживания выбранной задачи
+      tasks: [],
+      selectedTaskId: null,  // для отслеживания выбранной задачи
+      searchQuery: ''  // для поиска задачи по названию
     };
+  },
+  computed: {
+    filteredTasks() {
+      return this.tasks.filter(task =>
+        task.taskName.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    }
   },
   methods: {
     addTask() {
@@ -89,7 +104,6 @@ export default {
           console.error(error);
         }
       }
-
     },
     viewTask() {
       setTaskId(this.selectedTaskId);
@@ -135,6 +149,19 @@ export default {
   padding: 20px;
   margin-left: 150px;
   margin-top: 60px;
+}
+
+.search-input {
+  width: 300px;
+  padding-left: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-header{
+  gap: 20px;
+  display: flex;
 }
 
 .task-table {
