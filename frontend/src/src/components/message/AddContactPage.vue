@@ -35,7 +35,7 @@ import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
-const { getProjectId, getProjectName } = useCookies();
+const { getProjectId} = useCookies();
 
 
 export default {
@@ -117,7 +117,7 @@ export default {
         });
         console.log(res);
         alert(`Пользователь ${user.lastname} ${user.name} ${user.middlename} добавлен в контакты`);
-        this.$router.push(`/project/${getProjectName()}`);
+        this.$router.push(`/project/${getProjectId()}`);
       } catch (error) {
         if(error.response.status === 401){
           this.$store.commit('removeUsers');  // Изменяем состояние
@@ -126,7 +126,7 @@ export default {
         }
         if(error.response.status === 400){
           if (confirm(`Не удалось добавить {user.lastname} ${user.name} ${user.middlename} в контакты. Убедитесь что он уже не добавлен. Хотите вернуться к задаче?`)) {
-            this.$router.push(`/project/${getProjectName()}`);
+            this.$router.push(`/project/${getProjectId()}`);
           }
         }
         console.error("Ошибка сети:", error.message);

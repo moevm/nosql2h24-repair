@@ -53,7 +53,7 @@ export default {
       // Логика перехода на страницу проекта
       setProjectId(this.projectId);
       setProjectName(this.projectName);
-      this.$router.push(`/project/${this.projectName}`);
+      this.$router.push(`/project/${this.projectId}`);
     },
   },
 };
