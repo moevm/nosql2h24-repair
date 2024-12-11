@@ -8,15 +8,12 @@
           <span>-</span>
           <input type="date" v-model="endDate" class="large-input" />
         </div>
-        <div class="project-filter">
-          <label for="project">Проект</label>
-          <select v-model="selectedProject">
-            <option value="">Выберите проект</option>
-            <option v-for="project in projects" :key="project" :value="project">
-              {{ project }}
-            </option>
-          </select>
-        </div>
+        <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Поиск проекта"
+            class="search-input"
+        />
         <div class="status-filter">
           <label for="status">Статус</label>
           <select v-model="selectedStatus">
