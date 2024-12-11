@@ -28,7 +28,7 @@ const routes = [
   { path: '/register', component: RegisterPage },
   { path: '/main', component: MainPage },
   { path: '/new-project', component: NewProjectPage},
-  { path: '/project', component: ProjectPage},
+  { path: '/project/:id', component: ProjectPage},
   { path: '/stages', component: StagesPage},
   { path: '/risks', component: RisksPage},
   { path: '/procurements', component: ProcurementsPage},
