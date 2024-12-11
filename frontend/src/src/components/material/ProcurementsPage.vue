@@ -5,33 +5,31 @@
 
     <div class="content">
       <div class="purchases-container">
-        <h1>{{projectName}}</h1>
-<!--        <p>Итоговая стоимость: 3,100,000 руб</p>-->
-        
+        <h1>{{ projectName }}</h1>
+
         <div class="search-add-container">
           <div class="filter-container">
-              <div class="date-filter">
-                <input type="date" v-model="startDate" class="large-input" />
-                <span>-</span>
-                <input type="date" v-model="endDate" class="large-input" />
-              </div>
-              <input
-                type="text"
-                placeholder="Название материала"
-                v-model="searchQuery"
-                class="search-input"
-              />
-              <div class="status-filter">
-                <label for="status">Статус</label>
-                <select v-model="selectedStatus">
-                  <option value="">Выберите статус</option>
-                  <option v-for="status in statuses" :key="status.text" :value="status.text">
-                    {{ status.text }}
-                  </option>
-                </select>
-              </div>
-              <button @click="applyFilters">Применить</button>
+            <div class="date-filter">
+              <input type="date" v-model="startDate" class="large-input" />
+              <span>-</span>
+              <input type="date" v-model="endDate" class="large-input" />
             </div>
+            <input
+              type="text"
+              placeholder="Название материала"
+              v-model="searchQuery"
+              class="search-input"
+            />
+            <div class="status-filter">
+              <label for="status">Статус</label>
+              <select v-model="selectedStatus">
+                <option v-for="status in statuses" :key="status" :value="status">
+                  {{ status }}
+                </option>
+              </select>
+            </div>
+            <button @click="applyFilters">Применить</button>
+          </div>
           <button @click="goToAddMaterial" class="add-button">+ Добавить</button>
         </div>
 
@@ -54,7 +52,7 @@ import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
 import ProcurementsItemComponent from '../material/ProcurementsItemComponent.vue';
 import axios from 'axios';
-import {clearAllCookies, useCookies} from '@/src/js/useCookies';
+import { clearAllCookies, useCookies } from '@/src/js/useCookies';
 const { getProjectId, getProjectName } = useCookies();
 
 export default {
@@ -67,19 +65,24 @@ export default {
     return {
       projectName: getProjectName(),
       searchQuery: '',
-      procurements: [
-      ],
+      startDate: '',
+      endDate: '',
+      selectedStatus: '',
+      procurements: [],
       statuses: [
-        { text: 'В наличии'},
-        { text: 'Нет'},
-        { text: 'Не выбрано'},
+        'Нет',
+        'В наличии',
+        'Не выбрано',
       ],
     };
   },
   computed: {
     filteredMaterials() {
       return this.procurements.filter(procurement =>
-        procurement.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+        procurement.name.toLowerCase().includes(this.searchQuery.toLowerCase()) &&
+        (!this.startDate || new Date(procurement.date) >= new Date(this.startDate)) &&
+        (!this.endDate || new Date(procurement.date) <= new Date(this.endDate)) &&
+        (!this.selectedStatus || procurement.inStock === this.selectedStatus)
       );
     },
   },
@@ -107,17 +110,21 @@ export default {
           user: procurement.created_by.username,
           userRole: procurement.created_by.role,
           inStock: procurement.inStock,
+          date: procurement.date, // Добавьте поле даты, если оно есть в данных
         }));
         console.log(this.procurements);
       } catch (error) {
-        if(error.response.status === 401){
+        if (error.response.status === 401) {
           this.$store.commit('removeUsers');  // Изменяем состояние
           clearAllCookies();
           this.$router.push("/login");
         }
         console.error('Ошибка при загрузке Закупок:', error);
       }
-    }
+    },
+    applyFilters() {
+      // Здесь можно добавить дополнительную логику для применения фильтров
+    },
   },
   beforeMount() {
     this.fetchStageData();
