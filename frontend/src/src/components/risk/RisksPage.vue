@@ -7,24 +7,7 @@
       <div class="task-container">
         <div class="search-bar">
           <h1>{{projectName}}</h1>
-          <div class="filter-container">
-              <div class="date-filter">
-                <input type="date" v-model="startDate" class="large-input" />
-                <span>-</span>
-                <input type="date" v-model="endDate" class="large-input" />
-              </div>
-              <input type="text" placeholder="Название риска" v-model="searchQuery" class="search-input" />
-              <div class="status-filter">
-                <label for="status">Статус</label>
-                <select v-model="selectedStatus">
-                  <option value="">Выберите статус</option>
-                  <option v-for="status in statuses" :key="status.text" :value="status.text">
-                    {{ status.text }}
-                  </option>
-                </select>
-              </div>
-              <button @click="applyFilters">Применить</button>
-            </div>
+          <input type="text" placeholder="Название риска" v-model="searchQuery" class="search-input" />
         </div>
 
         <!-- Кнопка добавления -->
@@ -192,58 +175,5 @@ sidebar-component {
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 4px;
-}
-
-.filter-container {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 20px;
-}
-
-.date-filter,
-.project-filter,
-.status-filter {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.date-filter input {
-  margin-left: 5px;
-}
-
-.project-filter label,
-.status-filter label {
-  margin-right: 10px;
-}
-
-.large-input {
-  padding: 10px;
-  margin-left: 5px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
-}
-
-input,
-select {
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-button {
-  background-color: #6e6b93;
-  color: white;
-  padding: 8px 15px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-left: 10px;
-}
-
-button:hover {
-  background-color: #5c5583;
 }
 </style>
