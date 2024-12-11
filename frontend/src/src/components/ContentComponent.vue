@@ -2,12 +2,32 @@
   <div class="content">
     <div class="header-search">
       <h1>Проекты</h1>
-      <input
-          type="text"
-          v-model="searchQuery"
-          placeholder="Поиск проекта"
-          class="search-input"
-      />
+       <div class="filter-container">
+        <div class="date-filter">
+          <input type="date" v-model="startDate" class="large-input" />
+          <span>-</span>
+          <input type="date" v-model="endDate" class="large-input" />
+        </div>
+        <div class="project-filter">
+          <label for="project">Проект</label>
+          <select v-model="selectedProject">
+            <option value="">Выберите проект</option>
+            <option v-for="project in projects" :key="project" :value="project">
+              {{ project }}
+            </option>
+          </select>
+        </div>
+        <div class="status-filter">
+          <label for="status">Статус</label>
+          <select v-model="selectedStatus">
+            <option value="">Выберите статус</option>
+            <option v-for="status in statuses" :key="status.text" :value="status.text">
+              {{ status.text }}
+            </option>
+          </select>
+        </div>
+        <button @click="applyFilters">Применить</button>
+      </div>
     </div>
     <div class="projects-container">
       <div v-for="(item, index) in filteredItems" :key="index" class="project-item">
@@ -118,6 +138,60 @@ export default {
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 4px;
+}
+
+.filter-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20px;
+  margin-left: 20px;
+}
+
+.date-filter,
+.project-filter,
+.status-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-filter input {
+  margin-left: 5px;
+}
+
+.project-filter label,
+.status-filter label {
+  margin-right: 10px;
+}
+
+.large-input {
+  padding: 10px;
+  margin-left: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+input,
+select {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  background-color: #6e6b93;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+button:hover {
+  background-color: #5c5583;
 }
 
 .projects-container {
