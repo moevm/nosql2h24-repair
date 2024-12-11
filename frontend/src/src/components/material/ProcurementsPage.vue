@@ -69,6 +69,11 @@ export default {
       searchQuery: '',
       procurements: [
       ],
+      statuses: [
+        { text: 'В наличии'},
+        { text: 'Нет'},
+        { text: 'Не выбрано'},
+      ],
     };
   },
   computed: {
