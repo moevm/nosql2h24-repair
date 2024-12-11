@@ -23,7 +23,7 @@
 import router from "@/src/router";
 import axios from 'axios';
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
-const { getProjectId,getStageId,getTaskId } = useCookies();
+const { getProjectId,getStageId,getTaskId} = useCookies();
 
 export default {
   props: {
@@ -38,7 +38,7 @@ export default {
   },
   methods: {
     addContact() {
-      if(this.$route.path === '/project') {
+      if (this.$route.path.startsWith('/project/')) {
         router.push(`/add_contact`);
         console.log('Добавить контакт');
       }
@@ -71,7 +71,7 @@ export default {
           }
         }
       }
-      if(this.$route.path === '/project') {
+      if (this.$route.path.startsWith('/project/')) {
         if (confirm(`Удалить контакта "${contact.userName}"?`)) {
           try {
             await axios.delete(`/api/projects/${getProjectId()}/delete_contact/${contact.id}`, {

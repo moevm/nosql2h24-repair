@@ -36,7 +36,8 @@
 
 <script>
 import axios from 'axios';
-import { clearAllCookies } from '@/src/js/useCookies';
+import { clearAllCookies, useCookies } from '@/src/js/useCookies';
+const { getProjectName } = useCookies();
 const clearCookies = () => {
   clearAllCookies();
 };
@@ -74,21 +75,21 @@ export default {
     },
     goToPhases() {
       if (this.$route.fullPath === `/stages`) {
-        this.$router.push(`/project`);
+        this.$router.push(`/project/${getProjectName()}`);
       } else {
         this.$router.push(`/stages`);
       }
     },
     goToProcurements() {
       if (this.$route.fullPath === `/procurements`) {
-        this.$router.push(`/project`);
+        this.$router.push(`/project/${getProjectName()}`);
       } else {
         this.$router.push(`/procurements`);
       }
     },
     goToRisks() {
       if (this.$route.fullPath === `/risks`) {
-        this.$router.push(`/project`);
+        this.$router.push(`/project/${getProjectName()}`);
       } else {
         this.$router.push(`/risks`);
       }
