@@ -86,7 +86,6 @@ export default {
       roles: [
         { text: 'Прораб'},
         { text: 'Администратор'},
-        { text: 'Заказчик'},
         { text: 'Все'}
       ],
     };
@@ -161,13 +160,13 @@ export default {
           params.append('start_date', this.formatToDateTime(this.startDate));
         }
         if (this.materialName) {
-          params.append('project_name', this.materialName);
+          params.append('name', this.materialName);
         }
         if(this.selectedStatus) {
           params.append('state', this.selectedStatus);
         }
         if(this.selectedRole) {
-          params.append('role', this.selectedRole);
+          params.append('creator_role', this.selectedRole);
         }
         const response = await axios.get(`/api/projects/${getProjectId()}/get_procurements?${params.toString()}`);
         this.procurements = Object.values(response.data.procurements).map(procurement => ({
