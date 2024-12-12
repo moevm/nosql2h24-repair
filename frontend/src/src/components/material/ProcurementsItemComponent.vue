@@ -45,7 +45,7 @@
           <p class="value">{{ material.userRole }}</p>
         </div>
         <div class="item-row">
-          <span class="label">Дата доставки</span>
+          <span class="label">Дата поставки</span>
           <p class="value">{{ material.delivery_date}}</p>
         </div>
       </div>
