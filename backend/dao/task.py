@@ -179,7 +179,18 @@ class TaskDAO(BaseDao):
                             else:
                                 status_match = True
 
-                            if status_match and name_match:
+                            if "start_date" in search_params:
+                                start_date_match = search_params["start_date"] <= task["start_date"]
+                            else:
+                                start_date_match = True
+
+
+                            if "end_date" in search_params:
+                                end_date_match = search_params["end_date"] >= task["end_date"]
+                            else:
+                                end_date_match = True
+
+                            if status_match and name_match and start_date_match and end_date_match:
                                 tasks.append(ProjectTaskResponse(
                                     id=task_id, 
                                     project_id=str(project["_id"]),

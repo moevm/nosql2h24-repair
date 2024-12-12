@@ -77,7 +77,11 @@ async def get_stage_tasks(project_id: str, stage_id: str):
 async def get_all_tasks(task_name: str = "", project_name: str = "", task_status: TaskStatus = TaskStatus.none_status, 
                         start_date: datetime = None, end_date: datetime = None, 
                         user: User = Depends(get_current_user)):
-    tasks = await TaskDAO.get_all_tasks_by_user(user.id, task_name, project_name, task_status)
+    tasks = await TaskDAO.get_all_tasks_by_user(
+        user.id, task_name, 
+        project_name, task_status, 
+        start_date, end_date
+        )
     return tasks
 
 
