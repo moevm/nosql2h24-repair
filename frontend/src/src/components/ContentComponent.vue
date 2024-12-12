@@ -171,9 +171,8 @@ export default {
       this.startDate = '';
       this.endDate = '';
       this.projectName = '';
-      this.taskName = '';
       this.selectedStatus = '';
-      this.fetchTasks();
+      this.fetchProjects();
     },
   },
   beforeMount() {
