@@ -351,15 +351,23 @@ class ProjectDao(BaseDao):
         return risk_id
 
     @classmethod
-    async def get_risks_by_project_id(cls, project_id: str) -> list[RiskResponse] | list[None] | None:
+    async def get_risks_by_project_id(cls, project_id: str, name: str = "") -> list[RiskResponse] | list[None] | None:
         project = await cls.collection.find_one({"_id": ObjectId(project_id)}, {"risks": 1})
+
+        risks = []
         if project and "risks" in project:
-            risks = [RiskResponse(id=risk_id, **risk_data) for risk_id, risk_data in
-                     project["risks"].items()]
-            return risks
+            
+            for risk_id, risk in project.get("risks", {}).items():
+                if name:
+                    name_match = re.search(name, risk["name"], re.IGNORECASE)
+                else:
+                    name_match = True
+
+                if name_match:
+                    risks.append(RiskResponse(id=risk_id, **risk))
         elif project is None:
             return None
-        return []
+        return risks
 
     @classmethod
     async def get_risk_by_id(cls, project_id: str, risk_id: str) -> RiskResponse | None:
