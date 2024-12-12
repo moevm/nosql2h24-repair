@@ -39,7 +39,7 @@
             <p>Конец</p>
             <input
                 type="date"
-                :min="startDate ? endDate : $store.getters.getStartDateStage"
+                :min="startDate ? startDate : $store.getters.getStartDateStage"
                 :max="$store.getters.getEndDateStage"
                 v-model="endDate"
             />
