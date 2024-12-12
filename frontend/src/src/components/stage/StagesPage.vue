@@ -221,7 +221,6 @@ button {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  margin-left: 10px;
 }
 
 button:hover {
