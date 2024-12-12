@@ -18,6 +18,7 @@
             </div>
             <input type="text" v-model="search" placeholder="Название этапа" />
             <button @click="applyFilters">Применить</button>
+            <button @click="resetFilters">Сбросить</button>
             <button @click="goToAddStagePage" class="add-stage-button">
               Добавить этап
             </button>
@@ -117,6 +118,14 @@ export default {
     },
     applyFilters() {
       // Здесь можно добавить дополнительную логику для применения фильтров
+    },
+    resetFilters() {
+      this.startDate = '';
+      this.endDate = '';
+      this.projectName = '';
+      this.taskName = '';
+      this.selectedStatus = '';
+      this.fetchTasks();
     },
   },
   beforeMount() {
