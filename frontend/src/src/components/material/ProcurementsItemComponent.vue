@@ -46,7 +46,7 @@
         </div>
         <div class="item-row">
           <span class="label">Дата поставки</span>
-          <p class="value">{{ material.delivery_date}}</p>
+          <p class="value">{{ material.deliveryDate}}</p>
         </div>
       </div>
     </div>
