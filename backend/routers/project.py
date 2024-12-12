@@ -1,7 +1,8 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from dao.user import UserDao
-from schemas.project import ProjectResponse, ProjectCreate, ProjectUpdate
+from schemas.project import ProjectResponse, ProjectCreate, ProjectStatus, ProjectUpdate
 from schemas.user import User, Role, UserResponse, ContactResponse, UserCreateSchema
 from utils.role import get_customer_role, get_foreman_role
 from utils.token import get_current_user
@@ -56,10 +57,12 @@ async def remove_project(project_id: str, user: User = Depends(get_foreman_role)
 
 
 @router.get("/all", response_model=list[ProjectResponse])
-async def get_all(user: User = Depends(get_current_user)):
+async def get_all(project_name: str = "", project_status: ProjectStatus = None, 
+                  start_date: datetime = None, end_date: datetime = None, 
+                  user = Depends(get_current_user)):
     if user.role == Role.admin:
-        return await ProjectDao.get_all_projects()
-    return await ProjectDao.get_projects_by_user(user.id)
+        return await ProjectDao.get_all_projects(project_name, project_status, start_date, end_date)
+    return await ProjectDao.get_all_projects(project_name, project_status, start_date, end_date, user.id)
 
 
 @router.get("/get_users/{project_id}", response_model=list[ContactResponse | None])

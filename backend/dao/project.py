@@ -1,8 +1,9 @@
+from datetime import datetime
 from bson import ObjectId
 
 from dao.base import BaseDao
 from database import db
-from schemas.project import ProjectCreate, ProjectResponse, Procurement, Stage, Risk, ProcurementResponse, \
+from schemas.project import ProjectCreate, ProjectResponse, Procurement, ProjectStatus, Stage, Risk, ProcurementResponse, \
     RiskResponse, \
     StageResponse, ProjectUpdate, RiskUpdate, ProcurementUpdate, StageUpdate
 from schemas.user import User, Contact, ContactResponse
@@ -47,8 +48,24 @@ class ProjectDao(BaseDao):
         return ProjectResponse(**project)
 
     @classmethod
-    async def get_all_projects(cls) -> list[ProjectResponse] | list[None]:
-        cursor = cls.collection.find()
+    async def get_all_projects(cls, project_name: str = "", project_status: ProjectStatus = ProjectStatus.none_status, 
+                               start_date: datetime = None, end_date: datetime = None, user_id: str = "") -> list[ProjectResponse] | list[None]:
+        
+        filters = {}
+
+        if project_name:
+            filters["name"] = {"$regex": project_name, "$options": "i"}
+        if project_status:
+            filters["status"] = str(project_status.value)
+        if start_date:
+            filters["start_date"] = {"$gte": start_date}
+        if end_date:
+            filters["end_date"] = {"$lte": end_date}
+        if user_id:
+            filters[f"contacts.{user_id}"] = {"$exists": True}
+        
+        print(filters)
+        cursor = cls.collection.find(filters)
         projects_list = await cursor.to_list()
         result = []
         for project in projects_list:
@@ -57,7 +74,7 @@ class ProjectDao(BaseDao):
         return result
 
     @classmethod
-    async def get_projects_by_user(cls, user_id: str) -> list[ProjectResponse] | list[None]:
+    async def get_projects_by_user(cls, user_id: str, filters: dict = {}) -> list[ProjectResponse] | list[None]:
         cursor = cls.collection.find(
             {f"contacts.{user_id}": {"$exists": True}}
         )
