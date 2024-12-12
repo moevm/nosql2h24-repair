@@ -17,9 +17,8 @@
         <div class="status-filter">
           <label for="status">Статус</label>
           <select v-model="selectedStatus">
-            <option value="">Выберите статус</option>
-            <option v-for="status in statuses" :key="status.text" :value="status.text">
-              {{ status.text }}
+            <option v-for="status in statuses" :key="status" :value="status">
+              {{ status }}
             </option>
           </select>
         </div>
@@ -62,6 +61,13 @@ export default {
         {
           type: 'newProjectButton',
         },
+      ],
+      statuses: [
+        'Нет статуса',
+        'Готово',
+        'В процессе',
+        'Опоздание',
+        'Новый',
       ],
     };
   },
