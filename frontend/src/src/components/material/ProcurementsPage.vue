@@ -10,6 +10,7 @@
         <div class="search-add-container">
           <div class="filter-container">
             <div class="date-filter">
+              <p>Даты доставки</p>
               <input type="date" v-model="startDate" class="large-input" />
               <span>-</span>
               <input type="date" v-model="endDate" class="large-input" />
@@ -25,6 +26,12 @@
               <select v-model="selectedStatus">
                 <option v-for="status in statuses" :key="status" :value="status">
                   {{ status }}
+                </option>
+              </select>
+              <label for="status">Создатель</label>
+              <select v-model="selectedStatus">
+                <option v-for="role in roles" :key="role" :value="role">
+                  {{ role }}
                 </option>
               </select>
             </div>
@@ -72,6 +79,12 @@ export default {
       statuses: [
         'Нет',
         'В наличии',
+        'Не выбрано',
+      ],
+      roles: [
+        'Прораб',
+        'Администратор',
+        'Заказчик',
         'Не выбрано',
       ],
     };
