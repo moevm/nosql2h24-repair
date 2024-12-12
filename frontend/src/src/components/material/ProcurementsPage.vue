@@ -18,20 +18,20 @@
             <input
               type="text"
               placeholder="Название материала"
-              v-model="searchQuery"
+              v-model="materialName"
               class="search-input"
             />
             <div class="status-filter">
               <label for="status">В наличии</label>
               <select v-model="selectedStatus">
-                <option v-for="status in statuses" :key="status" :value="status">
-                  {{ status }}
+                <option v-for="status in statuses" :key="status.text" :value="status.value ">
+                  {{ status.text }}
                 </option>
               </select>
               <label for="status">Создатель</label>
-              <select v-model="selectedStatus">
-                <option v-for="role in roles" :key="role" :value="role">
-                  {{ role }}
+              <select v-model="selectedRole">
+                <option v-for="role in roles" :key="role.text" :value="role.text === 'Все'? '': role.text ">
+                  {{ role.text }}
                 </option>
               </select>
             </div>
@@ -42,7 +42,7 @@
 
         <div class="materials-list">
           <ProcurementsItemComponent
-            v-for="material in filteredMaterials"
+            v-for="material in procurements"
             :key="material.materialId"
             :material="material"
             @viewDetails="viewDetails"
@@ -72,32 +72,34 @@ export default {
     return {
       projectName: getProjectName(),
       searchQuery: '',
+      materialName: '',
       startDate: '',
       endDate: '',
       selectedStatus: '',
+      selectedRole:'',
       procurements: [],
       statuses: [
-        'Нет',
-        'Да',
-        'Не выбрано',
+        { text: 'Нет', value:'false'},
+        { text: 'Да', value:'true'},
+        { text: 'Все', value:''},
       ],
       roles: [
-        'Прораб',
-        'Администратор',
-        'Заказчик',
-        'Не выбрано',
+        { text: 'Прораб'},
+        { text: 'Администратор'},
+        { text: 'Заказчик'},
+        { text: 'Все'}
       ],
     };
   },
   computed: {
-    filteredMaterials() {
-      return this.procurements.filter(procurement =>
-        procurement.name.toLowerCase().includes(this.searchQuery.toLowerCase()) &&
-        (!this.startDate || new Date(procurement.date) >= new Date(this.startDate)) &&
-        (!this.endDate || new Date(procurement.date) <= new Date(this.endDate)) &&
-        (!this.selectedStatus || procurement.inStock === this.selectedStatus)
-      );
-    },
+    // filteredMaterials() {
+    //   return this.procurements.filter(procurement =>
+    //     procurement.name.toLowerCase().includes(this.searchQuery.toLowerCase()) &&
+    //     (!this.startDate || new Date(procurement.date) >= new Date(this.startDate)) &&
+    //     (!this.endDate || new Date(procurement.date) <= new Date(this.endDate)) &&
+    //     (!this.selectedStatus || procurement.inStock === this.selectedStatus)
+    //   );
+    // },
   },
   methods: {
     formatDate(dateString) {
@@ -119,7 +121,7 @@ export default {
     async fetchStageData() {
       try {
         const response = await axios.get(`/api/projects/${getProjectId()}/get_procurements`);
-        console.log(response.data);
+        // console.log(response.data);
         this.procurements = Object.values(response.data.procurements).map(procurement => ({
           name: procurement.item_name,
           quantity: procurement.quantity,
@@ -144,8 +146,56 @@ export default {
         console.error('Ошибка при загрузке Закупок:', error);
       }
     },
-    applyFilters() {
-      // Здесь можно добавить дополнительную логику для применения фильтров
+    formatToDateTime(date) {
+      return `${date}T00:00:00`;
+    },
+    async applyFilters() {
+      try {
+        const params = new URLSearchParams({
+        });
+
+        if (this.endDate) {
+          params.append('end_date', this.formatToDateTime(this.endDate));
+        }
+        if(this.startDate) {
+          params.append('start_date', this.formatToDateTime(this.startDate));
+        }
+        if (this.materialName) {
+          params.append('project_name', this.materialName);
+        }
+        if(this.selectedStatus) {
+          params.append('state', this.selectedStatus);
+        }
+        if(this.selectedRole) {
+          params.append('role', this.selectedRole);
+        }
+        const response = await axios.get(`/api/projects/${getProjectId()}/get_procurements?${params.toString()}`);
+        this.procurements = Object.values(response.data.procurements).map(procurement => ({
+          name: procurement.item_name,
+          quantity: procurement.quantity,
+          unit: procurement.units,
+          pricePerUnit: procurement.price,
+          totalCost: procurement.cost,
+          materialId: procurement.id,
+          user: procurement.created_by.username,
+          userRole: procurement.created_by.role,
+          inStock: procurement.inStock,
+          created_date: this.formatDate(procurement.created_at),
+          deliveryDate: this.formatDate(procurement.delivery_date),
+          date: procurement.date, // Добавьте поле даты, если оно есть в данных
+        }));
+        // console.log(response.data);
+      } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        console.error('Ошибка при загрузке контактов:', error);
+        if (error.response && error.response.data.detail) {
+          this.errorMessage = error.response.data.detail;
+        }
+      }
     },
   },
   beforeMount() {
