@@ -74,18 +74,6 @@ class ProjectDao(BaseDao):
         return result
 
     @classmethod
-    async def get_projects_by_user(cls, user_id: str, filters: dict = {}) -> list[ProjectResponse] | list[None]:
-        cursor = cls.collection.find(
-            {f"contacts.{user_id}": {"$exists": True}}
-        )
-        projects_list = await cursor.to_list()
-        result = []
-        for project in projects_list:
-            project = object_id_to_str(project)
-            result.append(ProjectResponse(**project))
-        return result
-
-    @classmethod
     async def add_contact_to_project(cls, project_id: str, user: User) -> ProjectResponse | None:
         updated_id = await cls._update_with_query(
             {"_id": ObjectId(project_id)},
