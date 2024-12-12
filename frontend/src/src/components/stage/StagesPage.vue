@@ -13,7 +13,6 @@
           <div class="filter-container">
             <div class="date-filter">
               <p>Интервал выполнения</p>
-              <input type="date" v-model="startDate" class="large-input" />
               <input type="date" v-model="startDate" class="large-input" :max="endDate"  />
               <span>-</span>
               <input type="date" v-model="endDate" class="large-input" :min="startDate"  />
