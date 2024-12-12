@@ -3,20 +3,30 @@
       <h2>Задачи</h2>
       <div class="filter-container">
         <div class="date-filter">
-          <input type="date" v-model="startDate" class="large-input" />
+          <input
+              type="date"
+              v-model="startDate"
+              class="large-input"
+              :max="endDate"
+          />
           <span>-</span>
-          <input type="date" v-model="endDate" class="large-input" />
+          <input
+              type="date"
+              v-model="endDate"
+              class="large-input"
+              :min="startDate"
+          />
         </div>
         <div class="project-filter">
           <input
             type="text"
-            v-model="searchQuery"
+            v-model="projectName"
             placeholder="Название проекта"
             class="search-input"
           />
           <input
             type="text"
-            v-model="searchQuery"
+            v-model="taskName"
             placeholder="Название задачи"
             class="search-input"
           />
@@ -24,8 +34,7 @@
         <div class="status-filter">
           <label for="status">Статус</label>
           <select v-model="selectedStatus">
-            <option value="">Value</option>
-            <option v-for="status in statuses" :key="status.text" :value="status.text">
+            <option v-for="status in statuses" :key="status.text" :value="status.text === 'Все'? '': status.text ">
               {{ status.text }}
             </option>
           </select>
@@ -64,14 +73,16 @@
       return {
         startDate: '',
         endDate: '',
-        selectedProject: '',
+        projectName: '',
+        taskName: '',
         selectedStatus: '',
         projects: ['Ремонт кафедры МОЗВМ'], // Пример списка проектов
         statuses: [
           { text: 'Готово', color: 'green' },
           { text: 'Опоздание', color: 'red' },
           { text: 'В процессе', color: 'orange' },
-          { text: '-не выбрано-', color: '#e0e0e0' }
+          { text: 'Все', color: '#e0e0e0' },
+          { text: 'Нет статуса', color: '#e0e0e0' }
         ],
         tasks: [
           // { name: 'Прибить полки', startDate: '2024-12-25', endDate: '2024-12-25', project: 'Ремонт кафедры МОЗВМ', status: 'Готово' },
@@ -96,8 +107,53 @@
       }
     },
     methods: {
-      applyFilters() {
-        // Здесь можно будет применить дополнительные фильтры, если нужно
+      formatToDateTime(date) {
+        return `${date}T00:00:00`;
+      },
+      async applyFilters() {
+        try {
+          const params = new URLSearchParams({
+          });
+
+          if (this.endDate) {
+            params.append('end_date', this.formatToDateTime(this.endDate));
+          }
+          if(this.startDate) {
+            params.append('start_date', this.formatToDateTime(this.startDate));
+          }
+          if (this.projectName) {
+            params.append('project_name', this.projectName);
+          }
+          if(this.taskName) {
+            params.append('task_name', this.taskName);
+          }
+          if(this.selectedStatus) {
+            params.append('task_status', this.selectedStatus);
+          }
+          const response = await axios.get(`/api/tasks/get_all/?${params.toString()}`);
+          this.tasks = Object.values(response.data).map(task => ({
+            name: task.name,
+            startDate: this.formatDate(task.start_date),
+            endDate: this.formatDate(task.end_date),
+            status: task.status,
+            description: task.description,
+            taskId: task.id,
+            stageId: task.stage_id,
+            projectId:task.project_id,
+            projectName: task.project_name,
+          }));
+          // console.log(response.data);
+        } catch (error) {
+          if(error.response.status === 401){
+            this.$store.commit('removeUsers');
+            clearAllCookies();
+            this.$router.push("/login");
+          }
+          console.error('Ошибка при загрузке контактов:', error);
+          if (error.response && error.response.data.detail) {
+            this.errorMessage = error.response.data.detail;
+          }
+        }
       },
       async fetchTasks() {
         try {
@@ -114,7 +170,7 @@
             projectId:task.project_id,
             projectName: task.project_name,
           }));
-          console.log(this.tasks)
+          // console.log(this.tasks)
         } catch (error) {
           if(error.response.status === 401){
             this.$store.commit('removeUsers');  // Изменяем состояние
