@@ -36,6 +36,7 @@
               </select>
             </div>
             <button @click="applyFilters">Применить</button>
+            <button @click="resetFilters">Сбросить</button>
           </div>
           <button @click="goToAddMaterial" class="add-button">+ Добавить</button>
         </div>
@@ -195,6 +196,14 @@ export default {
           this.errorMessage = error.response.data.detail;
         }
       }
+    },
+    resetFilters() {
+      this.startDate = '';
+      this.endDate = '';
+      this.projectName = '';
+      this.taskName = '';
+      this.selectedStatus = '';
+      this.fetchTasks();
     },
   },
   beforeMount() {
