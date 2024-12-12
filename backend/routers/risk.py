@@ -21,8 +21,8 @@ async def add_stage(project_id: str, risk_data: Risk, foreman: User = Depends(ge
 
 
 @router.get("/{project_id}/get_risks", response_model=dict[str, list[RiskResponse] | list[None]])
-async def get_risks(project_id: str, user: User = Depends(get_current_user)):
-    risks = await ProjectDao.get_risks_by_project_id(project_id)
+async def get_risks(project_id: str, name: str = "", user: User = Depends(get_current_user)):
+    risks = await ProjectDao.get_risks_by_project_id(project_id, name)
     if risks is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
