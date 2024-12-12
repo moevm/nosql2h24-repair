@@ -17,15 +17,6 @@
               <input type="date" v-model="endDate" class="large-input" />
             </div>
             <input type="text" v-model="search" placeholder="Название этапа" />
-            <div class="status-filter">
-              <label for="status">Статус</label>
-              <select v-model="selectedStatus">
-                <option value="">Выберите статус</option>
-                <option v-for="status in statuses" :key="status.text" :value="status.text">
-                  {{ status.text }}
-                </option>
-              </select>
-            </div>
             <button @click="applyFilters">Применить</button>
           </div>
           <!-- Контейнер для поля поиска и кнопки -->
