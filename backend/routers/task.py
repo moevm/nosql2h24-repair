@@ -1,8 +1,9 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from dao.project import ProjectDao
 from dao.task import TaskDAO
-from schemas.task import Task, TaskResponse, TaskUpdate, ProjectTaskResponse, TaskStatusUpdate
+from schemas.task import Task, TaskResponse, TaskStatus, TaskUpdate, ProjectTaskResponse, TaskStatusUpdate
 from schemas.user import User, Worker
 from utils.role import get_foreman_role
 from utils.token import get_current_user
@@ -73,8 +74,10 @@ async def get_stage_tasks(project_id: str, stage_id: str):
 
 
 @router.get('/get_all', response_model=list[ProjectTaskResponse] | list[None])
-async def get_all_tasks(user: User = Depends(get_current_user)):
-    tasks = await TaskDAO.get_all_tasks_by_user(user.id)
+async def get_all_tasks(task_name: str = "", project_name: str = "", task_status: TaskStatus = TaskStatus.none_status, 
+                        start_date: datetime = None, end_date: datetime = None, 
+                        user: User = Depends(get_current_user)):
+    tasks = await TaskDAO.get_all_tasks_by_user(user.id, task_name, project_name, task_status)
     return tasks
 
 

@@ -1,8 +1,10 @@
+from datetime import datetime
+import re
 from bson import ObjectId
 
 from dao.base import BaseDao
 from database import db
-from schemas.task import Task, TaskResponse, TaskUpdate, TaskStatusUpdate, ProjectTaskResponse
+from schemas.task import Task, TaskResponse, TaskStatus, TaskUpdate, TaskStatusUpdate, ProjectTaskResponse
 from schemas.user import Worker
 from schemas.utils import generate_id, get_date_now
 
@@ -124,7 +126,9 @@ class TaskDAO(BaseDao):
         return tasks_list
 
     @classmethod
-    async def get_all_tasks_by_user(cls, user_id: str) -> list[ProjectTaskResponse] | list[None]:
+    async def get_all_tasks_by_user(cls, user_id: str, task_name: str = "", project_name: str = "", 
+                                    task_status: TaskStatus = TaskStatus.none_status, 
+                                    start_date: datetime = None, end_date: datetime = None) -> list[ProjectTaskResponse] | list[None]:
         cursor = cls.collection.find(
             {
                 "stages": {
@@ -133,20 +137,58 @@ class TaskDAO(BaseDao):
             }
         )
 
+        search_params = {}
+
+        if task_name:
+            search_params["name"] = task_name
+        if project_name:
+            search_params["project_name"] = project_name
+        if task_status is not TaskStatus.none_status:
+            search_params["status"] = task_status
+        if start_date is not None:
+            search_params["start_date"] = start_date
+        if end_date is not None:
+            search_params["end_date"] = end_date
+
         tasks = []
         async for project in cursor:
+
+            if "project_name" in search_params:
+                project_match = re.search(search_params["project_name"], project["name"], re.IGNORECASE)
+                print(f'project match is: {project_match}')
+            else:
+                project_match = True                
+
+            if project_match is None:
+                continue
+
             for stage_id, stage in project.get("stages", {}).items():
                 for task_id, task in stage.get("tasks", {}).items():
                     for worker_id, worker in task.get("workers", {}).items():
                         if worker_id == user_id:
-                            tasks.append(ProjectTaskResponse(
-                                id=task_id, 
-                                project_id=str(project["_id"]),
-                                project_name=project["name"],
-                                stage_id=str(stage_id),
-                                **task
-                            ))
 
+                            if "name" in search_params:
+                                name_match = re.search(search_params["name"], task["name"], re.IGNORECASE)
+                                print(f'name match is: {name_match}')
+                            else:
+                                name_match = True
+
+                            if "status" in search_params:
+                                status_match = search_params["status"] == task["status"]
+                                print(f'status match is: {status_match}')
+                            else:
+                                status_match = True
+
+                            if status_match and name_match:
+                                tasks.append(ProjectTaskResponse(
+                                    id=task_id, 
+                                    project_id=str(project["_id"]),
+                                    project_name=project["name"],
+                                    stage_id=str(stage_id),
+                                    **task
+                                ))
+
+        print(f'Finded tasks: {len(tasks)}')
         return tasks
 
     @classmethod
