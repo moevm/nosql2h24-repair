@@ -12,12 +12,15 @@
           </div>
           <div class="filter-container">
             <div class="date-filter">
+              <p>Интервал выполнения</p>
+              <input type="date" v-model="startDate" class="large-input" />
               <input type="date" v-model="startDate" class="large-input" :max="endDate"  />
               <span>-</span>
               <input type="date" v-model="endDate" class="large-input" :min="startDate"  />
             </div>
             <input type="text" v-model="stageName" placeholder="Название этапа" />
             <button @click="applyFilters">Применить</button>
+            <button @click="resetFilters">Сбросить</button>
             <button @click="goToAddStagePage" class="add-stage-button">
               Добавить этап
             </button>
@@ -57,20 +60,20 @@ export default {
   data() {
     return {
       projectName: getProjectName(),
-      stageName: '',
+      search: '',
       startDate: '',
       endDate: '',
       stages: [],
     };
   },
   computed: {
-    // filteredStages() {
-    //   return this.stages.filter(stage =>
-    //     stage.name.includes(this.search) &&
-    //     (!this.startDate || new Date(stage.startDate) >= new Date(this.startDate)) &&
-    //     (!this.endDate || new Date(stage.endDate) <= new Date(this.endDate))
-    //   );
-    // },
+    filteredStages() {
+      return this.stages.filter(stage =>
+        stage.name.includes(this.search) &&
+        (!this.startDate || new Date(stage.startDate) >= new Date(this.startDate)) &&
+        (!this.endDate || new Date(stage.endDate) <= new Date(this.endDate))
+      );
+    },
   },
   methods: {
     updateStage(updatedStage) {
@@ -115,64 +118,16 @@ export default {
       const year = date.getFullYear();
       return `${year}-${month}-${day}`;
     },
-    formatToDateTime(date) {
-      return `${date}T00:00:00`;
+    applyFilters() {
+      // Здесь можно добавить дополнительную логику для применения фильтров
     },
-    async applyFilters() {
-      try {
-        const params = new URLSearchParams({
-        });
-
-        if (this.endDate) {
-          params.append('end_date', this.formatToDateTime(this.endDate));
-        }
-        if(this.startDate) {
-          params.append('start_date', this.formatToDateTime(this.startDate));
-        }
-        if (this.stageName) {
-          params.append('name', this.stageName);
-        }
-        const response = await axios.get(`/api/projects/${getProjectId()}/get_stages/?${params.toString()}`);
-        this.stages = Object.values(response.data.stages).map(stage => ({
-          name: stage.name,
-          startDate: this.formatDate(stage.start_date),
-          endDate: this.formatDate(stage.end_date),
-          stageId: stage.id,
-        }));
-        // console.log(this.stages);
-      } catch (error) {
-        if (error.response.status === 401) {
-          this.$store.commit('removeUsers');  // Изменяем состояние
-          clearAllCookies();
-          this.$router.push("/login");
-        }
-        console.error('Ошибка при загрузке Этапов:', error);
-      }
-    },
-    async fetchTasks() {
-      try {
-        const response = await axios.get('/api/tasks/get_all');
-        console.log(response.data);
-        this.tasks = Object.values(response.data).map(task => ({
-          name: task.name,
-          startDate: this.formatDate(task.start_date),
-          endDate: this.formatDate(task.end_date),
-          status: task.status,
-          description: task.description,
-          taskId: task.id,
-          stageId: task.stage_id,
-          projectId:task.project_id,
-          projectName: task.project_name,
-        }));
-        // console.log(this.tasks)
-      } catch (error) {
-        if(error.response.status === 401){
-          this.$store.commit('removeUsers');  // Изменяем состояние
-          clearAllCookies();
-          this.$router.push("/login");
-        }
-        console.error('Ошибка при загрузке проектов:', error);
-      }
+    resetFilters() {
+      this.startDate = '';
+      this.endDate = '';
+      this.projectName = '';
+      this.taskName = '';
+      this.selectedStatus = '';
+      this.fetchTasks();
     },
   },
   beforeMount() {

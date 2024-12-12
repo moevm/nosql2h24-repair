@@ -6,7 +6,7 @@
     </div>
     <div v-if="userRole === 'Администратор'" class="menu-item" @click="goToUsers">
       <img src="@/assets/icons/user.png" alt="User Icon" class="icon">
-      <p>Пользователи</p>
+      <p>Административная страница</p>
     </div>
     <div v-if="!isMainPage && !isMessages && userRole !== 'Рабочий'" :class="['menu-item', { 'active': isPhasesPage }]" @click="goToPhases">
       <img src="@/assets/icons/phases.png" alt="Phases Icon" class="icon">
@@ -98,7 +98,7 @@ export default {
       this.$router.push('/statistics');
     },
     goToUsers() {
-      this.$router.push('/user-search');
+      this.$router.push('/admin');
     },
     async logOut() {
       try {
@@ -163,6 +163,7 @@ export default {
 .menu-item p {
   margin: 0;
   font-size: 16px;
+  text-align: center;
 }
 
 .logout-item {

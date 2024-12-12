@@ -25,6 +25,7 @@
           </select>
         </div>
         <button @click="applyFilters">Применить</button>
+        <button @click="resetFilters">Сбросить</button>
       </div>
     </div>
     <button @click="addTask">Добавить задачу</button>
@@ -157,6 +158,14 @@ export default {
       const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 по 11, поэтому +1
       const year = date.getFullYear();
       return `${day}.${month}.${year}`;
+    },
+    resetFilters() {
+      this.startDate = '';
+      this.endDate = '';
+      this.projectName = '';
+      this.taskName = '';
+      this.selectedStatus = '';
+      this.fetchTasks();
     },
   },
   beforeMount() {

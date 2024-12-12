@@ -10,6 +10,7 @@
           <div class = "filter-bar">
             <input type="text" placeholder="Название риска" v-model="riskName" class="search-input" />
             <button @click="applyFilters">Применить</button>
+            <button @click="resetFilters">Сбросить</button>
           </div>
         </div>
 
@@ -123,6 +124,14 @@ export default {
         }
         console.error('Ошибка при загрузке проектов:', error);
       }
+    },
+    resetFilters() {
+      this.startDate = '';
+      this.endDate = '';
+      this.projectName = '';
+      this.taskName = '';
+      this.selectedStatus = '';
+      this.fetchTasks();
     },
   },
   beforeMount() {

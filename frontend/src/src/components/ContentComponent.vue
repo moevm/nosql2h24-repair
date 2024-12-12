@@ -3,6 +3,7 @@
     <div class="header-search">
       <h1>Проекты</h1>
        <div class="filter-container">
+        <p>Интервал выполнения</p>
         <div class="date-filter">
           <input
               type="date"
@@ -31,6 +32,7 @@
            </select>
          </div>
         <button @click="applyFilters">Применить</button>
+        <button @click="resetFilters">Сбросить</button>
       </div>
     </div>
     <div class="projects-container">
@@ -164,6 +166,14 @@ export default {
       const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 по 11, поэтому +1
       const year = date.getFullYear();
       return `${day}.${month}.${year}`;
+    },
+    resetFilters() {
+      this.startDate = '';
+      this.endDate = '';
+      this.projectName = '';
+      this.taskName = '';
+      this.selectedStatus = '';
+      this.fetchTasks();
     },
   },
   beforeMount() {
