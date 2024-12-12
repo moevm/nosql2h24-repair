@@ -100,14 +100,17 @@ class TaskDAO(BaseDao):
                 }
             }
         )
-        
+
         if updated_id is None:
             return None
 
         return await cls.get_task_by_id(project_id, stage_id, task_id)
 
     @classmethod
-    async def get_tasks_by_stage_id(cls, project_id: str, stage_id: str) -> list[TaskResponse] | list[None]:
+    async def get_tasks_by_stage_id(cls, project_id: str, stage_id: str, task_name: str = "", project_name: str = "",
+                                    task_status: TaskStatus = TaskStatus.none_status,
+                                    start_date: datetime = None, end_date: datetime = None) -> list[TaskResponse] | \
+                                                                                               list[None]:
         project = await cls.collection.find_one(
             {
                 "_id": ObjectId(project_id),
@@ -118,17 +121,45 @@ class TaskDAO(BaseDao):
         if not project or "stages" not in project or stage_id not in project["stages"]:
             return []
 
-        tasks = project["stages"][stage_id].get("tasks", {})
+        tasks = []
 
-        tasks_list = [
-            TaskResponse(id=task_id, **task_data) for task_id, task_data in tasks.items()
-        ]
-        return tasks_list
+        for task_id, task in project["stages"][stage_id].get("tasks", {}).items():
+
+            if task_name:
+                name_match = re.search(task_name, task["name"], re.IGNORECASE)
+                print(f'name match is: {name_match}')
+            else:
+                name_match = True
+
+            if task_status:
+                status_match = task_status == task["status"]
+                print(f'status match is: {status_match}')
+            else:
+                status_match = True
+
+            if start_date:
+                start_date_match = start_date <= task["start_date"]
+            else:
+                start_date_match = True
+
+            if end_date:
+                end_date_match = end_date >= task["end_date"]
+            else:
+                end_date_match = True
+
+            if status_match and name_match and start_date_match and end_date_match:
+                tasks.append(TaskResponse(
+                    id=task_id,
+                    **task
+                ))
+        return tasks
 
     @classmethod
-    async def get_all_tasks_by_user(cls, user_id: str, task_name: str = "", project_name: str = "", 
-                                    task_status: TaskStatus = TaskStatus.none_status, 
-                                    start_date: datetime = None, end_date: datetime = None) -> list[ProjectTaskResponse] | list[None]:
+    async def get_all_tasks_by_user(cls, user_id: str, task_name: str = "", project_name: str = "",
+                                    task_status: TaskStatus = TaskStatus.none_status,
+                                    start_date: datetime = None, end_date: datetime = None) -> list[
+                                                                                                   ProjectTaskResponse] | \
+                                                                                               list[None]:
         cursor = cls.collection.find(
             {
                 "stages": {
@@ -143,7 +174,7 @@ class TaskDAO(BaseDao):
             search_params["name"] = task_name
         if project_name:
             search_params["project_name"] = project_name
-        if task_status is not TaskStatus.none_status:
+        if task_status:
             search_params["status"] = task_status
         if start_date is not None:
             search_params["start_date"] = start_date
@@ -157,7 +188,7 @@ class TaskDAO(BaseDao):
                 project_match = re.search(search_params["project_name"], project["name"], re.IGNORECASE)
                 print(f'project match is: {project_match}')
             else:
-                project_match = True                
+                project_match = True
 
             if project_match is None:
                 continue
@@ -184,7 +215,6 @@ class TaskDAO(BaseDao):
                             else:
                                 start_date_match = True
 
-
                             if "end_date" in search_params:
                                 end_date_match = search_params["end_date"] >= task["end_date"]
                             else:
@@ -192,7 +222,7 @@ class TaskDAO(BaseDao):
 
                             if status_match and name_match and start_date_match and end_date_match:
                                 tasks.append(ProjectTaskResponse(
-                                    id=task_id, 
+                                    id=task_id,
                                     project_id=str(project["_id"]),
                                     project_name=project["name"],
                                     stage_id=str(stage_id),
