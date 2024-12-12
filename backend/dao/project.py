@@ -279,15 +279,38 @@ class ProjectDao(BaseDao):
         return stage_id
 
     @classmethod
-    async def get_stages_by_project_id(cls, project_id: str) -> list[StageResponse] | list[None] | None:
+    async def get_stages_by_project_id(cls, project_id: str, name: str = "", start_date: datetime = None, 
+                                       end_date: datetime = None) -> list[StageResponse] | list[None] | None:
         project = await cls.collection.find_one({"_id": ObjectId(project_id)}, {"stages": 1})
+
+        stages = []
         if project and "stages" in project:
-            stages = [StageResponse(id=stage_id, **stage_data) for stage_id, stage_data in
-                      project["stages"].items()]
-            return stages
+            for stage_id, stage in project.get("stages", {}).items():
+
+                if name:
+                    name_match = re.search(name, stage["name"], re.IGNORECASE)
+                else:
+                    name_match = True
+
+                if start_date:
+                    start_date_match = start_date <= stage["start_date"]
+                else:
+                    start_date_match = True
+
+
+                if end_date:
+                    end_date_match = end_date >= stage["end_date"]
+                else:
+                    end_date_match = True
+
+                if name_match and start_date_match and end_date_match:
+                    stages.append(
+                        StageResponse(id=stage_id, **stage)
+                    )
+    
         elif project is None:
             return None
-        return []
+        return stages
 
     @classmethod
     async def get_stage_by_id(cls, project_id: str, stage_id: str) -> StageResponse | None:

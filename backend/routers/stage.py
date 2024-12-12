@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from dao.project import ProjectDao 
@@ -21,8 +22,10 @@ async def add_stage(project_id: str, stage_data: Stage, foreman: User = Depends(
 
 
 @router.get("/{project_id}/get_stages", response_model=dict[str, list[StageResponse] | list[None]])
-async def get_stages(project_id: str, user: User = Depends(get_current_user)):
-    stages = await ProjectDao.get_stages_by_project_id(project_id)
+async def get_stages(project_id: str, name: str = "", 
+                     start_date: datetime = None, end_date: datetime = None, 
+                     user: User = Depends(get_current_user)):
+    stages = await ProjectDao.get_stages_by_project_id(project_id, name, start_date, end_date)
     if stages is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
