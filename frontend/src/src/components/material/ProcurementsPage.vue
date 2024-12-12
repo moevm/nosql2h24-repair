@@ -100,6 +100,13 @@ export default {
     },
   },
   methods: {
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 по 11, поэтому +1
+      const year = date.getFullYear();
+      return `${day}.${month}.${year}`;
+    },
     goToAddMaterial() {
       this.$router.push(`/add_procurement`);
     },
@@ -123,6 +130,8 @@ export default {
           user: procurement.created_by.username,
           userRole: procurement.created_by.role,
           inStock: procurement.inStock,
+          created_date: this.formatDate(procurement.created_at),
+          deliveryDate: this.formatDate(procurement.delivery_date),
           date: procurement.date, // Добавьте поле даты, если оно есть в данных
         }));
         console.log(this.procurements);
