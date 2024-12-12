@@ -10,9 +10,9 @@
         <div class="search-add-container">
           <div class="filter-container">
             <div class="date-filter">
-              <p>Дата создания заказа</p>
+              <p>Дата доставки</p>
               <input type="date" v-model="startDate" class="large-input" />
-              <p>Дата поставки</p>
+              <span>-</span>
               <input type="date" v-model="endDate" class="large-input" />
             </div>
             <input
