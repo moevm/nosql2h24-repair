@@ -40,6 +40,7 @@
           </select>
         </div>
         <button @click="applyFilters">Применить</button>
+        <button @click="resetFilters">Сбросить</button>
       </div>
   
       <div class="task-list">
@@ -187,6 +188,14 @@
         const year = date.getFullYear();
         return `${day}.${month}.${year}`;
       },
+      resetFilters() {
+          this.startDate = '';
+          this.endDate = '';
+          this.projectName = '';
+          this.taskName = '';
+          this.selectedStatus = '';
+          this.fetchTasks();
+        }
     },
     beforeMount() {
       this.fetchTasks();
