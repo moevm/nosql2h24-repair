@@ -1,26 +1,26 @@
 <template>
-  <HeaderComponent />
-  <SidebarComponent />
+  <HeaderComponent/>
+  <SidebarComponent/>
   <div class="tasks-list-page">
     <div class="search-header">
       <h2>Задачи этапа: {{ stageName }}</h2>
       <div class="filter-container">
         <div class="date-filter">
-          <input type="date" v-model="startDate" class="large-input" />
+          <input type="date" v-model="startDate" class="large-input"/>
           <span>-</span>
-          <input type="date" v-model="endDate" class="large-input" />
+          <input type="date" v-model="endDate" class="large-input"/>
         </div>
         <input
-          type="text"
-          v-model="searchQuery"
-          placeholder="Название задачи"
-          class="search-input"
+            type="text"
+            v-model="taskName"
+            placeholder="Название задачи"
+            class="search-input"
         />
         <div class="status-filter">
           <label for="status">Статус</label>
           <select v-model="selectedStatus">
-            <option v-for="status in statuses" :key="status" :value="status">
-              {{ status }}
+            <option v-for="status in statuses" :key="status.text" :value="status.text === 'Все'? '': status.text ">
+              {{ status.text }}
             </option>
           </select>
         </div>
@@ -33,26 +33,26 @@
     <div v-if="filteredTasks.length">
       <table class="task-table">
         <thead>
-          <tr>
-            <th>Название задачи</th>
-            <th>Начало</th>
-            <th>Конец</th>
-            <th>Статус</th>
-          </tr>
+        <tr>
+          <th>Название задачи</th>
+          <th>Начало</th>
+          <th>Конец</th>
+          <th>Статус</th>
+        </tr>
         </thead>
         <tbody>
-          <tr
+        <tr
             v-for="task in filteredTasks"
             :key="task.taskId"
             :taskName="task.taskName"
             :class="{ selected: selectedTaskId === task.taskId}"
             @click="selectTask(task)"
-          >
-            <td>{{ task.taskName }}</td>
-            <td>{{ task.startDate }}</td>
-            <td>{{ task.endDate }}</td>
-            <td>{{ task.status }}</td>
-          </tr>
+        >
+          <td>{{ task.taskName }}</td>
+          <td>{{ task.startDate }}</td>
+          <td>{{ task.endDate }}</td>
+          <td>{{ task.status }}</td>
+        </tr>
         </tbody>
       </table>
 
@@ -72,7 +72,8 @@ import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
-const { getProjectId, getStageId, getStageName, setTaskId } = useCookies();
+
+const {getProjectId, getStageId, getStageName, setTaskId} = useCookies();
 
 export default {
   components: {
@@ -87,17 +88,18 @@ export default {
       selectedTaskId: null,  // для отслеживания выбранной задачи
       searchQuery: '',  // для поиска задачи по названию
       statuses: [
-        'Нет статуса',
-        'Готово',
-        'В процессе',
-        'Опоздание',
+        {text: 'Готово'},
+        {text: 'Опоздание'},
+        {text: 'В процессе'},
+        {text: 'Все'},
+        {text: 'Нет статуса'}
       ],
     };
   },
   computed: {
     filteredTasks() {
       return this.tasks.filter(task =>
-        task.taskName.toLowerCase().includes(this.searchQuery.toLowerCase())
+          task.taskName.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     }
   },
@@ -117,7 +119,7 @@ export default {
           this.tasks = this.tasks.filter(task => task.taskId !== taskId);
           this.selectedTaskId = null;  // сбрасываем выбор после удаления
         } catch (error) {
-          if(error.response.status === 401){
+          if (error.response.status === 401) {
             this.$store.commit('removeUsers');  // Изменяем состояние
             clearAllCookies();
             this.$router.push("/login");
@@ -149,6 +151,50 @@ export default {
         }));
         console.log(this.tasks);
       } catch (error) {
+        if (error.response.status === 401) {
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        console.error('Ошибка при загрузке Этапов:', error);
+      }
+    },
+    formatToDateTime(date) {
+      return `${date}T00:00:00`;
+    },
+    async applyFilters() {
+      try {
+        const params = new URLSearchParams({});
+
+        if (this.endDate) {
+          params.append('end_date', this.formatToDateTime(this.endDate));
+        }
+        if (this.startDate) {
+          params.append('start_date', this.formatToDateTime(this.startDate));
+        }
+        if (this.taskName) {
+          params.append('task_name', this.taskName);
+        }
+        if (this.selectedStatus) {
+          params.append('task_status', this.selectedStatus);
+        }
+        const response = await axios.get(`/api/tasks/get_stage_tasks/${getProjectId()}/${getStageId()}/?${params.toString()}`);
+        // console.log(response.data);
+        this.tasks = Object.values(response.data).map(task => ({
+          taskName: task.name,
+          startDate: this.formatDate(task.start_date),
+          endDate: this.formatDate(task.end_date),
+          status: task.status,
+          taskDescription: task.description,
+          taskId: task.id
+        }));
+        console.log(this.tasks);
+      } catch (error) {
+        if (error.response.status === 401) {
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
         console.error('Ошибка при загрузке Этапов:', error);
       }
     },
@@ -162,10 +208,9 @@ export default {
     resetFilters() {
       this.startDate = '';
       this.endDate = '';
-      this.projectName = '';
       this.taskName = '';
       this.selectedStatus = '';
-      this.fetchTasks();
+      this.fetchTaskData();
     },
   },
   beforeMount() {
@@ -189,7 +234,7 @@ export default {
   border-radius: 4px;
 }
 
-.search-header{
+.search-header {
   gap: 20px;
   display: flex;
 }

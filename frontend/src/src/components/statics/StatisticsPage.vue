@@ -65,6 +65,7 @@
             <button class="action-button" @click="triggerImport">Импортировать</button>
             <button class="action-button" @click="exportData">Экспортировать</button>
           </div>
+          <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
         </div>
       </div>
     </div>
@@ -99,6 +100,7 @@ export default {
         // { id: 2, name: "Проект 2" },
         // { id: 3, name: "Проект 3" },
       ],
+      errorMessage: "",
     };
   },
   computed: {
@@ -116,6 +118,7 @@ export default {
       return `${date}T00:00:00`; // Преобразует в формат `YYYY-MM-DDT00:00:00`
     },
     async applyFilters() {
+      this.errorMessage = "";
       // Проверяем, выбраны ли фильтры, и обновляем график
       if (this.selectedStatType && this.selectedProjects.length > 0) {
         const dataToSend = {
@@ -140,6 +143,15 @@ export default {
               ? { label: matchedProject.name, value: value }
               : null;
           }).filter(item => item !== null);
+          const allValuesAreZero = this.chartData.every(item => item.value === 0);
+
+          if (allValuesAreZero) {
+            this.chartData = []; // Зануляем массив
+            this.errorMessage = "В выбранных датах у всех проектов отсутствуют значения. Если хотите посмотреть по всей дате, то оставьте поля с датой пустыми.";
+          } else {
+            this.errorMessage = ""; // Очищаем сообщение об ошибке
+          }
+
           console.log(this.chartData);
         } catch (error) {
           if (error.response.status === 401) {
@@ -425,6 +437,11 @@ export default {
   padding: 5px 10px;
   cursor: pointer;
 }
+.error-message {
+   color: red;
+   font-weight: bold;
+   margin-top: 10px;
+ }
 
 @media (max-width: 768px) {
   .graphs-container {
