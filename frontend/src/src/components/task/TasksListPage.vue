@@ -4,13 +4,28 @@
   <div class="tasks-list-page">
     <div class="search-header">
       <h2>Задачи этапа: {{ stageName }}</h2>
-
-      <input
+      <div class="filter-container">
+        <div class="date-filter">
+          <input type="date" v-model="startDate" class="large-input" />
+          <span>-</span>
+          <input type="date" v-model="endDate" class="large-input" />
+        </div>
+        <input
           type="text"
           v-model="searchQuery"
           placeholder="Название задачи"
           class="search-input"
-      />
+        />
+        <div class="status-filter">
+          <label for="status">Статус</label>
+          <select v-model="selectedStatus">
+            <option v-for="status in statuses" :key="status" :value="status">
+              {{ status }}
+            </option>
+          </select>
+        </div>
+        <button @click="applyFilters">Применить</button>
+      </div>
     </div>
     <button @click="addTask">Добавить задачу</button>
 
@@ -69,7 +84,13 @@ export default {
       stageName: getStageName(),
       tasks: [],
       selectedTaskId: null,  // для отслеживания выбранной задачи
-      searchQuery: ''  // для поиска задачи по названию
+      searchQuery: '',  // для поиска задачи по названию
+      statuses: [
+        'Нет статуса',
+        'Готово',
+        'В процессе',
+        'Опоздание',
+      ],
     };
   },
   computed: {
@@ -197,18 +218,56 @@ export default {
   margin-top: 20px;
 }
 
-button {
-  padding: 5px 10px;
+.filter-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20px;
+}
+
+.date-filter,
+.project-filter,
+.status-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-filter input {
+  margin-left: 5px;
+}
+
+.project-filter label,
+.status-filter label {
   margin-right: 10px;
-  background-color: #625b71;
+}
+
+.large-input {
+  padding: 10px;
+  margin-left: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+input,
+select {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  background-color: #6e6b93;
   color: white;
+  padding: 8px 15px;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
-  border-radius: 10px;
+  margin-left: 10px;
 }
 
 button:hover {
-  background-color: #4d4069;
+  background-color: #5c5583;
 }
 </style>
