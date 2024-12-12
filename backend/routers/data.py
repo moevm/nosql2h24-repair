@@ -74,13 +74,28 @@ async def import_database(file: UploadFile):
                     detail=f"Collection '{collection_name}' does not exist in the database."
                 )
 
+        def convert_dates(item):
+            if isinstance(item, dict):
+                for key, value in item.items():
+                    if isinstance(value, str):
+                        # Попробуем распознать ISO формат
+                        try:
+                            item[key] = datetime.fromisoformat(value)
+                        except ValueError:
+                            pass  # Если это не дата, оставляем строку
+                    elif isinstance(value, (list, dict)):
+                        convert_dates(value)
+            elif isinstance(item, list):
+                for sub_item in item:
+                    convert_dates(sub_item)
+
         # Импорт данных
         for collection_name, documents in data.items():
             if not isinstance(documents, list):
                 raise HTTPException(status_code=400, detail=f"Collection '{collection_name}' must contain a list of documents")
 
-            # Преобразование _id в ObjectId
             for doc in documents:
+                convert_dates(doc)
                 if "_id" in doc:
                     doc["_id"] = ObjectId(doc["_id"])
 
