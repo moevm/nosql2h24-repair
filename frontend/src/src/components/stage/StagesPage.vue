@@ -117,16 +117,45 @@ export default {
       const year = date.getFullYear();
       return `${year}-${month}-${day}`;
     },
-    applyFilters() {
-      // Здесь можно добавить дополнительную логику для применения фильтров
+    formatToDateTime(date) {
+      return `${date}T00:00:00`;
+    },
+    async applyFilters() {
+      try {
+        const params = new URLSearchParams({
+        });
+
+        if (this.endDate) {
+          params.append('end_date', this.formatToDateTime(this.endDate));
+        }
+        if(this.startDate) {
+          params.append('start_date', this.formatToDateTime(this.startDate));
+        }
+        if (this.stageName) {
+          params.append('name', this.stageName);
+        }
+        const response = await axios.get(`/api/projects/${getProjectId()}/get_stages/?${params.toString()}`);
+        this.stages = Object.values(response.data.stages).map(stage => ({
+          name: stage.name,
+          startDate: this.formatDate(stage.start_date),
+          endDate: this.formatDate(stage.end_date),
+          stageId: stage.id,
+        }));
+        // console.log(this.stages);
+      } catch (error) {
+        if (error.response.status === 401) {
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        console.error('Ошибка при загрузке Этапов:', error);
+      }
     },
     resetFilters() {
       this.startDate = '';
       this.endDate = '';
-      this.projectName = '';
-      this.taskName = '';
       this.selectedStatus = '';
-      this.fetchTasks();
+      this.fetchStageData();
     },
   },
   beforeMount() {
