@@ -20,6 +20,10 @@
           <span class="label">Создатель Закупки</span>
           <p class="value">{{ material.user }}</p>
         </div>
+        <div class="item-row">
+          <span class="label">Дата создания заказа</span>
+          <p class="value">{{ material.created_date }}</p>
+        </div>
       </div>
 
       <!-- Вторая группа элементов -->
@@ -39,6 +43,10 @@
         <div class="item-row">
           <span class="label">Роль Создателя</span>
           <p class="value">{{ material.userRole }}</p>
+        </div>
+        <div class="item-row">
+          <span class="label">Дата поставки</span>
+          <p class="value">{{ material.delivery_date}}</p>
         </div>
       </div>
     </div>
