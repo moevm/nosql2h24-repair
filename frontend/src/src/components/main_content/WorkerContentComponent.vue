@@ -1,65 +1,65 @@
 <template>
-    <div class="task-page">
-      <h2>Задачи</h2>
-      <div class="filter-container">
-        <div class="date-filter">
-          <input
-              type="date"
-              v-model="startDate"
-              class="large-input"
-              :max="endDate"
-          />
-          <span>-</span>
-          <input
-              type="date"
-              v-model="endDate"
-              class="large-input"
-              :min="startDate"
-          />
-        </div>
-        <div class="project-filter">
-          <input
-            type="text"
-            v-model="projectName"
-            placeholder="Название проекта"
-            class="search-input"
-          />
-          <input
-            type="text"
-            v-model="taskName"
-            placeholder="Название задачи"
-            class="search-input"
-          />
-        </div>
-        <div class="status-filter">
-          <label for="status">Статус</label>
-          <select v-model="selectedStatus">
-            <option v-for="status in statuses" :key="status.text" :value="status.text === 'Все'? '': status.text ">
-              {{ status.text }}
-            </option>
-          </select>
-        </div>
-        <button @click="applyFilters">Применить</button>
-        <button @click="resetFilters">Сбросить</button>
-      </div>
-  
-      <div class="task-list">
-        <TaskCard
-            v-for="task in tasks"
-            :key="task.taskId"
-            :description="task.description"
-            :endDate="task.endDate"
-            :startDate="task.startDate"
-            :name="task.name"
-            :status="task.status"
-            :projectName="task.projectName"
-            :id="task.taskId"
-            :projectId="task.projectId"
-            :stageId="task.stageId"
+  <div class="task-page">
+    <h2>Задачи</h2>
+    <div class="filter-container">
+      <div class="date-filter">
+        <input
+            type="date"
+            v-model="startDate"
+            class="large-input"
+            :max="endDate"
+        />
+        <span>-</span>
+        <input
+            type="date"
+            v-model="endDate"
+            class="large-input"
+            :min="startDate"
         />
       </div>
+      <div class="project-filter">
+        <input
+          type="text"
+          v-model="projectName"
+          placeholder="Название проекта"
+          class="search-input"
+        />
+        <input
+          type="text"
+          v-model="taskName"
+          placeholder="Название задачи"
+          class="search-input"
+        />
+      </div>
+      <div class="status-filter">
+        <label for="status">Статус</label>
+        <select v-model="selectedStatus">
+          <option v-for="status in statuses" :key="status.text" :value="status.text === 'Все'? '': status.text ">
+            {{ status.text }}
+          </option>
+        </select>
+      </div>
+      <button @click="applyFilters">Применить</button>
+      <button @click="resetFilters">Сбросить</button>
     </div>
-  </template>
+
+    <div class="task-list">
+      <TaskCard
+          v-for="task in filteredTasks"
+          :key="task.taskId"
+          :description="task.description"
+          :endDate="task.endDate"
+          :startDate="task.startDate"
+          :name="task.name"
+          :status="task.status"
+          :projectName="task.projectName"
+          :id="task.taskId"
+          :projectId="task.projectId"
+          :stageId="task.stageId"
+      />
+    </div>
+  </div>
+</template>
   
   <script>
   import axios from 'axios';
@@ -203,7 +203,7 @@
   };
   </script>
   
-  <style scoped>
+<style scoped>
 .task-page {
   padding: 20px;
   margin-top: 60px;
@@ -271,8 +271,13 @@ button:hover {
 }
 
 .task-list {
-  display: flex;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 15px;
 }
-  </style>  
+
+.task-card {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+</style>
