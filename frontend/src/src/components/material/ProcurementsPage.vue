@@ -1,39 +1,54 @@
 <template>
-  <div class="stages-page">
+  <div class="main-container">
     <HeaderComponent />
-    <SidebarComponent />
-    <div class="main-content">
-      <div class="stages-container">
-        <div class="header-container">
-          <!-- Контейнер для заголовка и фильтров -->
-          <div class="header-left">
-            <h1>{{ projectName }}</h1>
-            <!--            <p>СПбГЭТУ "ЛЭТИ"</p>-->
-          </div>
+    <SidebarComponent/>
+
+    <div class="content">
+      <div class="purchases-container">
+        <h1>{{ projectName }}</h1>
+
+        <div class="search-add-container">
           <div class="filter-container">
             <div class="date-filter">
+              <p>Дата доставки</p>
               <input type="date" v-model="startDate" class="large-input" />
               <span>-</span>
               <input type="date" v-model="endDate" class="large-input" />
             </div>
-            <input type="text" v-model="search" placeholder="Название этапа" />
+            <input
+              type="text"
+              placeholder="Название материала"
+              v-model="searchQuery"
+              class="search-input"
+            />
+            <div class="status-filter">
+              <label for="status">В наличии</label>
+              <select v-model="selectedStatus">
+                <option v-for="status in statuses" :key="status" :value="status">
+                  {{ status }}
+                </option>
+              </select>
+              <label for="status">Создатель</label>
+              <select v-model="selectedStatus">
+                <option v-for="role in roles" :key="role" :value="role">
+                  {{ role }}
+                </option>
+              </select>
+            </div>
             <button @click="applyFilters">Применить</button>
-            <button @click="goToAddStagePage" class="add-stage-button">
-              Добавить этап
-            </button>
           </div>
+          <button @click="goToAddMaterial" class="add-button">+ Добавить</button>
         </div>
 
-        <StageComponent
-          :projectId="projectId"
-          :projectName="projectName"
-          v-for="stage in filteredStages"
-          :key="stage.id"
-          :stage="stage"
-          @update-stage="updateStage"
-          @delete="deleteStage"
-          @goToTasks="goToTasks"
-        />
+        <div class="materials-list">
+          <ProcurementsItemComponent
+            v-for="material in filteredMaterials"
+            :key="material.materialId"
+            :material="material"
+            @viewDetails="viewDetails"
+            @delete="deleteMaterial"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -140,37 +155,60 @@ export default {
 </script>
 
 <style scoped>
-.stages-page {
+.main-container {
   display: flex;
   flex-direction: column;
-  width: 100%;
 }
 
-.main-content {
+.content {
   display: flex;
   margin-left: 150px;
   padding-top: 30px;
-  width: calc(100% - 150px);
 }
 
-.stages-container {
+.purchases-container {
   flex: 1;
   padding: 20px;
 }
 
-.header-container {
+.search-bar {
   display: flex;
-  align-items: center; /* Выравниваем элементы по вертикали */
-  margin-bottom: 16px;
+  align-items: center;
+  gap: 10px;
 }
 
-.header-left {
-  margin-right: 20px; /* Добавляем отступ между заголовком и фильтрами */
+.search-add-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.search-input {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.add-button {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #625b71;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-left: auto;
+  border-radius: 15px;
+}
+
+.materials-list {
+  margin-top: 20px;
 }
 
 .filter-container {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 20px;
 }
 
@@ -213,23 +251,10 @@ button {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  margin-left: 10px;
 }
 
 button:hover {
   background-color: #5c5583;
-}
-
-.add-stage-button {
-  background-color: #625b71;
-  color: white;
-  padding: 8px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  margin-left: 10px; /* Добавляем отступ для кнопки */
-}
-
-.add-stage-button:hover {
-  background-color: #4e4168;
 }
 </style>
