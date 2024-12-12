@@ -9,11 +9,6 @@
 
         <div class="search-add-container">
           <div class="filter-container">
-            <div class="date-filter">
-              <input type="date" v-model="startDate" class="large-input" />
-              <span>-</span>
-              <input type="date" v-model="endDate" class="large-input" />
-            </div>
             <input
               type="text"
               placeholder="Название материала"
@@ -21,10 +16,16 @@
               class="search-input"
             />
             <div class="status-filter">
-              <label for="status">Статус</label>
+              <label for="status">В наличии</label>
               <select v-model="selectedStatus">
                 <option v-for="status in statuses" :key="status" :value="status">
                   {{ status }}
+                </option>
+              </select>
+              <label for="status">Создатель</label>
+              <select v-model="selectedStatus">
+                <option v-for="role in roles" :key="role" :value="role">
+                  {{ role }}
                 </option>
               </select>
             </div>
@@ -71,7 +72,13 @@ export default {
       procurements: [],
       statuses: [
         'Нет',
-        'В наличии',
+        'Да',
+        'Не выбрано',
+      ],
+      roles: [
+        'Прораб',
+        'Администратор',
+        'Заказчик',
         'Не выбрано',
       ],
     };

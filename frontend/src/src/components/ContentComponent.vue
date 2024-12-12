@@ -4,29 +4,37 @@
       <h1>Проекты</h1>
        <div class="filter-container">
         <div class="date-filter">
-          <input type="date" v-model="startDate" class="large-input" />
+          <input
+              type="date"
+              v-model="startDate"
+              class="large-input"
+          />
           <span>-</span>
-          <input type="date" v-model="endDate" class="large-input" />
+          <input
+              type="date"
+              v-model="endDate"
+              class="large-input"
+          />
         </div>
         <input
             type="text"
-            v-model="searchQuery"
+            v-model="projectName"
             placeholder="Поиск проекта"
             class="search-input"
         />
-        <div class="status-filter">
-          <label for="status">Статус</label>
-          <select v-model="selectedStatus">
-            <option v-for="status in statuses" :key="status" :value="status">
-              {{ status }}
-            </option>
-          </select>
-        </div>
+         <div class="status-filter">
+           <label for="status">Статус</label>
+           <select v-model="selectedStatus">
+             <option v-for="status in statuses" :key="status.text" :value="status.text === 'Все'? '': status.text ">
+               {{ status.text }}
+             </option>
+           </select>
+         </div>
         <button @click="applyFilters">Применить</button>
       </div>
     </div>
     <div class="projects-container">
-      <div v-for="(item, index) in filteredItems" :key="index" class="project-item">
+      <div v-for="(item, index) in items" :key="index" class="project-item">
         <Project
             v-if="item.type === 'project'"
             :projectName="item.name"
@@ -56,34 +64,77 @@ export default {
   },
   data() {
     return {
-      searchQuery: '',
+      projectName: '',
+      endDate: '',
+      startDate: '',
+      selectedStatus: '',
       items: [
         {
           type: 'newProjectButton',
         },
       ],
       statuses: [
-        'Нет статуса',
-        'Готово',
-        'В процессе',
-        'Опоздание',
-        'Новый',
+        { text: 'Готово' },
+        { text: 'Опоздание'},
+        { text: 'В процессе' },
+        { text: 'Все' },
+        { text: 'Нет статуса' },
+        { text: 'Новый' }
       ],
     };
   },
   computed: {
-    filteredItems() {
-      return this.items.filter(item =>
-          item.type === 'newProjectButton' ||
-          (item.type === 'project' && item.name.toLowerCase().includes(this.searchQuery.toLowerCase()))
-      );
-    },
     userRole() {
       const user = this.$store.getters.getUser[0];
       return user ? user.role : null;
     },
   },
   methods: {
+    formatToDateTime(date) {
+      return `${date}T00:00:00`;
+    },
+    async applyFilters() {
+      try {
+        const params = new URLSearchParams({
+        });
+
+        if (this.endDate) {
+          params.append('end_date', this.formatToDateTime(this.endDate));
+        }
+        if(this.startDate) {
+          params.append('start_date', this.formatToDateTime(this.startDate));
+        }
+        if (this.projectName) {
+          params.append('project_name', this.projectName);
+        }
+        if(this.selectedStatus) {
+          params.append('project_status', this.selectedStatus);
+        }
+        const response = await axios.get(`/api/projects/all/?${params.toString()}`);
+        this.items = [
+          { type: 'newProjectButton' },
+          ...response.data.map(project => ({
+            type: 'project',
+            name: project.name,
+            startDate: this.formatDate(project.start_date),
+            endDate: this.formatDate(project.end_date),
+            projectPhase: project.status,
+            projectId: project.id,
+          })),
+        ];
+        // console.log(response.data);
+      } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        console.error('Ошибка при загрузке контактов:', error);
+        if (error.response && error.response.data.detail) {
+          this.errorMessage = error.response.data.detail;
+        }
+      }
+    },
     async fetchProjects() {
       try {
         const response = await axios.get('/api/projects/all');
