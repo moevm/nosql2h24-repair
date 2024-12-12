@@ -5,10 +5,10 @@
     <div class="main-content">
       <div class="stages-container">
         <div class="header-container">
-          <!-- Контейнер для заголовка -->
+          <!-- Контейнер для заголовка и фильтров -->
           <div class="header-left">
-            <h1>{{projectName}}</h1>
-<!--            <p>СПбГЭТУ "ЛЭТИ"</p>-->
+            <h1>{{ projectName }}</h1>
+            <!--            <p>СПбГЭТУ "ЛЭТИ"</p>-->
           </div>
           <div class="filter-container">
             <div class="date-filter">
@@ -18,16 +18,15 @@
             </div>
             <input type="text" v-model="search" placeholder="Название этапа" />
             <button @click="applyFilters">Применить</button>
-          </div>
-          <!-- Контейнер для поля поиска и кнопки -->
-          <div class="header-right">
             <button @click="goToAddStagePage" class="add-stage-button">
               Добавить этап
             </button>
           </div>
         </div>
 
-        <StageComponent :projectId="projectId" :projectName="projectName"
+        <StageComponent
+          :projectId="projectId"
+          :projectName="projectName"
           v-for="stage in filteredStages"
           :key="stage.id"
           :stage="stage"
@@ -45,7 +44,7 @@ import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
 import StageComponent from './StageComponent.vue';
 import axios from 'axios';
-import {clearAllCookies, useCookies} from '@/src/js/useCookies';
+import { clearAllCookies, useCookies } from '@/src/js/useCookies';
 const { getProjectId, getProjectName } = useCookies();
 
 export default {
@@ -59,13 +58,18 @@ export default {
     return {
       projectName: getProjectName(),
       search: '',
-      stages: [
-      ],
+      startDate: '',
+      endDate: '',
+      stages: [],
     };
   },
   computed: {
     filteredStages() {
-      return this.stages.filter(stage => stage.name.includes(this.search));
+      return this.stages.filter(stage =>
+        stage.name.includes(this.search) &&
+        (!this.startDate || new Date(stage.startDate) >= new Date(this.startDate)) &&
+        (!this.endDate || new Date(stage.endDate) <= new Date(this.endDate))
+      );
     },
   },
   methods: {
@@ -96,7 +100,7 @@ export default {
         }));
         // console.log(this.stages);
       } catch (error) {
-        if(error.response.status === 401){
+        if (error.response.status === 401) {
           this.$store.commit('removeUsers');  // Изменяем состояние
           clearAllCookies();
           this.$router.push("/login");
@@ -110,6 +114,9 @@ export default {
       const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 по 11, поэтому +1
       const year = date.getFullYear();
       return `${year}-${month}-${day}`;
+    },
+    applyFilters() {
+      // Здесь можно добавить дополнительную логику для применения фильтров
     },
   },
   beforeMount() {
@@ -139,46 +146,17 @@ export default {
 
 .header-container {
   display: flex;
-  justify-content: space-between; /* Располагаем элементы на разных сторонах */
-  align-items: center; /* Центрируем элементы по вертикали */
+  align-items: center; /* Выравниваем элементы по вертикали */
   margin-bottom: 16px;
 }
 
 .header-left {
-  display: flex;
-  flex-direction: column;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-}
-
-.stages-container input {
-  padding: 12px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  margin-left: 8%;
-}
-
-.add-stage-button {
-  background-color: #625b71;
-  color: white;
-  padding: 8px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  margin-left: 10px; /* Добавляем отступ для кнопки */
-}
-
-.add-stage-button:hover {
-  background-color: #4e4168;
+  margin-right: 20px; /* Добавляем отступ между заголовком и фильтрами */
 }
 
 .filter-container {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
   gap: 20px;
 }
 
@@ -225,5 +203,19 @@ button {
 
 button:hover {
   background-color: #5c5583;
+}
+
+.add-stage-button {
+  background-color: #625b71;
+  color: white;
+  padding: 8px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-left: 10px; /* Добавляем отступ для кнопки */
+}
+
+.add-stage-button:hover {
+  background-color: #4e4168;
 }
 </style>
