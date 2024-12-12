@@ -6,7 +6,7 @@
     </div>
     <div v-if="userRole === 'Администратор'" class="menu-item" @click="goToUsers">
       <img src="@/assets/icons/user.png" alt="User Icon" class="icon">
-      <p>Пользователи</p>
+      <p>Административная страница</p>
     </div>
     <div v-if="!isMainPage && !isMessages && userRole !== 'Рабочий'" :class="['menu-item', { 'active': isPhasesPage }]" @click="goToPhases">
       <img src="@/assets/icons/phases.png" alt="Phases Icon" class="icon">
@@ -36,7 +36,8 @@
 
 <script>
 import axios from 'axios';
-import { clearAllCookies } from '@/src/js/useCookies';
+import { clearAllCookies, useCookies } from '@/src/js/useCookies';
+const { getProjectId } = useCookies();
 const clearCookies = () => {
   clearAllCookies();
 };
@@ -74,21 +75,21 @@ export default {
     },
     goToPhases() {
       if (this.$route.fullPath === `/stages`) {
-        this.$router.push(`/project`);
+        this.$router.push(`/project/${getProjectId()}`);
       } else {
         this.$router.push(`/stages`);
       }
     },
     goToProcurements() {
       if (this.$route.fullPath === `/procurements`) {
-        this.$router.push(`/project`);
+        this.$router.push(`/project/${getProjectId()}`);
       } else {
         this.$router.push(`/procurements`);
       }
     },
     goToRisks() {
       if (this.$route.fullPath === `/risks`) {
-        this.$router.push(`/project`);
+        this.$router.push(`/project/${getProjectId()}`);
       } else {
         this.$router.push(`/risks`);
       }
@@ -97,7 +98,7 @@ export default {
       this.$router.push('/statistics');
     },
     goToUsers() {
-      this.$router.push('/user-search');
+      this.$router.push('/admin');
     },
     async logOut() {
       try {
@@ -162,6 +163,7 @@ export default {
 .menu-item p {
   margin: 0;
   font-size: 16px;
+  text-align: center;
 }
 
 .logout-item {

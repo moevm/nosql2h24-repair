@@ -18,12 +18,16 @@
               v-model="newStageStartDate"
               :class="{'input-error': !newStageStartDate && showErrors}"
               type="date"
+              :min="$store.getters.getStartDateProject"
+              :max="newStageEndDate ? newStageEndDate : $store.getters.getEndDateProject"
               class="stage-date-input"
           />
           <input
               v-model="newStageEndDate"
               :class="{'input-error': !newStageEndDate && showErrors}"
               type="date"
+              :min="newStageStartDate ? newStageStartDate : $store.getters.getStartDateProject"
+              :max="$store.getters.getEndDateProject"
               class="stage-date-input"
           />
           <button @click="addStage">Добавить этап</button>
@@ -67,14 +71,14 @@ export default {
           end_date: this.formatToDateTime(this.newStageEndDate),
         };
         try {
-          const res = await axios.post(`/api/projects/${getProjectId()}/add_stage`, dataToSend, {
+          await axios.post(`/api/projects/${getProjectId()}/add_stage`, dataToSend, {
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
             },
             withCredentials: true,
           });
-          console.log(res);
+          console.log(this.$store.getters.getStartDateProject);
           alert('Этап успешно создан!');
           this.$router.push(`/stages`);
         } catch (error) {

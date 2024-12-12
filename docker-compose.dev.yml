@@ -1,0 +1,49 @@
+services:
+  db:
+    image: mongo:8.0.3
+    container_name: mongo_db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password123
+      - MONGO_INITDB_DATABASE=fastapi
+    volumes:
+      - mongo:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - app-network
+
+  app-backend:
+    container_name: repair-backend
+    restart: on-failure
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - "./backend:/app"
+    build: ./backend
+    depends_on:
+      - db
+    networks:
+      - app-network
+  
+  app-frontend:
+    container_name: repair-frontend
+    restart: on-failure
+    build: ./frontend
+    ports:
+      - "127.0.0.1:8080:8080"
+    networks:
+      - app-network
+    volumes:
+      - "./frontend:/app"
+      - "/app/node_modules"
+
+
+volumes:
+  mongo:
+    
+networks:
+  app-network:
+    driver: bridge
+        
+        

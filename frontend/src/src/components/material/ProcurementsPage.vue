@@ -5,22 +5,45 @@
 
     <div class="content">
       <div class="purchases-container">
-        <h1>{{projectName}}</h1>
-<!--        <p>Итоговая стоимость: 3,100,000 руб</p>-->
-        
+        <h1>{{ projectName }}</h1>
+
         <div class="search-add-container">
-          <input
-            type="text"
-            placeholder="Название материала"
-            v-model="searchQuery"
-            class="search-input"
-          />
+          <div class="filter-container">
+            <div class="date-filter">
+              <p>Дата доставки</p>
+              <input type="date" v-model="startDate" class="large-input" />
+              <span>-</span>
+              <input type="date" v-model="endDate" class="large-input" />
+            </div>
+            <input
+              type="text"
+              placeholder="Название материала"
+              v-model="materialName"
+              class="search-input"
+            />
+            <div class="status-filter">
+              <label for="status">В наличии</label>
+              <select v-model="selectedStatus">
+                <option v-for="status in statuses" :key="status.text" :value="status.value ">
+                  {{ status.text }}
+                </option>
+              </select>
+              <label for="status">Создатель</label>
+              <select v-model="selectedRole">
+                <option v-for="role in roles" :key="role.text" :value="role.text === 'Все'? '': role.text ">
+                  {{ role.text }}
+                </option>
+              </select>
+            </div>
+            <button @click="applyFilters">Применить</button>
+            <button @click="resetFilters">Сбросить</button>
+          </div>
           <button @click="goToAddMaterial" class="add-button">+ Добавить</button>
         </div>
 
         <div class="materials-list">
           <ProcurementsItemComponent
-            v-for="material in filteredMaterials"
+            v-for="material in procurements"
             :key="material.materialId"
             :material="material"
             @viewDetails="viewDetails"
@@ -37,7 +60,7 @@ import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
 import ProcurementsItemComponent from '../material/ProcurementsItemComponent.vue';
 import axios from 'axios';
-import {clearAllCookies, useCookies} from '@/src/js/useCookies';
+import { clearAllCookies, useCookies } from '@/src/js/useCookies';
 const { getProjectId, getProjectName } = useCookies();
 
 export default {
@@ -49,19 +72,42 @@ export default {
   data() {
     return {
       projectName: getProjectName(),
-      searchQuery: '',
-      procurements: [
+      materialName: '',
+      startDate: '',
+      endDate: '',
+      selectedStatus: '',
+      selectedRole:'',
+      procurements: [],
+      statuses: [
+        { text: 'Нет', value:'false'},
+        { text: 'Да', value:'true'},
+        { text: 'Все', value:''},
+      ],
+      roles: [
+        { text: 'Прораб'},
+        { text: 'Администратор'},
+        { text: 'Все'}
       ],
     };
   },
   computed: {
-    filteredMaterials() {
-      return this.procurements.filter(procurement =>
-        procurement.name.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
-    },
+    // filteredMaterials() {
+    //   return this.procurements.filter(procurement =>
+    //     procurement.name.toLowerCase().includes(this.searchQuery.toLowerCase()) &&
+    //     (!this.startDate || new Date(procurement.date) >= new Date(this.startDate)) &&
+    //     (!this.endDate || new Date(procurement.date) <= new Date(this.endDate)) &&
+    //     (!this.selectedStatus || procurement.inStock === this.selectedStatus)
+    //   );
+    // },
   },
   methods: {
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 по 11, поэтому +1
+      const year = date.getFullYear();
+      return `${day}.${month}.${year}`;
+    },
     goToAddMaterial() {
       this.$router.push(`/add_procurement`);
     },
@@ -74,7 +120,7 @@ export default {
     async fetchStageData() {
       try {
         const response = await axios.get(`/api/projects/${getProjectId()}/get_procurements`);
-        console.log(response.data);
+        // console.log(response.data);
         this.procurements = Object.values(response.data.procurements).map(procurement => ({
           name: procurement.item_name,
           quantity: procurement.quantity,
@@ -85,17 +131,79 @@ export default {
           user: procurement.created_by.username,
           userRole: procurement.created_by.role,
           inStock: procurement.inStock,
+          created_date: this.formatDate(procurement.created_at),
+          deliveryDate: this.formatDate(procurement.delivery_date),
+          date: procurement.date, // Добавьте поле даты, если оно есть в данных
         }));
         console.log(this.procurements);
       } catch (error) {
-        if(error.response.status === 401){
+        if (error.response.status === 401) {
           this.$store.commit('removeUsers');  // Изменяем состояние
           clearAllCookies();
           this.$router.push("/login");
         }
         console.error('Ошибка при загрузке Закупок:', error);
       }
-    }
+    },
+    formatToDateTime(date) {
+      return `${date}T00:00:00`;
+    },
+    async applyFilters() {
+      try {
+        const params = new URLSearchParams({
+        });
+
+        if (this.endDate) {
+          params.append('end_date', this.formatToDateTime(this.endDate));
+        }
+        if(this.startDate) {
+          params.append('start_date', this.formatToDateTime(this.startDate));
+        }
+        if (this.materialName) {
+          params.append('name', this.materialName);
+        }
+        if(this.selectedStatus) {
+          params.append('state', this.selectedStatus);
+        }
+        if(this.selectedRole) {
+          params.append('creator_role', this.selectedRole);
+        }
+        const response = await axios.get(`/api/projects/${getProjectId()}/get_procurements?${params.toString()}`);
+        this.procurements = Object.values(response.data.procurements).map(procurement => ({
+          name: procurement.item_name,
+          quantity: procurement.quantity,
+          unit: procurement.units,
+          pricePerUnit: procurement.price,
+          totalCost: procurement.cost,
+          materialId: procurement.id,
+          user: procurement.created_by.username,
+          userRole: procurement.created_by.role,
+          inStock: procurement.inStock,
+          created_date: this.formatDate(procurement.created_at),
+          deliveryDate: this.formatDate(procurement.delivery_date),
+          date: procurement.date, // Добавьте поле даты, если оно есть в данных
+        }));
+        // console.log(response.data);
+      } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        console.error('Ошибка при загрузке контактов:', error);
+        if (error.response && error.response.data.detail) {
+          this.errorMessage = error.response.data.detail;
+        }
+      }
+    },
+    resetFilters() {
+      this.startDate = '';
+      this.endDate = '';
+      this.materialName = '';
+      this.selectedStatus = '';
+      this.selectedRole ='';
+      this.fetchStageData();
+    },
   },
   beforeMount() {
     this.fetchStageData();
@@ -152,5 +260,58 @@ export default {
 
 .materials-list {
   margin-top: 20px;
+}
+
+.filter-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20px;
+}
+
+.date-filter,
+.project-filter,
+.status-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-filter input {
+  margin-left: 5px;
+}
+
+.project-filter label,
+.status-filter label {
+  margin-right: 10px;
+}
+
+.large-input {
+  padding: 10px;
+  margin-left: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+input,
+select {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  background-color: #6e6b93;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+button:hover {
+  background-color: #5c5583;
 }
 </style>

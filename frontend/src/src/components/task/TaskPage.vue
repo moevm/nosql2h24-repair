@@ -26,11 +26,22 @@
         <div class="task-dates">
           <div class="task-date">
             <p>Начало</p>
-            <input type="date" v-model="startDate" :disabled="!isEditing" />
+            <input
+                type="date"
+                v-model="startDate"
+                :disabled="!isEditing"
+                :max="endDate"
+                :min="$store.getters.getStartDateStage"
+            />
           </div>
           <div class="task-date">
             <p>Конец</p>
-            <input type="date" v-model="endDate" :disabled="!isEditing" />
+            <input type="date"
+                   v-model="endDate"
+                   :disabled="!isEditing"
+                   :min="startDate"
+                   :max="$store.getters.getEndDateStage"
+            />
           </div>
         </div>
         <div class="task-status">
@@ -55,6 +66,7 @@
       <button v-if="isEditing" @click="cancelEdit">Отмена</button>
       <button @click="goToTasks" class="go-to-tasks-button">Перейти к задачам</button>
     </div>
+    <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
   </div>
 </template>
 
@@ -88,6 +100,7 @@ export default {
       originalEndDate: "",
       originalStatus: "",
       originalTaskDescription: "",
+      errorMessage:"",
     };
   },
   methods: {
@@ -116,12 +129,6 @@ export default {
           clearAllCookies();
           this.$router.push("/login");
         }
-        // if (error.code === "ERR_NETWORK") {
-        //   this.$store.commit('removeUsers');  // Изменяем состояние
-        //   clearAllCookies();
-        //   this.$router.push("/login");
-        //   alert("Ошибка сети проверьте соединение")
-        // }
         console.error('Ошибка при загрузке Задачи:', error);
       }
     },
@@ -144,41 +151,46 @@ export default {
       this.isEditing = true;
     },
     async saveEdit() {
-      const dataToSend = {
-        name: this.taskName,
-        description: this.taskDescription,
-        status: this.status,
-        start_date: this.formatToDateTime(this.startDate),
-        end_date: this.formatToDateTime(this.endDate),
-      };
-      console.log(dataToSend)
-      try {
-        await axios.put(`/api/tasks/update_task/${getProjectId()}/${getStageId()}/${getTaskId()}`, dataToSend, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          withCredentials: true,
-        });
-        this.$emit('update-stage', { ...this.stage, ...this.editStageData });
-      } catch (error) {
-        if (error.response.status === 401) {
-          this.$store.commit('removeUsers');  // Изменяем состояние
-          clearAllCookies();
-          this.$router.push("/login");
-        }
-        console.error("Ошибка сети:", error.message);
-        if (error.response) {
-          console.error("Данные ответа:", error.response.data);
-          // Вывод ошибки с сервера
-          if (error.response.data.detail) {
-            this.errorMessage = error.response.data.detail; // Сохраняем ошибку с сервера
+      if (this.taskName && this.taskDescription && this.status && this.startDate && this.endDate) {
+        const dataToSend = {
+          name: this.taskName,
+          description: this.taskDescription,
+          status: this.status,
+          start_date: this.formatToDateTime(this.startDate),
+          end_date: this.formatToDateTime(this.endDate),
+        };
+        console.log(dataToSend)
+        try {
+          await axios.put(`/api/tasks/update_task/${getProjectId()}/${getStageId()}/${getTaskId()}`, dataToSend, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            withCredentials: true,
+          });
+          this.$emit('update-stage', { ...this.stage, ...this.editStageData });
+        } catch (error) {
+          if (error.response.status === 401) {
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
+          console.error("Ошибка сети:", error.message);
+          if (error.response) {
+            console.error("Данные ответа:", error.response.data);
+            // Вывод ошибки с сервера
+            if (error.response.data.detail) {
+              this.errorMessage = error.response.data.detail; // Сохраняем ошибку с сервера
+            }
           }
         }
+
+        // console.log("Сохранено:", this.startDate, this.endDate, this.status, this.taskDescription);
+        this.isEditing = false;
+      }else {
+        this.errorMessage='Пожалуйста, заполните все поля.';
       }
 
-      console.log("Сохранено:", this.startDate, this.endDate, this.status, this.taskDescription);
-      this.isEditing = false;
     },
     cancelEdit() {
       this.taskName = this.originalTaskName;
@@ -325,7 +337,11 @@ export default {
   border-radius: 15px;
   cursor: pointer;
 }
-
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}
 .go-to-tasks-button:hover {
   background-color: #4f416d;
 }

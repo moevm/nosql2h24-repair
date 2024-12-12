@@ -28,6 +28,13 @@
             <label for="stock">В наличии:</label>
             <input type="checkbox" v-model="material.inStock" id="stock" />
           </div>
+          <div class="form-group">
+            <label for="deliveryDate"> Дата поставки: </label>
+            <input
+                type="date"
+                v-model="material.deliveryDate"
+            />
+          </div>
 
           <div class="button-container">
             <button type="submit" class="save-button" @click="addProcurement">{{ isEditMode ? 'Сохранить изменения' : 'Сохранить' }}</button>
@@ -59,20 +66,33 @@ export default {
         unit: '',
         pricePerUnit: 0,
         inStock: false,
+        deliveryDate: '',
       },
       isEditMode: false, // Определяет режим редактирования или добавления
     };
   },
   methods: {
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 по 11, поэтому +1
+      const year = date.getFullYear();
+      return `${year}-${month}-${day}`;
+    },
+    formatToDateTime(date) {
+      return `${date}T00:00:00`;
+    },
     async checkPath() {
       if (this.$route.path !== '/add_procurement') {
         try {
           const response = await axios.get(`/api/projects/${getProjectId()}/get_procurement/${getMaterialId()}`);
+          console.log(response.data);
           this.material.name = response.data.procurement.item_name;
           this.material.quantity = response.data.procurement.quantity;
           this.material.unit = response.data.procurement.units;
           this.material.pricePerUnit = response.data.procurement.price;
           this.material.inStock = response.data.procurement.inStock;
+          this.material.deliveryDate = this.formatDate(response.data.procurement.delivery_date);
         } catch (error) {
           if(error.response.status === 401){
               this.$store.commit('removeUsers');  // Изменяем состояние
@@ -87,13 +107,14 @@ export default {
     async addProcurement() {
       this.showErrors = true;
 
-      if (this.material.name) {
+      if (this.material.name && this.material.quantity && this.material.pricePerUnit && this.material.deliveryDate && this.material.unit) {
         const dataToSend = {
           item_name: this.material.name,
           quantity: this.material.quantity,
           price: this.material.pricePerUnit,
           inStock: this.material.inStock,
           units: this.material.unit,
+          delivery_date:this.formatDate(this.material.deliveryDate),
         };
         if (this.isEditMode) {
           try {

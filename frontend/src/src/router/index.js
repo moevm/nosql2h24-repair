@@ -21,6 +21,7 @@ import AddTaskPage from '../components/task/TaskAddPage.vue';
 import AddContactPage from "@/src/components/message/AddContactPage.vue";
 import StatisticsPage from '../components/statics/StatisticsPage.vue';
 import AddWorkerNewPage from "@/src/components/message/AddWorkerNewPage.vue";
+import AdminPage from '../components/AdminComponent.vue';
 
 const routes = [
   { path: '/', component: LoginPage }, // Начальная страница - страница логина
@@ -28,7 +29,7 @@ const routes = [
   { path: '/register', component: RegisterPage },
   { path: '/main', component: MainPage },
   { path: '/new-project', component: NewProjectPage},
-  { path: '/project', component: ProjectPage},
+  { path: '/project/:id', component: ProjectPage},
   { path: '/stages', component: StagesPage},
   { path: '/risks', component: RisksPage},
   { path: '/procurements', component: ProcurementsPage},
@@ -47,6 +48,7 @@ const routes = [
   { path: '/statistics', component: StatisticsPage },
   {path: '/add_worker', component: AddWorkerPage},
   {path: '/add_new_worker', component: AddWorkerNewPage},
+  {path: '/admin', component: AdminPage},
 ];
 
 const router = createRouter({

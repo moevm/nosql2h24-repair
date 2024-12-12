@@ -1,11 +1,13 @@
+from datetime import datetime
+import re
 from bson import ObjectId
 
 from dao.base import BaseDao
 from database import db
-from schemas.project import ProjectCreate, ProjectResponse, Procurement, Stage, Risk, ProcurementResponse, \
+from schemas.project import ProjectCreate, ProjectResponse, Procurement, ProjectStatus, Stage, Risk, ProcurementResponse, \
     RiskResponse, \
     StageResponse, ProjectUpdate, RiskUpdate, ProcurementUpdate, StageUpdate
-from schemas.user import User, Contact, ContactResponse
+from schemas.user import Role, User, Contact, ContactResponse
 from schemas.utils import object_id_to_str, generate_id, get_date_now
 
 
@@ -47,20 +49,24 @@ class ProjectDao(BaseDao):
         return ProjectResponse(**project)
 
     @classmethod
-    async def get_all_projects(cls) -> list[ProjectResponse] | list[None]:
-        cursor = cls.collection.find()
-        projects_list = await cursor.to_list()
-        result = []
-        for project in projects_list:
-            project = object_id_to_str(project)
-            result.append(ProjectResponse(**project))
-        return result
+    async def get_all_projects(cls, project_name: str = "", project_status: ProjectStatus = ProjectStatus.none_status, 
+                               start_date: datetime = None, end_date: datetime = None, user_id: str = "") -> list[ProjectResponse] | list[None]:
+        
+        filters = {}
 
-    @classmethod
-    async def get_projects_by_user(cls, user_id: str) -> list[ProjectResponse] | list[None]:
-        cursor = cls.collection.find(
-            {f"contacts.{user_id}": {"$exists": True}}
-        )
+        if project_name:
+            filters["name"] = {"$regex": project_name, "$options": "i"}
+        if project_status:
+            filters["status"] = str(project_status.value)
+        if start_date:
+            filters["start_date"] = {"$gte": start_date}
+        if end_date:
+            filters["end_date"] = {"$lte": end_date}
+        if user_id:
+            filters[f"contacts.{user_id}"] = {"$exists": True}
+        
+        print(filters)
+        cursor = cls.collection.find(filters)
         projects_list = await cursor.to_list()
         result = []
         for project in projects_list:
@@ -166,17 +172,48 @@ class ProjectDao(BaseDao):
         )
 
     @classmethod
-    async def get_procurements_by_project_id(cls, project_id: str) -> list[ProcurementResponse] | list[None] | None:
-        project = await cls.collection.find_one({"_id": ObjectId(project_id)}, {"procurements": 1})
+    async def get_procurements_by_project_id(cls, project_id: str, name: str = "", creator_role: Role = None, state: bool = None, 
+                           start_date: datetime = None, end_date: datetime = None) -> list[ProcurementResponse] | list[None] | None:
+        
+        procurements = []
+        project = await cls.collection.find_one({"_id": ObjectId(project_id)})
         if project and "procurements" in project:
-            procurements = [ProcurementResponse(id=procurement_id, **procurement_data) for
-                            procurement_id, procurement_data
-                            in
-                            project["procurements"].items()]
-            return procurements
+            for procurement_id, procurement in project.get("procurements", {}).items():
+
+                if name:
+                    name_match = re.search(name, procurement["item_name"], re.IGNORECASE)
+                else:
+                    name_match = True
+
+                if creator_role:
+                    role_match = procurement["created_by"]["role"] == creator_role
+                else:
+                    role_match = True
+
+                if state is not None:
+                    state_match = procurement["inStock"] == state
+                else:
+                    state_match = True
+
+                if start_date and procurement["delivery_date"] is not None:
+                    start_date_match = start_date <= procurement["delivery_date"]
+                else:
+                    start_date_match = True
+
+
+                if end_date and procurement["delivery_date"] is not None:
+                    end_date_match = end_date >= procurement["delivery_date"]
+                else:
+                    end_date_match = True
+
+                if name_match and state_match and role_match and start_date_match and end_date_match:
+                    procurements.append(
+                        ProcurementResponse(id=procurement_id, **procurement)
+                    )
+
         elif project is None:
             return None
-        return []
+        return procurements
 
     @classmethod
     async def get_procurement_by_id(cls, project_id: str, procurement_id: str) -> ProcurementResponse | None:
@@ -247,15 +284,38 @@ class ProjectDao(BaseDao):
         return stage_id
 
     @classmethod
-    async def get_stages_by_project_id(cls, project_id: str) -> list[StageResponse] | list[None] | None:
+    async def get_stages_by_project_id(cls, project_id: str, name: str = "", start_date: datetime = None, 
+                                       end_date: datetime = None) -> list[StageResponse] | list[None] | None:
         project = await cls.collection.find_one({"_id": ObjectId(project_id)}, {"stages": 1})
+
+        stages = []
         if project and "stages" in project:
-            stages = [StageResponse(id=stage_id, **stage_data) for stage_id, stage_data in
-                      project["stages"].items()]
-            return stages
+            for stage_id, stage in project.get("stages", {}).items():
+
+                if name:
+                    name_match = re.search(name, stage["name"], re.IGNORECASE)
+                else:
+                    name_match = True
+
+                if start_date:
+                    start_date_match = start_date <= stage["start_date"]
+                else:
+                    start_date_match = True
+
+
+                if end_date:
+                    end_date_match = end_date >= stage["end_date"]
+                else:
+                    end_date_match = True
+
+                if name_match and start_date_match and end_date_match:
+                    stages.append(
+                        StageResponse(id=stage_id, **stage)
+                    )
+    
         elif project is None:
             return None
-        return []
+        return stages
 
     @classmethod
     async def get_stage_by_id(cls, project_id: str, stage_id: str) -> StageResponse | None:
@@ -319,15 +379,23 @@ class ProjectDao(BaseDao):
         return risk_id
 
     @classmethod
-    async def get_risks_by_project_id(cls, project_id: str) -> list[RiskResponse] | list[None] | None:
+    async def get_risks_by_project_id(cls, project_id: str, name: str = "") -> list[RiskResponse] | list[None] | None:
         project = await cls.collection.find_one({"_id": ObjectId(project_id)}, {"risks": 1})
+
+        risks = []
         if project and "risks" in project:
-            risks = [RiskResponse(id=risk_id, **risk_data) for risk_id, risk_data in
-                     project["risks"].items()]
-            return risks
+            
+            for risk_id, risk in project.get("risks", {}).items():
+                if name:
+                    name_match = re.search(name, risk["name"], re.IGNORECASE)
+                else:
+                    name_match = True
+
+                if name_match:
+                    risks.append(RiskResponse(id=risk_id, **risk))
         elif project is None:
             return None
-        return []
+        return risks
 
     @classmethod
     async def get_risk_by_id(cls, project_id: str, risk_id: str) -> RiskResponse | None:

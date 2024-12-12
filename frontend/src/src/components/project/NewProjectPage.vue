@@ -5,9 +5,19 @@
     <h1>Опишите проект</h1>
     <input v-model="projectName" type="text" placeholder="Введите название проекта" />
     <p> Дата начала</p>
-    <input v-model="startDate" type="date" placeholder="Дата начала" />
+    <input
+        v-model="startDate"
+        type="date"
+        :max="endDate"
+        placeholder="Дата начала"
+    />
     <p> Дата конца</p>
-    <input v-model="endDate" type="date" placeholder="Дата окончания" />
+    <input
+        v-model="endDate"
+        type="date"
+        :min="startDate"
+        placeholder="Дата окончания"
+    />
     <textarea v-model="projectDescription" placeholder="Введите описание проекта"></textarea>
     <button @click="submitProject">Отправить</button>
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
@@ -44,7 +54,11 @@ export default {
         this.errorMessage = 'Пожалуйста, заполните все поля';
         return;
       }
-
+      // Проверка на корректность дат
+      if (new Date(this.endDate) < new Date(this.startDate)) {
+        this.errorMessage = 'Дата окончания не может быть раньше даты начала';
+        return;
+      }
       const dataToSend = {
         name: this.projectName,
         description: this.projectDescription,

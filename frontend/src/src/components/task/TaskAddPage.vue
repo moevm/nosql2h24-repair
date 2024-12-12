@@ -28,11 +28,21 @@
         <div class="task-dates">
           <div class="task-date">
             <p>Начало</p>
-            <input type="date" v-model="startDate" />
+            <input
+                type="date"
+                :max="endDate ? endDate : $store.getters.getEndDateStage"
+                :min="$store.getters.getStartDateStage"
+                v-model="startDate"
+            />
           </div>
           <div class="task-date">
             <p>Конец</p>
-            <input type="date" v-model="endDate" />
+            <input
+                type="date"
+                :min="startDate ? startDate : $store.getters.getStartDateStage"
+                :max="$store.getters.getEndDateStage"
+                v-model="endDate"
+            />
           </div>
         </div>
         <div class="task-status">

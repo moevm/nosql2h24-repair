@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 
 from bson import ObjectId
@@ -44,8 +45,24 @@ def load_default_data():
         with open(settings.DEFAULT_DATA_FILE, "r") as file:
             data = json.load(file)
 
+        def convert_dates(item):
+            if isinstance(item, dict):
+                for key, value in item.items():
+                    if isinstance(value, str):
+                        # Попробуем распознать ISO формат
+                        try:
+                            item[key] = datetime.fromisoformat(value)
+                        except ValueError:
+                            pass  # Если это не дата, оставляем строку
+                    elif isinstance(value, (list, dict)):
+                        convert_dates(value)
+            elif isinstance(item, list):
+                for sub_item in item:
+                    convert_dates(sub_item)
+
         for collection_name, documents in data.items():
             for doc in documents:
+                convert_dates(doc)
                 if "_id" in doc:
                     doc["_id"] = ObjectId(doc["_id"])
 

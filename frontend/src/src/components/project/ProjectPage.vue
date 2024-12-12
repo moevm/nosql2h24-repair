@@ -120,16 +120,18 @@ export default {
         start_date: this.formatToDateTime(this.dateStart),
         end_date: this.formatToDateTime(this.dateEnd)
       };
-      console.log(dataToSend)
+      // console.log(dataToSend)
       try {
-        const res = await axios.put(`/api/projects/update/${getProjectId()}`, dataToSend, {
+          await axios.put(`/api/projects/update/${getProjectId()}`, dataToSend, {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
           withCredentials: true,
         });
-        console.log(res);
+        this.$store.commit("addStartProject", this.dateStart);
+        this.$store.commit("addEndProject", this.dateEnd);
+        // console.log(res);
       } catch (error) {
         if(error.response.status === 401){
           this.$store.commit('removeUsers');  // Изменяем состояние
@@ -192,7 +194,9 @@ export default {
           userName: contact.username,
           role: contact.role,
         }));
-        console.log(this.contacts);
+        this.$store.commit("addStartProject", this.dateStart);
+        this.$store.commit("addEndProject", this.dateEnd);
+        // console.log(this.contacts);
       } catch (error) {
         if(error.response.status === 401){
           this.$store.commit('removeUsers');  // Изменяем состояние

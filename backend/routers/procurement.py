@@ -1,8 +1,9 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from dao.project import ProjectDao
 from schemas.project import ProjectResponse, Procurement, ProcurementResponse, ProcurementUpdate
-from schemas.user import Contact, User
+from schemas.user import Contact, Role, User
 from utils.role import get_foreman_role
 from utils.token import get_current_user
 
@@ -25,8 +26,10 @@ async def add_procurement(project_id: str, procurement_data: Procurement, forema
 
 
 @router.get("/{project_id}/get_procurements", response_model=dict[str, list[ProcurementResponse] | list[None]])
-async def get_procurements(project_id: str, user: User = Depends(get_current_user)):
-    procurements = await ProjectDao.get_procurements_by_project_id(project_id)
+async def get_procurements(project_id: str, name: str = "", creator_role: Role = None, 
+                           state: bool = None, start_date: datetime = None, end_date: datetime = None, 
+                           user: User = Depends(get_current_user)):
+    procurements = await ProjectDao.get_procurements_by_project_id(project_id, name, creator_role, state, start_date, end_date)
     if procurements is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

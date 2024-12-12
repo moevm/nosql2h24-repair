@@ -1,37 +1,61 @@
 <template>
-  <HeaderComponent />
-  <SidebarComponent />
+  <HeaderComponent/>
+  <SidebarComponent/>
   <div class="tasks-list-page">
-    <h2>Задачи этапа: {{ stageName }}</h2>
-
+    <div class="search-header">
+      <h2>Задачи этапа: {{ stageName }}</h2>
+      <div class="filter-container">
+        <div class="date-filter">
+          <input type="date" v-model="startDate" class="large-input"/>
+          <span>-</span>
+          <input type="date" v-model="endDate" class="large-input"/>
+        </div>
+        <input
+            type="text"
+            v-model="taskName"
+            placeholder="Название задачи"
+            class="search-input"
+        />
+        <div class="status-filter">
+          <label for="status">Статус</label>
+          <select v-model="selectedStatus">
+            <option v-for="status in statuses" :key="status.text" :value="status.text === 'Все'? '': status.text ">
+              {{ status.text }}
+            </option>
+          </select>
+        </div>
+        <button @click="applyFilters">Применить</button>
+        <button @click="resetFilters">Сбросить</button>
+      </div>
+    </div>
     <button @click="addTask">Добавить задачу</button>
 
-    <div v-if="tasks.length">
+    <div v-if="filteredTasks.length">
       <table class="task-table">
         <thead>
-          <tr>
-            <th>Название задачи</th>
-            <th>Начало</th>
-            <th>Конец</th>
-            <th>Статус</th>
-          </tr>
+        <tr>
+          <th>Название задачи</th>
+          <th>Начало</th>
+          <th>Конец</th>
+          <th>Статус</th>
+        </tr>
         </thead>
         <tbody>
-          <tr 
-            v-for="task in tasks" 
+        <tr
+            v-for="task in filteredTasks"
             :key="task.taskId"
             :taskName="task.taskName"
             :class="{ selected: selectedTaskId === task.taskId}"
             @click="selectTask(task)"
-          >
-            <td>{{ task.taskName }}</td>
-            <td>{{ task.startDate }}</td>
-            <td>{{ task.endDate }}</td>
-            <td>{{ task.status }}</td>
-          </tr>
+        >
+          <td>{{ task.taskName }}</td>
+          <td>{{ task.startDate }}</td>
+          <td>{{ task.endDate }}</td>
+          <td>{{ task.status }}</td>
+        </tr>
         </tbody>
       </table>
-      
+
       <div class="task-actions" v-if="selectedTaskId">
         <button @click="viewTask(selectedTaskId)">Описание</button>
         <button @click="deleteTask(selectedTaskId)">Удалить</button>
@@ -48,7 +72,8 @@ import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
 import axios from 'axios';
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
-const { getProjectId, getStageId, getStageName,setTaskId } = useCookies();
+
+const {getProjectId, getStageId, getStageName, setTaskId} = useCookies();
 
 export default {
   components: {
@@ -59,10 +84,24 @@ export default {
     return {
       taskName: '',
       stageName: getStageName(),
-      tasks: [
+      tasks: [],
+      selectedTaskId: null,  // для отслеживания выбранной задачи
+      searchQuery: '',  // для поиска задачи по названию
+      statuses: [
+        {text: 'Готово'},
+        {text: 'Опоздание'},
+        {text: 'В процессе'},
+        {text: 'Все'},
+        {text: 'Нет статуса'}
       ],
-      selectedTaskId: null  // для отслеживания выбранной задачи
     };
+  },
+  computed: {
+    filteredTasks() {
+      return this.tasks.filter(task =>
+          task.taskName.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    }
   },
   methods: {
     addTask() {
@@ -80,7 +119,7 @@ export default {
           this.tasks = this.tasks.filter(task => task.taskId !== taskId);
           this.selectedTaskId = null;  // сбрасываем выбор после удаления
         } catch (error) {
-          if(error.response.status === 401){
+          if (error.response.status === 401) {
             this.$store.commit('removeUsers');  // Изменяем состояние
             clearAllCookies();
             this.$router.push("/login");
@@ -89,7 +128,6 @@ export default {
           console.error(error);
         }
       }
-
     },
     viewTask() {
       setTaskId(this.selectedTaskId);
@@ -113,6 +151,50 @@ export default {
         }));
         console.log(this.tasks);
       } catch (error) {
+        if (error.response.status === 401) {
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        console.error('Ошибка при загрузке Этапов:', error);
+      }
+    },
+    formatToDateTime(date) {
+      return `${date}T00:00:00`;
+    },
+    async applyFilters() {
+      try {
+        const params = new URLSearchParams({});
+
+        if (this.endDate) {
+          params.append('end_date', this.formatToDateTime(this.endDate));
+        }
+        if (this.startDate) {
+          params.append('start_date', this.formatToDateTime(this.startDate));
+        }
+        if (this.taskName) {
+          params.append('task_name', this.taskName);
+        }
+        if (this.selectedStatus) {
+          params.append('task_status', this.selectedStatus);
+        }
+        const response = await axios.get(`/api/tasks/get_stage_tasks/${getProjectId()}/${getStageId()}/?${params.toString()}`);
+        // console.log(response.data);
+        this.tasks = Object.values(response.data).map(task => ({
+          taskName: task.name,
+          startDate: this.formatDate(task.start_date),
+          endDate: this.formatDate(task.end_date),
+          status: task.status,
+          taskDescription: task.description,
+          taskId: task.id
+        }));
+        console.log(this.tasks);
+      } catch (error) {
+        if (error.response.status === 401) {
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
         console.error('Ошибка при загрузке Этапов:', error);
       }
     },
@@ -122,6 +204,13 @@ export default {
       const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 по 11, поэтому +1
       const year = date.getFullYear();
       return `${day}.${month}.${year}`;
+    },
+    resetFilters() {
+      this.startDate = '';
+      this.endDate = '';
+      this.taskName = '';
+      this.selectedStatus = '';
+      this.fetchTaskData();
     },
   },
   beforeMount() {
@@ -135,6 +224,19 @@ export default {
   padding: 20px;
   margin-left: 150px;
   margin-top: 60px;
+}
+
+.search-input {
+  width: 300px;
+  padding-left: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-header {
+  gap: 20px;
+  display: flex;
 }
 
 .task-table {
@@ -170,18 +272,56 @@ export default {
   margin-top: 20px;
 }
 
-button {
-  padding: 5px 10px;
+.filter-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20px;
+}
+
+.date-filter,
+.project-filter,
+.status-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-filter input {
+  margin-left: 5px;
+}
+
+.project-filter label,
+.status-filter label {
   margin-right: 10px;
-  background-color: #625b71;
+}
+
+.large-input {
+  padding: 10px;
+  margin-left: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+input,
+select {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  background-color: #6e6b93;
   color: white;
+  padding: 8px 15px;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
-  border-radius: 10px;
+  margin-left: 10px;
 }
 
 button:hover {
-  background-color: #4d4069;
+  background-color: #5c5583;
 }
 </style>

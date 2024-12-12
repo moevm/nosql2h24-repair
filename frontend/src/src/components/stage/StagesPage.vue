@@ -5,23 +5,31 @@
     <div class="main-content">
       <div class="stages-container">
         <div class="header-container">
-          <!-- Контейнер для заголовка -->
+          <!-- Контейнер для заголовка и фильтров -->
           <div class="header-left">
-            <h1>{{projectName}}</h1>
-<!--            <p>СПбГЭТУ "ЛЭТИ"</p>-->
+            <h1>{{ projectName }}</h1>
+            <!--            <p>СПбГЭТУ "ЛЭТИ"</p>-->
           </div>
-
-          <!-- Контейнер для поля поиска и кнопки -->
-          <div class="header-right">
-            <input type="text" v-model="search" placeholder="Название этапа" />
+          <div class="filter-container">
+            <div class="date-filter">
+              <p>Интервал выполнения</p>
+              <input type="date" v-model="startDate" class="large-input" :max="endDate"  />
+              <span>-</span>
+              <input type="date" v-model="endDate" class="large-input" :min="startDate"  />
+            </div>
+            <input type="text" v-model="stageName" placeholder="Название этапа" />
+            <button @click="applyFilters">Применить</button>
+            <button @click="resetFilters">Сбросить</button>
             <button @click="goToAddStagePage" class="add-stage-button">
               Добавить этап
             </button>
           </div>
         </div>
 
-        <StageComponent :projectId="projectId" :projectName="projectName"
-          v-for="stage in filteredStages"
+        <StageComponent
+          :projectId="projectId"
+          :projectName="projectName"
+          v-for="stage in stages"
           :key="stage.id"
           :stage="stage"
           @update-stage="updateStage"
@@ -38,7 +46,7 @@ import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
 import StageComponent from './StageComponent.vue';
 import axios from 'axios';
-import {clearAllCookies, useCookies} from '@/src/js/useCookies';
+import { clearAllCookies, useCookies } from '@/src/js/useCookies';
 const { getProjectId, getProjectName } = useCookies();
 
 export default {
@@ -52,13 +60,18 @@ export default {
     return {
       projectName: getProjectName(),
       search: '',
-      stages: [
-      ],
+      startDate: '',
+      endDate: '',
+      stages: [],
     };
   },
   computed: {
     filteredStages() {
-      return this.stages.filter(stage => stage.name.includes(this.search));
+      return this.stages.filter(stage =>
+        stage.name.includes(this.search) &&
+        (!this.startDate || new Date(stage.startDate) >= new Date(this.startDate)) &&
+        (!this.endDate || new Date(stage.endDate) <= new Date(this.endDate))
+      );
     },
   },
   methods: {
@@ -89,7 +102,7 @@ export default {
         }));
         // console.log(this.stages);
       } catch (error) {
-        if(error.response.status === 401){
+        if (error.response.status === 401) {
           this.$store.commit('removeUsers');  // Изменяем состояние
           clearAllCookies();
           this.$router.push("/login");
@@ -103,6 +116,46 @@ export default {
       const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 по 11, поэтому +1
       const year = date.getFullYear();
       return `${year}-${month}-${day}`;
+    },
+    formatToDateTime(date) {
+      return `${date}T00:00:00`;
+    },
+    async applyFilters() {
+      try {
+        const params = new URLSearchParams({
+        });
+
+        if (this.endDate) {
+          params.append('end_date', this.formatToDateTime(this.endDate));
+        }
+        if(this.startDate) {
+          params.append('start_date', this.formatToDateTime(this.startDate));
+        }
+        if (this.stageName) {
+          params.append('name', this.stageName);
+        }
+        const response = await axios.get(`/api/projects/${getProjectId()}/get_stages/?${params.toString()}`);
+        this.stages = Object.values(response.data.stages).map(stage => ({
+          name: stage.name,
+          startDate: this.formatDate(stage.start_date),
+          endDate: this.formatDate(stage.end_date),
+          stageId: stage.id,
+        }));
+        // console.log(this.stages);
+      } catch (error) {
+        if (error.response.status === 401) {
+          this.$store.commit('removeUsers');  // Изменяем состояние
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        console.error('Ошибка при загрузке Этапов:', error);
+      }
+    },
+    resetFilters() {
+      this.startDate = '';
+      this.endDate = '';
+      this.selectedStatus = '';
+      this.fetchStageData();
     },
   },
   beforeMount() {
@@ -132,26 +185,63 @@ export default {
 
 .header-container {
   display: flex;
-  justify-content: space-between; /* Располагаем элементы на разных сторонах */
-  align-items: center; /* Центрируем элементы по вертикали */
+  align-items: center; /* Выравниваем элементы по вертикали */
   margin-bottom: 16px;
 }
 
 .header-left {
-  display: flex;
-  flex-direction: column;
+  margin-right: 20px; /* Добавляем отступ между заголовком и фильтрами */
 }
 
-.header-right {
+.filter-container {
   display: flex;
   align-items: center;
+  gap: 20px;
 }
 
-.stages-container input {
-  padding: 12px;
-  border-radius: 4px;
+.date-filter,
+.project-filter,
+.status-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-filter input {
+  margin-left: 5px;
+}
+
+.project-filter label,
+.status-filter label {
+  margin-right: 10px;
+}
+
+.large-input {
+  padding: 10px;
+  margin-left: 5px;
   border: 1px solid #ccc;
-  margin-left: 8%;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+input,
+select {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  background-color: #6e6b93;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #5c5583;
 }
 
 .add-stage-button {
