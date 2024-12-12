@@ -126,12 +126,8 @@ export default {
       }
     },
     resetFilters() {
-      this.startDate = '';
-      this.endDate = '';
-      this.projectName = '';
-      this.taskName = '';
-      this.selectedStatus = '';
-      this.fetchTasks();
+      this.riskName ='';
+      this.fetchRisks();
     },
   },
   beforeMount() {
