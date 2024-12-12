@@ -8,7 +8,7 @@
         <div class="search-bar">
           <h1>{{projectName}}</h1>
           <div class = "filter-bar">
-            <input type="text" placeholder="Название риска" v-model="searchQuery" class="search-input" />
+            <input type="text" placeholder="Название риска" v-model="riskName" class="search-input" />
             <button @click="applyFilters">Применить</button>
           </div>
         </div>
@@ -18,7 +18,7 @@
         
         <!-- Список задач -->
         <TaskItemComponent
-          v-for="risk in filteredTasks"
+          v-for="risk in risks"
           :key="risk.riskId"
           :projectId="projectId"
           :projectName="projectName"
@@ -51,7 +51,7 @@ export default {
   data() {
     return {
       projectName: getProjectName(),
-      searchQuery: '',
+      riskName: '',
       risks: [
         // { id: 1, title: 'Износ, поломка', description: 'Студенты могут разбить дорогой кафель. ...' },
         // { id: 2, title: 'Задержка в работах', description: 'Из-за санкций некоторые материалы ...' },
@@ -59,11 +59,11 @@ export default {
     };
   },
   computed: {
-    filteredTasks() {
-      return this.risks.filter(risk =>
-        risk.riskName.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
-    },
+    // filteredTasks() {
+    //   return this.risks.filter(risk =>
+    //     risk.riskName.toLowerCase().includes(this.searchQuery.toLowerCase())
+    //   );
+    // },
   },
   methods: {
     goToAddTask() {
@@ -81,6 +81,30 @@ export default {
       console.log("Вызов просмотра риска");
       this.$router.push(`/risk-details`);
     },
+    async applyFilters() {
+      try {
+        const params = new URLSearchParams({
+        });
+        if (this.riskName) {
+          params.append('name', this.riskName);
+        }
+          const response = await axios.get(`/api/projects/${getProjectId()}/get_risks/?${params.toString()}`);
+          console.log(response.data);
+          this.risks = Object.values(response.data.risks).map(risk => ({
+            riskName: risk.name,
+            description: risk.description,
+            riskId: risk.id,
+          }));
+          // console.log(this.risks);
+      } catch (error) {
+          if(error.response.status === 401){
+            this.$store.commit('removeUsers');  // Изменяем состояние
+            clearAllCookies();
+            this.$router.push("/login");
+          }
+          console.error('Ошибка при загрузке проектов:', error);
+      }
+    },
     async fetchRisks() {
       try {
         const response = await axios.get(`/api/projects/${getProjectId()}/get_risks`);
@@ -90,7 +114,7 @@ export default {
           description: risk.description,
           riskId: risk.id,
         }));
-        console.log(this.risks);
+        // console.log(this.risks);
       } catch (error) {
         if(error.response.status === 401){
           this.$store.commit('removeUsers');  // Изменяем состояние
