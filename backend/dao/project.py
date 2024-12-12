@@ -7,7 +7,7 @@ from database import db
 from schemas.project import ProjectCreate, ProjectResponse, Procurement, ProjectStatus, Stage, Risk, ProcurementResponse, \
     RiskResponse, \
     StageResponse, ProjectUpdate, RiskUpdate, ProcurementUpdate, StageUpdate
-from schemas.user import User, Contact, ContactResponse
+from schemas.user import Role, User, Contact, ContactResponse
 from schemas.utils import object_id_to_str, generate_id, get_date_now
 
 
@@ -172,7 +172,7 @@ class ProjectDao(BaseDao):
         )
 
     @classmethod
-    async def get_procurements_by_project_id(cls, project_id: str, name: str = "", state: bool = None, 
+    async def get_procurements_by_project_id(cls, project_id: str, name: str = "", creator_role: Role = None, state: bool = None, 
                            start_date: datetime = None, end_date: datetime = None) -> list[ProcurementResponse] | list[None] | None:
         
         procurements = []
@@ -184,6 +184,11 @@ class ProjectDao(BaseDao):
                     name_match = re.search(name, procurement["item_name"], re.IGNORECASE)
                 else:
                     name_match = True
+
+                if creator_role:
+                    role_match = procurement["created_by"]["role"] == creator_role
+                else:
+                    role_match = True
 
                 if state is not None:
                     state_match = procurement["inStock"] == state
@@ -201,7 +206,7 @@ class ProjectDao(BaseDao):
                 else:
                     end_date_match = True
 
-                if name_match and state_match and start_date_match and end_date_match:
+                if name_match and state_match and role_match and start_date_match and end_date_match:
                     procurements.append(
                         ProcurementResponse(id=procurement_id, **procurement)
                     )
