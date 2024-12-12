@@ -14,6 +14,12 @@
             placeholder="Название проекта"
             class="search-input"
           />
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Название задачи"
+            class="search-input"
+          />
         </div>
         <div class="status-filter">
           <label for="status">Статус</label>
