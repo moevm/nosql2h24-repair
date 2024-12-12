@@ -72,7 +72,6 @@ export default {
   data() {
     return {
       projectName: getProjectName(),
-      searchQuery: '',
       materialName: '',
       startDate: '',
       endDate: '',
@@ -200,10 +199,10 @@ export default {
     resetFilters() {
       this.startDate = '';
       this.endDate = '';
-      this.projectName = '';
-      this.taskName = '';
+      this.materialName = '';
       this.selectedStatus = '';
-      this.fetchTasks();
+      this.selectedRole ='';
+      this.fetchStageData();
     },
   },
   beforeMount() {
