@@ -26,6 +26,7 @@
         <option value="Администратор">Администратор</option>
       </select>
       <button @click="searchUsers">Поиск</button>
+      <button @click="resetFilters">Сбросить</button>
     </div>
 
     <!-- Отображаем список пользователей только если хотя бы один фильтр изменен -->
