@@ -12,6 +12,7 @@
           </div>
           <div class="filter-container">
             <div class="date-filter">
+              <p>Интервал выполнения</p>
               <input type="date" v-model="startDate" class="large-input" />
               <span>-</span>
               <input type="date" v-model="endDate" class="large-input" />

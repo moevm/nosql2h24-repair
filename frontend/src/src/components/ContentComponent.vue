@@ -3,6 +3,7 @@
     <div class="header-search">
       <h1>Проекты</h1>
        <div class="filter-container">
+        <p>Интервал выполнения</p>
         <div class="date-filter">
           <input
               type="date"
