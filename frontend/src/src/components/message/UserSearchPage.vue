@@ -19,15 +19,28 @@
     </div>
 
     <!-- Отображаем список пользователей только если хотя бы один фильтр изменен -->
-    <div v-for="user in users" :key="user.id" class="user-item">
+    <div v-for="user in users" :key="user.id" class="user-item" @click="showUserCard(user)">
       <div>
         <p>{{ user.lastname }} {{ user.name }} {{ user.middlename }}</p>
         <p>Должность - {{ user.role }}</p>
       </div>
       <div class="user-item-actions">
-        <button @click="goToChat(user)">Перейти в чат</button>
+        <button @click.stop="goToChat(user)">Перейти в чат</button>
         <!-- <button v-if="userRole === 'Администратор'">Удалить пользователя</button> -->
       </div>
+    </div>
+
+    <!-- Всплывающая карточка пользователя -->
+    <div v-if="showCard" class="user-card-overlay" @click="closeUserCard"></div>
+    <div v-if="showCard" class="user-card">
+      <div class="user-card-content">
+        <p>Фамилия: {{ selectedUser.lastname }}</p>
+        <p>Имя: {{ selectedUser.name }}</p>
+        <p>Отчество: {{ selectedUser.middlename }}</p>
+        <p>E-mail: {{ selectedUser.email }}</p>
+        <p>Должность: {{ selectedUser.role }}</p>
+      </div>
+      <button @click.stop="closeUserCard">Назад</button>
     </div>
   </div>
 </template>
@@ -51,6 +64,8 @@ export default {
       middelname: '',
       selectedRole: '',
       users: [],
+      showCard: false,
+      selectedUser: null,
     };
   },
   computed: {
@@ -77,6 +92,9 @@ export default {
         if (this.lastname) {
           params.append('lastname', this.lastname);
         }
+        if(this.email){
+          params.append('email', this.email);
+        }
         const response = await axios.get(`/api/user/find/?${params.toString()}`);
         this.users = Object.values(response.data).map(user => ({
           name: user.name,
@@ -84,6 +102,7 @@ export default {
           middlename: user.middlename,
           id: user.id,
           role: user.role,
+          email: user.email
         }));
       } catch (error) {
         if (error.response.status === 401) {
@@ -102,6 +121,14 @@ export default {
       setReceiverId(user.id);
       setChatId("");
       this.$router.push(`/chat`);
+    },
+    showUserCard(user) {
+      this.selectedUser = user;
+      this.showCard = true;
+    },
+    closeUserCard() {
+      this.showCard = false;
+      this.selectedUser = null;
     },
     resetFilters() {
       this.lastname = '';
@@ -162,6 +189,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  cursor: pointer;
 }
 
 .user-item p {
@@ -173,7 +201,8 @@ export default {
   gap: 10px;
 }
 
-.user-item button {
+.user-item button,
+.user-card button {
   background-color: #625b71;
   color: #fff;
   border: none;
@@ -206,4 +235,38 @@ export default {
 .search-filters button:active {
   transform: scale(1);
 }
+
+.user-card {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.user-card-content {
+  text-align: left;
+  margin-left: 10px;
+}
+
+.user-card button {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.user-card-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
 </style>
+
