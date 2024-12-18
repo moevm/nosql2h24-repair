@@ -145,8 +145,28 @@ export default {
         }
       }
     },
-    showUserCard(user) {
-      this.selectedUser = user;
+    async showUserCard(user) {
+      try {
+        const response = await axios.get(`/api/user/get_user/${user.id}`);
+        this.selectedUser = {
+          firstName: response.data.name,
+          lastName: response.data.lastname,
+          email: response.data.email,
+          role: response.data.role,
+          middleName: response.data.middlename,
+        };
+        console.log(this.selectedUser)
+      } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        console.error('Ошибка при загрузке карточки пользователя:', error);
+        if (error.response && error.response.data.detail) {
+          this.errorMessage = error.response.data.detail;
+        }
+      }
       this.showCard = true;
     },
     closeUserCard() {
