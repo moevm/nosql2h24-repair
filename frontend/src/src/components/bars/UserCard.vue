@@ -2,9 +2,9 @@
     <div v-if="showCard" class="user-card-overlay" @click="closeUserCard"></div>
     <div v-if="showCard" class="user-card">
       <div class="user-card-content">
-        <p>Фамилия: {{ user.lastname }}</p>
-        <p>Имя: {{ user.name }}</p>
-        <p>Отчество: {{ user.middlename }}</p>
+        <p>Фамилия: {{ user.lastName }}</p>
+        <p>Имя: {{ user.firstName }}</p>
+        <p>Отчество: {{ user.middleName }}</p>
         <p>E-mail: {{ user.email }}</p>
         <p>Должность: {{ user.role }}</p>
       </div>

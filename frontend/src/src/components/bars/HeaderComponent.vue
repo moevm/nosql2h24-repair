@@ -19,9 +19,9 @@
 </template>
 
 <script>
-import { useCookies } from '@/src/js/useCookies';
+import {useCookies} from '@/src/js/useCookies';
 import UserCard from './UserCard.vue'; // Импортируйте компонент UserCard
-const { getUserName } = useCookies();
+const { getUserName,  } = useCookies();
 
 export default {
   components: {
@@ -49,9 +49,13 @@ export default {
       }, 1000);
     },
     showUserCard() {
+      const user = this.$store.getters.getUser;
       this.selectedUser = {
-        name: this.userName,
-        // Добавьте другие свойства пользователя, если они доступны
+        firstName: user[0].firstName,
+        lastName: user[0].lastName,
+        email: user[0].email,
+        role: user[0].role,
+        middleName: user[0].middleName,
       };
       this.showCard = true;
     },

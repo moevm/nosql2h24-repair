@@ -8,7 +8,7 @@
           v-model="email"
           :class="{'input-error': errors.email}"
           type="text"
-          placeholder="Логин(email)" />
+          placeholder="Логин(email)"/>
       <p v-if="errors.email" class="error-message">{{ errors.email }}</p>
 
       <!-- Поле пароля -->
@@ -16,7 +16,7 @@
           v-model="password"
           :class="{'input-error': errors.password}"
           type="password"
-          placeholder="Пароль" />
+          placeholder="Пароль"/>
       <p v-if="errors.password" class="error-message">{{ errors.password }}</p>
 
       <!-- Дополнительные поля для регистрации -->
@@ -25,28 +25,28 @@
             v-model="name"
             :class="{'input-error': errors.name}"
             type="text"
-            placeholder="Имя" />
+            placeholder="Имя"/>
         <p v-if="errors.name" class="error-message">{{ errors.name }}</p>
 
         <input
             v-model="lastname"
             :class="{'input-error': errors.lastname}"
             type="text"
-            placeholder="Фамилия" />
+            placeholder="Фамилия"/>
         <p v-if="errors.lastname" class="error-message">{{ errors.lastname }}</p>
 
         <input
             v-model="middlename"
             :class="{'input-error': errors.middlename}"
             type="text"
-            placeholder="Отчество" />
+            placeholder="Отчество"/>
         <p v-if="errors.middlename" class="error-message">{{ errors.middlename }}</p>
 
         <input
             v-model="confirmPassword"
             :class="{'input-error': errors.confirmPassword}"
             type="password"
-            placeholder="Повторите пароль" />
+            placeholder="Повторите пароль"/>
         <p v-if="errors.confirmPassword" class="error-message">{{ errors.confirmPassword }}</p>
 
         <select
@@ -79,8 +79,9 @@
 
 <script>
 import axios from 'axios';
-import { useCookies } from '@/src/js/useCookies';
-const { setUserName,setUserId } = useCookies();
+import {useCookies} from '@/src/js/useCookies';
+
+const {setUserName, setUserId} = useCookies();
 
 export default {
   data() {
@@ -176,7 +177,15 @@ export default {
           console.log(res);
           setUserName(res.data.lastname + ' ' + res.data.name + ' ' + res.data.middlename);
           setUserId(res.data.id)
-          const newUserData = { name: res.data.lastname + ' ' + res.data.name + ' ' + res.data.middlename, role: res.data.role };
+          const newUserData = {
+            name: res.data.lastname + ' ' + res.data.name + ' ' + res.data.middlename,
+            role: res.data.role,
+            firstName: res.data.name,
+            lastName: res.data.lastname,
+            middleName:res.data.middlename,
+            id: res.data.id,
+            email: res.data.email,
+          };
           this.$store.commit('addSingleUser', newUserData);  // Изменяем состояние
           console.log(newUserData);
           this.$router.push("/main");
