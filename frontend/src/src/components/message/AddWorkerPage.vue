@@ -18,7 +18,7 @@
     </div>
 
     <!-- Отображаем список пользователей только если хотя бы один фильтр изменен -->
-    <div v-for="user in users" :key="user.id" class="user-item">
+    <div v-for="user in users" :key="user.id" class="user-item" @click="showUserCard(user)">
       <div>
         <p>{{ user.username }}</p>
         <p>Должность - {{ user.role }}</p>
@@ -27,12 +27,14 @@
         <button @click="addToContacts(user)">Добавить в задачу</button>
       </div>
     </div>
+    <UserCard :user="selectedUser" :showCard="showCard" @close="closeUserCard" />
   </div>
 </template>
 
 <script>
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
+import UserCard from '../bars/UserCard.vue';
 import axios from 'axios';
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getProjectId, getStageId,getTaskId } = useCookies();
@@ -42,6 +44,7 @@ export default {
   components: {
     HeaderComponent,
     SidebarComponent,
+    UserCard,
   },
   data() {
     return {
@@ -52,6 +55,7 @@ export default {
       users: [
         // { id: "6731ccd729ebfd89e5eb0b86", name: "Илья", lastname: "Ильичевич", middlename: "Ильич", role: "Администратор" },
       ],
+      showCard: false,
     };
   },
   computed: {
@@ -76,6 +80,9 @@ export default {
         if(this.lastname){
           params.append('lastname', this.lastname);
         }
+        if(this.email){
+          params.append('email', this.email);
+        }
         console.log(params.toString());
         console.log(this.lastname);
         console.log(`/api/projects/get_users/${getProjectId()}?${params.toString()}`);
@@ -84,10 +91,11 @@ export default {
         // this.users.push(response.data);
         this.users = Object.values(response.data).map(user => ({
           username: user.username,
-          // lastname: user.lastname,
-          // middlename: user.middlename,
+          lastname: user.lastname,
+          middlename: user.middlename,
           id: user.id,
           role: user.role,
+          email: user.email
         }));
         console.log(this.users);
       } catch (error) {
@@ -129,6 +137,14 @@ export default {
           this.errorMessage = error.response.data.detail;
         }
       }
+    },
+    showUserCard(user) {
+      this.selectedUser = user;
+      this.showCard = true;
+    },
+    closeUserCard() {
+      this.showCard = false;
+      this.selectedUser = null;
     },
     // searchUsers() {
     //   // Метод для обработки поиска при нажатии кнопки "Поиск"
@@ -232,5 +248,9 @@ export default {
 
 .search-filters button:active {
   transform: scale(1);
+}
+
+.user-item{
+  cursor: pointer;
 }
 </style>

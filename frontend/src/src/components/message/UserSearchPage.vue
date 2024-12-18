@@ -31,23 +31,14 @@
     </div>
 
     <!-- Всплывающая карточка пользователя -->
-    <div v-if="showCard" class="user-card-overlay" @click="closeUserCard"></div>
-    <div v-if="showCard" class="user-card">
-      <div class="user-card-content">
-        <p>Фамилия: {{ selectedUser.lastname }}</p>
-        <p>Имя: {{ selectedUser.name }}</p>
-        <p>Отчество: {{ selectedUser.middlename }}</p>
-        <p>E-mail: {{ selectedUser.email }}</p>
-        <p>Должность: {{ selectedUser.role }}</p>
-      </div>
-      <button @click.stop="closeUserCard">Назад</button>
-    </div>
+    <UserCard :user="selectedUser" :showCard="showCard" @close="closeUserCard" />
   </div>
 </template>
 
 <script>
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
+import UserCard from '../bars/UserCard.vue';
 import axios from 'axios';
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { setReceiverId, setChatName, setChatId } = useCookies();
@@ -56,6 +47,7 @@ export default {
   components: {
     HeaderComponent,
     SidebarComponent,
+    UserCard, // Добавьте новый компонент в список компонентов
   },
   data() {
     return {
@@ -235,38 +227,4 @@ export default {
 .search-filters button:active {
   transform: scale(1);
 }
-
-.user-card {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-}
-
-.user-card-content {
-  text-align: left;
-  margin-left: 10px;
-}
-
-.user-card button {
-  text-align: center;
-  margin-top: 20px;
-}
-
-.user-card-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 999;
-}
 </style>
-
