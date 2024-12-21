@@ -18,7 +18,7 @@
   <style scoped>
   .create-project-button {
     width: 500px; /* Ширина, соответствующая компоненту проекта */
-    height: 350px; /* Высота, соответствующая компоненту проекта */
+    height: 250px; /* Высота, соответствующая компоненту проекта */
     background-color: #625b71; /* Фоновый цвет кнопки */
     color: white; /* Цвет текста */
     border: 1px solid #ccc;

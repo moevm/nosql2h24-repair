@@ -2,7 +2,7 @@
   <div class="content">
     <div class="header-search">
       <h1>Проекты</h1>
-       <div class="filter-container">
+      <div class="filter-container">
         <p>Интервал выполнения</p>
         <div class="date-filter">
           <input
@@ -23,20 +23,20 @@
             placeholder="Поиск проекта"
             class="search-input"
         />
-         <div class="status-filter">
-           <label for="status">Статус</label>
-           <select v-model="selectedStatus">
-             <option v-for="status in statuses" :key="status.text" :value="status.text === 'Все'? '': status.text ">
-               {{ status.text }}
-             </option>
-           </select>
-         </div>
+        <div class="status-filter">
+          <label for="status">Статус</label>
+          <select v-model="selectedStatus">
+            <option v-for="status in statuses" :key="status.text" :value="status.text === 'Все'? '': status.text ">
+              {{ status.text }}
+            </option>
+          </select>
+        </div>
         <button @click="applyFilters">Применить</button>
         <button @click="resetFilters">Сбросить</button>
       </div>
     </div>
     <div class="projects-container">
-      <div v-for="(item, index) in items" :key="index" class="project-item">
+      <div v-for="(item, index) in paginatedItems" :key="index" class="project-item">
         <Project
             v-if="item.type === 'project'"
             :projectName="item.name"
@@ -49,6 +49,11 @@
         />
         <NewProjectButton v-if="item.type === 'newProjectButton' && userRole !== 'Рабочий' && userRole !== 'Прораб'" />
       </div>
+    </div>
+    <div class="pagination">
+      <button @click="prevPage" :disabled="currentPage === 1">Предыдущая</button>
+      <span>Страница {{ currentPage }} из {{ totalPages }}</span>
+      <button @click="nextPage" :disabled="currentPage === totalPages">Следующая</button>
     </div>
   </div>
 </template>
@@ -70,11 +75,7 @@ export default {
       endDate: '',
       startDate: '',
       selectedStatus: '',
-      items: [
-        {
-          type: 'newProjectButton',
-        },
-      ],
+      items: [],
       statuses: [
         { text: 'Готово' },
         { text: 'Опоздание'},
@@ -83,12 +84,27 @@ export default {
         { text: 'Нет статуса' },
         { text: 'Новый' }
       ],
+      currentPage: 1,
     };
   },
   computed: {
     userRole() {
       const user = this.$store.getters.getUser[0];
       return user ? user.role : null;
+    },
+    itemsPerPage() {
+      if (this.currentPage === 1 && this.userRole !== 'Рабочий' && this.userRole !== 'Прораб') {
+        return 6;
+      }
+      return 7;
+    },
+    paginatedItems() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.items.slice(start, end);
+    },
+    totalPages() {
+      return Math.ceil((this.items.length - (this.currentPage === 1 && this.userRole !== 'Рабочий' && this.userRole !== 'Прораб' ? 1 : 0)) / this.itemsPerPage);
     },
   },
   methods: {
@@ -97,8 +113,7 @@ export default {
     },
     async applyFilters() {
       try {
-        const params = new URLSearchParams({
-        });
+        const params = new URLSearchParams({});
 
         if (this.endDate) {
           params.append('end_date', this.formatToDateTime(this.endDate));
@@ -124,7 +139,7 @@ export default {
             projectId: project.id,
           })),
         ];
-        // console.log(response.data);
+        this.currentPage = 1;
       } catch (error) {
         if(error.response.status === 401){
           this.$store.commit('removeUsers');
@@ -151,6 +166,7 @@ export default {
             projectId: project.id,
           })),
         ];
+        this.currentPage = 1;
       } catch (error) {
         if (error.response.status === 401) {
           this.$store.commit('removeUsers');  // Изменяем состояние
@@ -174,6 +190,16 @@ export default {
       this.selectedStatus = '';
       this.fetchProjects();
     },
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
   },
   beforeMount() {
     this.fetchProjects();
@@ -192,7 +218,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   background-color: #fff;
-  padding: 10px 20px;
+  /*padding: 10px 20px;*/
 }
 
 .search-input {
@@ -264,5 +290,31 @@ button:hover {
 
 .project-item {
   box-sizing: border-box;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pagination button {
+  background-color: #6e6b93;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 0 10px;
+}
+
+.pagination button:hover {
+  background-color: #5c5583;
+}
+
+.pagination button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 </style>

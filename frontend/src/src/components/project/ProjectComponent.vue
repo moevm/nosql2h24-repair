@@ -63,7 +63,7 @@ export default {
 .project-card {
   position: relative; /* Устанавливает относительное позиционирование для внутренних элементов */
   width: 500px;
-  height: 350px;
+  height: 250px;
   background-color: #f9f9f9;
   border: 1px solid #ccc;
   border-radius: 8px;
