@@ -12,7 +12,6 @@ class Settings(BaseSettings):
     JWT_PRIVATE_KEY: str
 
     ACCESS_TOKEN_EXPIRES_IN: int
-    REFRESH_TOKEN_EXPIRES_IN: int
     JWT_ALGORITHM: str
     JWT_SECRET_KEY: str
 
