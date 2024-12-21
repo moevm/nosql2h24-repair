@@ -8,15 +8,15 @@
       <img src="@/assets/icons/user.png" alt="User Icon" class="icon">
       <p>Административная страница</p>
     </div>
-    <div v-if="!isMainPage && !isMessages && userRole !== 'Рабочий'" :class="['menu-item', { 'active': isPhasesPage }]" @click="goToPhases">
+    <div v-if="!isMainPage && !isAdminSearch && !isMessages && userRole !== 'Рабочий'" :class="['menu-item', { 'active': isPhasesPage }]" @click="goToPhases">
       <img src="@/assets/icons/phases.png" alt="Phases Icon" class="icon">
       <p>Этапы</p>
     </div>
-    <div v-if="!isMainPage && !isMessages && userRole !== 'Рабочий'" :class="['menu-item', { 'active': isProcurementsPage }]" @click="goToProcurements">
+    <div v-if="!isMainPage && !isAdminSearch && !isMessages && userRole !== 'Рабочий'" :class="['menu-item', { 'active': isProcurementsPage }]" @click="goToProcurements">
       <img src="@/assets/icons/procurements.png" alt="Procurements Icon" class="icon">
       <p>Закупки</p>
     </div>
-    <div v-if="!isMainPage && !isMessages && userRole !== 'Рабочий'" :class="['menu-item', { 'active': isRisksPage }]" @click="goToRisks">
+    <div v-if="!isMainPage && !isAdminSearch && !isMessages && userRole !== 'Рабочий'" :class="['menu-item', { 'active': isRisksPage }]" @click="goToRisks">
       <img src="@/assets/icons/risks.png" alt="Risks Icon" class="icon">
       <p>Риски</p>
     </div>
@@ -63,6 +63,9 @@ export default {
     },
     isRisksPage() {
       return this.$route.path === '/risks';
+    },
+    isAdminSearch() {
+      return this.$route.path === '/admin';
     },
     userRole() {
       const user = this.$store.getters.getUser[0];

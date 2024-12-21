@@ -19,22 +19,26 @@
     </div>
 
     <!-- Отображаем список пользователей только если хотя бы один фильтр изменен -->
-    <div v-for="user in users" :key="user.id" class="user-item">
+    <div v-for="user in users" :key="user.id" class="user-item" @click="showUserCard(user)">
       <div>
         <p>{{ user.lastname }} {{ user.name }} {{ user.middlename }}</p>
         <p>Должность - {{ user.role }}</p>
       </div>
       <div class="user-item-actions">
-        <button @click="goToChat(user)">Перейти в чат</button>
+        <button @click.stop="goToChat(user)">Перейти в чат</button>
         <!-- <button v-if="userRole === 'Администратор'">Удалить пользователя</button> -->
       </div>
     </div>
+
+    <!-- Всплывающая карточка пользователя -->
+    <UserCard :user="selectedUser" :showCard="showCard" @close="closeUserCard" />
   </div>
 </template>
 
 <script>
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
+import UserCard from '../bars/UserCard.vue';
 import axios from 'axios';
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { setReceiverId, setChatName, setChatId } = useCookies();
@@ -43,6 +47,7 @@ export default {
   components: {
     HeaderComponent,
     SidebarComponent,
+    UserCard, // Добавьте новый компонент в список компонентов
   },
   data() {
     return {
@@ -51,6 +56,8 @@ export default {
       middelname: '',
       selectedRole: '',
       users: [],
+      showCard: false,
+      selectedUser: null,
     };
   },
   computed: {
@@ -77,6 +84,9 @@ export default {
         if (this.lastname) {
           params.append('lastname', this.lastname);
         }
+        if(this.email){
+          params.append('email', this.email);
+        }
         const response = await axios.get(`/api/user/find/?${params.toString()}`);
         this.users = Object.values(response.data).map(user => ({
           name: user.name,
@@ -84,6 +94,7 @@ export default {
           middlename: user.middlename,
           id: user.id,
           role: user.role,
+          email: user.email
         }));
       } catch (error) {
         if (error.response.status === 401) {
@@ -102,6 +113,34 @@ export default {
       setReceiverId(user.id);
       setChatId("");
       this.$router.push(`/chat`);
+    },
+    async showUserCard(user) {
+      try {
+        const response = await axios.get(`/api/user/get_user/${user.id}`);
+        this.selectedUser = {
+          firstName: response.data.name,
+          lastName: response.data.lastname,
+          email: response.data.email,
+          role: response.data.role,
+          middleName: response.data.middlename,
+        };
+        console.log(this.selectedUser)
+      } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        console.error('Ошибка при загрузке карточки пользователя:', error);
+        if (error.response && error.response.data.detail) {
+          this.errorMessage = error.response.data.detail;
+        }
+      }
+      this.showCard = true;
+    },
+    closeUserCard() {
+      this.showCard = false;
+      this.selectedUser = null;
     },
     resetFilters() {
       this.lastname = '';
@@ -162,6 +201,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  cursor: pointer;
 }
 
 .user-item p {
@@ -173,7 +213,8 @@ export default {
   gap: 10px;
 }
 
-.user-item button {
+.user-item button,
+.user-card button {
   background-color: #625b71;
   color: #fff;
   border: none;

@@ -1,40 +1,43 @@
 <template>
-  <div class="task-card">
-    <h3 class="task-title">{{ name }}</h3>
-    <div class="task-field">
-      <label>Описание</label>
-      <input type="text" :value="description" readonly />
-    </div>
-    <div class="task-field">
-      <label>Начало</label>
-      <input type="text" :value="startDate" readonly />
-    </div>
-    <div class="task-field">
-      <label>Конец</label>
-      <input type="text" :value="endDate" readonly />
-    </div>
-    <div class="task-field">
-      <label>Проект</label>
-      <input type="text" :value="projectName" readonly />
-    </div>
-    <div class="task-field">
-      <label>Статус</label>
-      <div class="status-dropdown">
-        <button @click="toggleDropdown" :style="{ backgroundColor: statuses[currentStatus] }">
-          {{ currentStatus }}
-        </button>
-        <ul v-if="dropdownOpen" class="dropdown-menu">
-          <li
-            v-for="(color, text) in statuses"
-            :key="text"
-            :style="{ backgroundColor: color }"
-            @click="selectStatus(text)"
-          >
-            {{ text }}
-          </li>
-        </ul>
+  <div class="task-container">
+    <div class="task-card">
+      <h3 class="task-title">{{ name }}</h3>
+      <div class="task-field">
+        <label>Описание</label>
+        <div class="description-text">{{ description }}</div>
+      </div>
+      <div class="task-field">
+        <label>Начало</label>
+        <div class="date-text">{{ startDate }}</div>
+      </div>
+      <div class="task-field">
+        <label>Конец</label>
+        <div class="date-text">{{ endDate }}</div>
+      </div>
+      <div class="task-field">
+        <label>Проект</label>
+        <div class="project-text">{{ projectName }}</div>
+      </div>
+      <div class="task-field">
+        <label>Статус</label>
+        <div class="status-dropdown">
+          <button @click="toggleDropdown" :style="{ backgroundColor: statuses[currentStatus] }">
+            {{ currentStatus }}
+          </button>
+          <ul v-if="dropdownOpen" class="dropdown-menu">
+            <li
+              v-for="(color, text) in statuses"
+              :key="text"
+              :style="{ backgroundColor: color }"
+              @click="selectStatus(text)"
+            >
+              {{ text }}
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
+    <!-- Добавьте другие карточки здесь -->
   </div>
 </template>
 
@@ -131,6 +134,12 @@ export default {
 </script>
 
 <style scoped>
+.task-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; /* Уменьшите это значение для уменьшения расстояния между карточками */
+}
+
 .task-card {
   background-color: #f9f9f9;
   border-radius: 10px;
@@ -146,9 +155,8 @@ export default {
   padding: 5px 10px;
   border-radius: 5px;
   text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-wrap: break-word;
 }
 
 .task-field {
@@ -161,17 +169,16 @@ export default {
   margin-bottom: 5px;
 }
 
-.task-field input {
-  width: 100%;
+.description-text, .project-text, .date-text {
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  background-color: #f2f2f2; /* Светло-серый фон для readonly полей */
-  color: #6e6e6e; /* Темный цвет текста для readonly полей */
-  pointer-events: none; /* Отключает кликабельность */
-}
-.task-field input[readonly] {
-  cursor: not-allowed; /* Курсор при наведении на readonly поля */
+  background-color: #f2f2f2; /* Светло-серый фон */
+  color: #6e6e6e; /* Темный цвет текста */
+  white-space: pre-wrap; /* Перенос текста по словам */
+  word-wrap: break-word; /* Перенос длинных слов */
+  overflow: hidden; /* Скрывает переполнение */
+  text-overflow: ellipsis; /* Добавляет многоточие, если текст не влезает */
 }
 
 .status-dropdown {

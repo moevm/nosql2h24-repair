@@ -17,22 +17,26 @@
       <button @click="searchUsers">Поиск</button>
     </div>
 
-    <!-- Отображаем список пользователей только если хотя бы один фильтр изменен -->
-      <div v-for="user in users" :key="user.id" class="user-item">
-        <div>
-          <p>{{ user.lastname }} {{ user.name }} {{ user.middlename }}</p>
-          <p>Должность - {{ user.role }}</p>
-        </div>
-        <div class="user-item-actions">
-          <button @click="addToContacts(user)">Добавить в контакты</button>
-        </div>
+      <!-- Отображаем список пользователей только если хотя бы один фильтр изменен -->
+    <div v-for="user in users" :key="user.id" class="user-item" @click="showUserCard(user)">
+      <div>
+        <p>{{ user.lastname }} {{ user.name }} {{ user.middlename }}</p>
+        <p>Должность - {{ user.role }}</p>
       </div>
+      <div class="user-item-actions">
+        <button @click.stop="addToContacts(user)">Добавить в контакты</button>
+      </div>
+    </div>
+
+    <!-- Всплывающая карточка пользователя -->
+    <UserCard :user="selectedUser" :showCard="showCard" @close="closeUserCard" />
   </div>
 </template>
 
 <script>
 import HeaderComponent from '../bars/HeaderComponent.vue';
 import SidebarComponent from '../bars/SidebarComponent.vue';
+import UserCard from '../bars/UserCard.vue';
 import axios from 'axios';
 import {clearAllCookies, useCookies} from '@/src/js/useCookies';
 const { getProjectId} = useCookies();
@@ -42,6 +46,7 @@ export default {
   components: {
     HeaderComponent,
     SidebarComponent,
+    UserCard,
   },
   data() {
     return {
@@ -52,6 +57,7 @@ export default {
       users: [
         // { id: "6731ccd729ebfd89e5eb0b86", name: "Илья", lastname: "Ильичевич", middlename: "Ильич", role: "Администратор" },
       ],
+      showCard: false,
     };
   },
   computed: {
@@ -76,6 +82,9 @@ export default {
         if(this.lastname){
           params.append('lastname', this.lastname);
         }
+        if(this.email){
+          params.append('email', this.email);
+        }
         // console.log(params.toString());
         // console.log(this.lastname);
         // console.log(`/api/user/find/?${params.toString()}`);
@@ -88,6 +97,7 @@ export default {
           middlename: user.middlename,
           id: user.id,
           role: user.role,
+          email: user.email
         }));
         // console.log(this.users);
       } catch (error) {
@@ -134,6 +144,34 @@ export default {
           this.errorMessage = error.response.data.detail;
         }
       }
+    },
+    async showUserCard(user) {
+      try {
+        const response = await axios.get(`/api/user/get_user/${user.id}`);
+        this.selectedUser = {
+          firstName: response.data.name,
+          lastName: response.data.lastname,
+          email: response.data.email,
+          role: response.data.role,
+          middleName: response.data.middlename,
+        };
+        console.log(this.selectedUser)
+      } catch (error) {
+        if(error.response.status === 401){
+          this.$store.commit('removeUsers');
+          clearAllCookies();
+          this.$router.push("/login");
+        }
+        console.error('Ошибка при загрузке карточки пользователя:', error);
+        if (error.response && error.response.data.detail) {
+          this.errorMessage = error.response.data.detail;
+        }
+      }
+      this.showCard = true;
+    },
+    closeUserCard() {
+      this.showCard = false;
+      this.selectedUser = null;
     },
     // searchUsers() {
     //   // Метод для обработки поиска при нажатии кнопки "Поиск"
@@ -237,5 +275,9 @@ export default {
 
 .search-filters button:active {
   transform: scale(1);
+}
+
+.user-item{
+  cursor: pointer;
 }
 </style>
