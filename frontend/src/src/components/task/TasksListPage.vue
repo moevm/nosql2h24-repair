@@ -67,7 +67,19 @@
 
     <div class="pagination">
       <button @click="prevPage" :disabled="currentPage === 1">Предыдущая</button>
-      <span>Страница {{ currentPage }} из {{ totalPages }}</span>
+      <span>
+        <template v-if="currentPage > 2">
+          <button @click="goToPage(1)">1</button>
+          <span v-if="currentPage > 3">...</span>
+        </template>
+        <button @click="goToPage(currentPage - 1)" v-if="currentPage > 1">{{ currentPage - 1 }}</button>
+        <button class="active">{{ currentPage }}</button>
+        <button @click="goToPage(currentPage + 1)" v-if="currentPage < totalPages">{{ currentPage + 1 }}</button>
+        <template v-if="currentPage < totalPages - 1">
+          <span v-if="currentPage < totalPages - 2">...</span>
+          <button @click="goToPage(totalPages)">{{ totalPages }}</button>
+        </template>
+      </span>
       <button @click="nextPage" :disabled="currentPage === totalPages">Следующая</button>
     </div>
   </div>
@@ -240,6 +252,11 @@ export default {
         this.currentPage++;
       }
     },
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+      }
+    },
   },
   beforeMount() {
     this.fetchTaskData();
@@ -368,6 +385,10 @@ button:hover {
   border-radius: 5px;
   cursor: pointer;
   margin: 0 10px;
+}
+
+.pagination button.active {
+  background-color: #5c5583;
 }
 
 .pagination button:hover {
