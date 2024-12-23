@@ -105,10 +105,10 @@ export default {
       return user ? user.role : null;
     },
     itemsPerPage() {
-      if (this.currentPage === 1 && this.userRole !== 'Рабочий' && this.userRole !== 'Прораб') {
-        return 6;
+      if (this.currentPage === 1 && (this.userRole === 'Рабочий' || this.userRole === 'Прораб')) {
+        return 7;
       }
-      return 7;
+      return 6;
     },
     paginatedItems() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
@@ -116,7 +116,7 @@ export default {
       return this.items.slice(start, end);
     },
     totalPages() {
-      return Math.ceil((this.items.length - (this.currentPage === 1 && this.userRole !== 'Рабочий' && this.userRole !== 'Прораб' ? 1 : 0)) / this.itemsPerPage);
+      return Math.ceil(this.items.length / this.itemsPerPage);
     },
   },
   methods: {
