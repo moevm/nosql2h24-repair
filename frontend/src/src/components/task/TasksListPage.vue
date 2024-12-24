@@ -30,7 +30,7 @@
     </div>
     <button @click="addTask">Добавить задачу</button>
 
-    <div v-if="filteredTasks.length">
+    <div v-if="paginatedTasks.length">
       <table class="task-table">
         <thead>
         <tr>
@@ -42,7 +42,7 @@
         </thead>
         <tbody>
         <tr
-            v-for="task in filteredTasks"
+            v-for="task in paginatedTasks"
             :key="task.taskId"
             :taskName="task.taskName"
             :class="{ selected: selectedTaskId === task.taskId}"
@@ -63,6 +63,24 @@
     </div>
     <div v-else>
       <p>Задачи отсутствуют для этого этапа.</p>
+    </div>
+
+    <div class="pagination">
+      <button @click="prevPage" :disabled="currentPage === 1">Предыдущая</button>
+      <span>
+        <template v-if="currentPage > 2">
+          <button @click="goToPage(1)">1</button>
+          <span v-if="currentPage > 3">...</span>
+        </template>
+        <button @click="goToPage(currentPage - 1)" v-if="currentPage > 1">{{ currentPage - 1 }}</button>
+        <button class="active">{{ currentPage }}</button>
+        <button @click="goToPage(currentPage + 1)" v-if="currentPage < totalPages">{{ currentPage + 1 }}</button>
+        <template v-if="currentPage < totalPages - 1">
+          <span v-if="currentPage < totalPages - 2">...</span>
+          <button @click="goToPage(totalPages)">{{ totalPages }}</button>
+        </template>
+      </span>
+      <button @click="nextPage" :disabled="currentPage === totalPages">Следующая</button>
     </div>
   </div>
 </template>
@@ -94,6 +112,8 @@ export default {
         {text: 'Все'},
         {text: 'Нет статуса'}
       ],
+      currentPage: 1,
+      itemsPerPage: 10,
     };
   },
   computed: {
@@ -101,7 +121,15 @@ export default {
       return this.tasks.filter(task =>
           task.taskName.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
-    }
+    },
+    paginatedTasks() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.filteredTasks.slice(start, end);
+    },
+    totalPages() {
+      return Math.ceil(this.filteredTasks.length / this.itemsPerPage);
+    },
   },
   methods: {
     addTask() {
@@ -189,6 +217,7 @@ export default {
           taskId: task.id
         }));
         console.log(this.tasks);
+        this.currentPage = 1; // Сброс текущей страницы после применения фильтров
       } catch (error) {
         if (error.response.status === 401) {
           this.$store.commit('removeUsers');  // Изменяем состояние
@@ -211,6 +240,22 @@ export default {
       this.taskName = '';
       this.selectedStatus = '';
       this.fetchTaskData();
+      this.currentPage = 1; // Сброс текущей страницы после сброса фильтров
+    },
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+      }
     },
   },
   beforeMount() {
@@ -323,5 +368,35 @@ button {
 
 button:hover {
   background-color: #5c5583;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pagination button {
+  background-color: #6e6b93;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 0 10px;
+}
+
+.pagination button.active {
+  background-color: #5c5583;
+}
+
+.pagination button:hover {
+  background-color: #5c5583;
+}
+
+.pagination button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 </style>
